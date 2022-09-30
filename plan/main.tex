@@ -1,0 +1,83 @@
+\documentclass[]{final_report}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Input project details
+\def\studentname{George Honeywood}
+\def\reportyear{2022}
+\def\projecttitle{Offline HTML5 Maps Application}
+\def\supervisorname{Reuben Rowe}
+\def\degree{BSc (Hons) in Computer Science}
+\def\fullOrHalfUnit{Full Unit} % indicate if you are doing the project as a Full Unit or Half Unit
+\def\finalOrInterim{Initial Plan} % indicate if this document is your Final Report or Interim Report
+
+\begin{document}
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Table of Contents
+\tableofcontents\pdfbookmark[0]{Table of Contents}{toc}\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Your Abstract here
+
+\begin{abstract}
+
+The OpenStreetMap project began in 2004, with the aim of creating a free world map~\cite{RAMM:2011}. Since then, it has met and surpassed its goals, becoming a mature, global dataset, edited by both volunteers, and corporations alike. As of late 2022, an average of 6,000 contributors edit the map daily, with more than 9 million registered in total~\cite{OSMStats}. In contrast to how cartography is traditionally carried out, OSM contributors tend to not use any specialized equipment, instead using tools like GPS and aerial imagery to create the map. The barrier of entry is low by design, making it easy for new mappers to get started. This sometimes results in inaccurate, or even vandalistic edits being made, but the community usually spots and reverts bad edits quickly.
+
+I have personally been involved in the OpenStreetMap project since creating an account on the 25th of May 2019. This was initially as I was using an OSM based map, and noticed that a new-build estate near my house was missing. Hence, \href{https://www.openstreetmap.org/changeset/70609319}{I added it}, and this led me down the rabbit hole of wanting to add all the missing features around me. Since then, I have been a regular contributor, with currently almost \href{https://www.openstreetmap.org/user/GeorgeHoneywood}{2,000 changesets} made over 341 separate days. I have also made some code contributions to the \href{https://every-door.app/}{Every Door} mobile editor, specifically \href{https://github.com/Zverik/every_door/pull/338}{adding support for viewing an element's history}. 
+
+Although online OpenStreetMap-based web maps are very popular, offline maps are much less of an explored field. On the Android platform, you have a few options for offline maps, such as the venerable \href{https://osmand.net/}{OsmAnd}, \href{https://organicmaps.app/}{Organic Maps} (FOSS fork of \href{https://maps.me}{Maps.me}), and the proprietary \href{https://www.magicearth.com/}{Magic Earth}. On desktop, the available options are more sparse. \href{https://marble.kde.org/}{KDE Marble} is one option, but it seems like the offline experience is an afterthought. It allows you to download pre-rendered Mapnik Carto style tiles, and this is limited to above zoom level 16, so fine details are not visible (\href{https://openstreetmap.org}{openstreetmap.org} renders tiles down to zoom level 19). This approach of downloading rendered raster tiles is also not very scalable, as there quickly becomes a huge number of images that need to be downloaded, and these images take up significant storage space. For example, I attempted to download the tiles for Cornwall, UK, in KDE Marble, and it would have had to fetch 58,928 tiles just for between zoom levels 11 and 16, equating to an estimated download size of 749 MB. This method is also explicitly prohibited by the OpenStreetMap Foundation's Tile Usage Policy, which states that ``In particular, downloading an area of over 250 tiles at zoom level 13 or higher for offline or later usage is forbidden.''~\cite{OSMF-tile-usage-policy}. This is because rendering map tiles is computationally expensive, and the OSMF is run with a limited budget.
+
+Another option is the \href{https://wiki.openstreetmap.org/wiki/API}{OpenStreetMap API} itself. This is more promising for offline usage, as it allows you to download vector data that can be stored more efficiently than raster images. However, the API is not designed for this use case --- it is an interface specifically for map editor programs to use. As such, you can only download small geographical areas at a time, and the data is not stored in an optimal format for rendering. For example, complex structures, such as buildings with internal courtyards, are represented in OSM with multi-polygon relations, which are difficult to parse and render correctly when using raw OSM data. An additional barrier to using the editing API is that its Terms of Use explicitly prohibit read only applications~\cite{OSM-editing-API-usage-policy}.
+
+\href{https://wiki.openstreetmap.org/wiki/Cruiser}{Cruiser} follows a more promising approach. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further. 
+
+Offline maps are a niche market, as desktop computers tend to always have an internet connection, and on mobile devices data is cheap enough to allow downloading some small vector or raster map tiles. Hence, the main use-case for an offline HTML5 map would be for when an internet connection is either prohibitively expensive or not available at all. This could be when roaming abroad, or when in an area without LTE coverage. As such, it makes sense to make support for mobile devices a priority, as they are the most likely to be in these situations.
+
+From this project I hope to learn how map data actually becomes a rendered map, as currently my understanding of this process is limited. I also hope to learn more about offline HTML applications, as I think that this type of web app has lots of room to become popular in the coming years. There are lots of apps on my phone that I think could be replaced by a PWA (progressive web app).
+
+\end{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Introduction
+\chapter{Timeline and milestones}
+
+
+\chapter{Risks and mitigations}
+
+% how to cite:: ~\cite{COHEN:2013}.
+
+%%%% ADD YOUR BIBLIOGRAPHY HERE
+\newpage
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Bibliography}
+% \bibitem{COHEN:2013} Dave Cohen and Carlos Matos. \emph{Third Year Projects -- Rules and Guidelines}. Royal Holloway, University of London, 2013.
+\bibitem{RAMM:2011} Frederik Ramm, Jochen Topf, and Steve Childon. \emph{OpenStreetMap --- Using and Enhancing the Free Map of the World}. Page 1. UIT Cambridge Ltd., 2011.
+\begin{quote}
+    A good summary of the basics of the OpenStreetMap project. Some content is a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, having been superseded by iD in 2013. 
+\end{quote}
+\bibitem{OSMStats} Pascal Neis. \emph{\href{https://osmstats.neis-one.org/?item=members}{OSMStats --- Statisics of the free wiki world map}}. Date of access: 29 Sep 2022.
+\begin{quote}
+    Useful set of statistics about the OpenStreetMap project. This includes the number of registered users, the number of edits, and the number of objects in the database.
+\end{quote}
+\bibitem{OSMF-tile-usage-policy} OpenStreetMap Foundation. \emph{\href{https://operations.osmfoundation.org/policies/tiles/\#bulk-downloading}{Tile Usage Policy: Bulk Downloading}}. Date of access: 29 Sep 2022.
+\bibitem{OSM-editing-API-usage-policy} OpenStreetMap Wiki. \emph{\href{https://wiki.openstreetmap.org/wiki/API\#Terms_of_use}{API: Terms of use}}. Date of access: 29 Sep 2022.
+\bibitem{mapsforge-format} Mapsforge. \emph{\href{https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md}{Mapsforge Binary Map File Format Specification}}. Date of access: 29 Sep 2022.
+\begin{quote}
+    The specification for the Mapsforge binary map format. This format is quite popular, and is used by a \href{https://github.com/mapsforge/mapsforge/blob/master/docs/Mapsforge-Applications.md}{number of applications}.
+\end{quote}
+
+\end{thebibliography}
+\label{endpage}
+
+
+
+\end{document}
+
+\end{article}
