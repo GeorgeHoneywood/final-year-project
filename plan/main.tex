@@ -51,6 +51,34 @@ From this project I hope to learn how map data actually becomes a rendered map, 
 
 \chapter{Risks and mitigations}
 
+Managing risks is an important part of any project, and anticipating and mitigating potential issues should help ensure that the project is successful. In this section I will outline issues that are specific to my project.
+
+\section{HTML5's offline storage limits}\label{sec:html5-storage-limits}
+
+Storing a large amount of map data may not be possible, as the amount of data a single website can store is likely to be limited. If this becomes a problem I will have to explore different technologies, as it could be a major issue for my project if I decide to use a data format that is too large. It will be important to discover this early on, and choose a data format that can work around these possible restrictions.
+
+\section{Computational complexity of rendering vector data}
+
+Rendering vector data is a non-trivial task to complete efficiently, especially when there is a large amount of data to render. Additionally, I do not have any experience using the HTML canvas, so I will have to learn how to use it, and how to navigate any performance pitfalls that may be present. Given I want the program to be able to run well on mobile devices that often have limited resources, efficiency is paramount. 
+
+To mitigate this I will test my application with reasonable amounts of data, on a mobile device, to ensure that the user experience is acceptable. 
+
+\section{Lack of experience with coordinate systems \& projections}\label{sec:coordinate-systems}
+
+Although I am familiar with the Web Mercator projection that OSM uses to represent objects, I have never had to render map data myself. This will require some mathematical equations to translate the coordinates into positions on the canvas, and I will need to learn how to do this. This will likely be a large stumbling block, as I am not a very confident mathematician.
+
+If this proves to be a significant issue, then I could use a library like \href{https://github.com/d3/d3-geo}{D3.js} to help with this aspect of the project. \href{https://openstreetmap.org}{openstreetmap.org}'s online editor, iD, uses this library, so it should be possible to use it in my project if necessary. 
+
+\section{Lack of experience with Offline HTML5 web applications}
+
+Offline HTML5 applications are a new technology to me. In the past I have worked on interactive SPAs (single page apps), but these have been traditional ones that work online. Therefore, it is important that I get up to speed with the technologies that allow a web app to work offline.
+
+\section{Poor estimation of timeline}
+
+It is crucial that I adhere to the timeline to ensure that the project is completed smoothly. If I underestimate the amount of time required to complete a task, then I will have to rush to complete it, this could lead to mistakes and poor quality code.
+
+Therefore, I should be careful to assign each task a realistic timeframe, and also allow enough time to write up each section as I proceed through the project.
+
 % how to cite:: ~\cite{COHEN:2013}.
 
 %%%% ADD YOUR BIBLIOGRAPHY HERE
