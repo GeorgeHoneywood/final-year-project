@@ -48,6 +48,29 @@ From this project I hope to learn how map data actually becomes a rendered map, 
 %%% Introduction
 \chapter{Timeline and milestones}
 
+Following a timeline should help my project to proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I will focus on exploring any risky areas or technologies that I am unsure about. This will help any large questions early on in the process.
+
+\section{Term 1}
+
+\begin{itemize}
+    \item \textbf{Week 3}: Proof of concept basic offline HTML5 app, and a report on the technologies used. Can also use this to discover any limit of how files can be stored for offline use (see~\ref{sec:html5-storage-limits} in Risks \& mitigations).
+    \item \textbf{Week 4}: Proof of concept that takes some way made up of latitude longitude pairs and draws a line onto an HTML canvas. If this is too challenging, could use D3.js, as per~\ref{sec:coordinate-systems}. Report about the mathematical details of projecting the map.
+    \item \textbf{Week 5}: Make the previous proof of concept interactive; allow the user to pan and zoom the map. This could be done with the scroll wheel on desktop and pinch zooming on mobile.
+    \item \textbf{Week 6--7}: Proof of concept that loads some actual OSM data from a Mapsforge file. If this is unfeasible, will pivot to some other technology like Mapbox Vector Tiles, or to using the OSM editing API\@. Report about how the data is loaded, and the steps that will have to be taken to render it.
+    \item \textbf{Week 8--9}: Proof of concept that loads data from the Mapsforge (or alternative) file, and renders it to the HTML canvas. Report about the rendering process.
+    \item \textbf{Week 10--11}: Prepare for the interim report, and presentation.
+\end{itemize}
+
+\section{Term 2}
+
+\begin{itemize}
+    \item \textbf{Week 1--2}: Integration of the above proof of concepts into the final program.
+    \item \textbf{Week 3--4}: Make sure that the program works well on mobile, as this will be the main use case.
+    \item \textbf{Week 5--6}: Add support for further features, such as showing points of interest, and allowing the user to view details about the these.
+    \item \textbf{Week 7--8}: Evaluate the solution so far, and decide whether to extend the project further, if time permits.
+    \item \textbf{Week 9--11}: Prepare for the final report.
+\end{itemize}
+
 
 \chapter{Risks and mitigations}
 
