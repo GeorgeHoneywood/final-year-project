@@ -35,7 +35,7 @@ Although online OpenStreetMap-based web maps are very popular, offline maps are 
 
 Another option is the \href{https://wiki.openstreetmap.org/wiki/API}{OpenStreetMap API} itself. This is more promising for offline usage, as it allows you to download vector data that can be stored more efficiently than raster images. However, the API is not designed for this use case --- it is an interface specifically for map editor programs to use. As such, you can only download small geographical areas at a time, and the data is not stored in an optimal format for rendering. For example, complex structures, such as buildings with internal courtyards, are represented in OSM with multi-polygon relations, which are difficult to parse and render correctly when using raw OSM data. An additional barrier to using the editing API is that its Terms of Use explicitly prohibit read only applications~\cite{OSM-editing-API-usage-policy}.
 
-\href{https://wiki.openstreetmap.org/wiki/Cruiser}{Cruiser} follows a more promising approach. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further. 
+\href{https://wiki.openstreetmap.org/wiki/Cruiser}{Cruiser} follows a more promising approach. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further.
 
 Offline maps are a niche market, as desktop computers tend to always have an internet connection, and on mobile devices data is cheap enough to allow downloading some small vector or raster map tiles. Hence, the main use-case for an offline HTML5 map would be for when an internet connection is either prohibitively expensive or not available at all. This could be when roaming abroad, or when in an area without LTE coverage. As such, it makes sense to make support for mobile devices a priority, as they are the most likely to be in these situations.
 
@@ -82,7 +82,7 @@ Storing a large amount of map data may not be possible, as the amount of data a 
 
 \section{Computational complexity of rendering vector data}
 
-Rendering vector data is a non-trivial task to complete efficiently, especially when there is a large amount of data to render. Additionally, I do not have any experience using the HTML canvas, so I will have to learn how to use it, and how to navigate any performance pitfalls that may be present. Given I want the program to be able to run well on mobile devices that often have limited resources, efficiency is paramount. 
+Rendering vector data is a non-trivial task to complete efficiently, especially when there is a large amount of data to render. Additionally, I do not have any experience using the HTML canvas, so I will have to learn how to use it, and how to navigate any performance pitfalls that may be present. Given I want the program to be able to run well on mobile devices that often have limited resources, efficiency is paramount.
 
 To mitigate this I will test my application with reasonable amounts of data, on a mobile device, to ensure that the user experience is acceptable. 
 
@@ -111,7 +111,7 @@ Therefore, I should be careful to assign each task a realistic timeframe, and al
 % \bibitem{COHEN:2013} Dave Cohen and Carlos Matos. \emph{Third Year Projects -- Rules and Guidelines}. Royal Holloway, University of London, 2013.
 \bibitem{RAMM:2011} Frederik Ramm, Jochen Topf, and Steve Childon. \emph{OpenStreetMap --- Using and Enhancing the Free Map of the World}. Page 1. UIT Cambridge Ltd., 2011.
 \begin{quote}
-    A good summary of the basics of the OpenStreetMap project. Some content is a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, having been superseded by iD in 2013. 
+    A good summary of the basics of the OpenStreetMap project. Some content is a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, having been superseded by iD in 2013.
 \end{quote}
 \bibitem{OSMStats} Pascal Neis. \emph{\href{https://osmstats.neis-one.org/?item=members}{OSMStats --- Statisics of the free wiki world map}}. Date of access: 29 Sep 2022.
 \begin{quote}
