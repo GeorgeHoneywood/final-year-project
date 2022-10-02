@@ -1,0 +1,19 @@
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\Qbasicstyle=., identifierstyle=., tabsize=2,language=python., numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\Q[L] [R] [L]George Honeywood (100921598) [R]Year in Industry Report [C]/\\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qbasicstyle=., identifierstyle=., tabsize=2,language=python., numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt.\\E$"}
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\Qbasicstyle=., identifierstyle=., tabsize=2,language=python., numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qtabsize=4,fontsize=.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qlanguage=python, breaklines=true, numbers=left, showspaces=false, showstringspaces=false, columns=fullflexible, upquote=true, belowskip=-4pt, aboveskip=14pt, frame=lines, abovecaptionskip=-3pt, belowcaptionskip=8pt, framexleftmargin=0.5em, framexrightmargin=0.5em, basicstyle=, keywordstyle=, stringstyle=, identifierstyle=, commentstyle=, numberstyle=.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qlanguage=python, breaklines=true, numbers=left, showspaces=false, showstringspaces=false, columns=fullflexible, upquote=true, belowskip=-4pt, aboveskip=14pt, frame=lines, abovecaptionskip=-3pt, belowcaptionskip=8pt, framexleftmargin=0.5em, framexrightmargin=0.5em, basicstyle=, keywordstyle=, stringstyle=, identifierstyle=, commentstyle=, numberstyle=.\\E$"}
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\Q.\\E$"}
+{"rule":"DOUBLE_PUNCTUATION","sentence":"^\\Q..\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qtable.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qbasicstyle=., identifierstyle=., tabsize=2,language=python., numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qtabsize=4,fontsize=.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qplain.\\E$"}
+{"rule":"DOUBLE_PUNCTUATION","sentence":"^\\Q..\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\Qlanguage=python, breaklines=true, numbers=left, showspaces=false, showstringspaces=false, columns=fullflexible, upquote=true, belowskip=-4pt, aboveskip=14pt, frame=lines, abovecaptionskip=-3pt, belowcaptionskip=8pt, framexleftmargin=0.5em, framexrightmargin=0.5em, basicstyle=, keywordstyle=, stringstyle=, identifierstyle=, commentstyle=, numberstyle=.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\Qbasicstyle=., identifierstyle=., tabsize=2,language=python., numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\Qtabsize=4,fontsize=.\\E$"}
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QFor example if you have a file, fetch.go., you put your tests in fetchtest.go., and they will be evaluated when you execute go test ./... — this made it easier to follow TDD.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\QFor example if you have a file, fetch.go., you put your tests in fetchtest.go., and they will be evaluated when you execute go test ./... — this made it easier to follow TDD.\\E$"}
