@@ -67,7 +67,7 @@
 %}
 
 \renewcommand\chapter{
-\if@openright\cleardoublepage\else\clearpage\fi % george commented this out
+% \if@openright\cleardoublepage\else\clearpage\fi % george commented this out
                     \thispagestyle{plain}%
                     \global\@topnum\z@
                     \@afterindentfalse

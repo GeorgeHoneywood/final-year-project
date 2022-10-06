@@ -9,3 +9,4 @@ Neis
 OSMF
 Carto
 Mapnik
+slippy

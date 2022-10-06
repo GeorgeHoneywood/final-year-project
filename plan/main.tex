@@ -1,7 +1,16 @@
 \documentclass[]{final_report}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{enumitem}
 \usepackage{graphicx}
-\usepackage{hyperref}
-
+\usepackage[dvipsnames]{xcolor}
+\usepackage[pdftex,
+            colorlinks,
+            linkcolor={red!50!black},
+            citecolor={red!50!black},
+            urlcolor={blue!80!black},
+            pdfauthor={George Honeywood},
+            pdftitle={Final Year Project Initial Plan}]{hyperref}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Input project details
@@ -27,48 +36,82 @@
 
 \begin{abstract}
 
+In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how map data is projected into a rendered map. It will also teach me how to successfully develop a medium-sized application.
+
+\end{abstract}
+
+\chapter{Introduction}
+
 The OpenStreetMap project began in 2004, with the aim of creating a free world map~\cite{RAMM:2011}. Since then, it has met and surpassed its goals, becoming a mature, global dataset, edited by both volunteers, and corporations alike. As of late 2022, an average of 6,000 contributors edit the map daily, with more than 9 million registered in total~\cite{OSMStats}. In contrast to how cartography is traditionally carried out, OSM contributors tend to not use any specialized equipment, instead using tools like GPS and aerial imagery to create the map. The barrier of entry is low by design, making it easy for new mappers to get started. This sometimes results in inaccurate, or even vandalistic edits being made, but the community usually spots and reverts bad edits quickly.
 
-I have personally been involved in the OpenStreetMap project since creating an account on the 25th of May 2019. This was initially as I was using an OSM based map, and noticed that a new-build estate near my house was missing. Hence, \href{https://www.openstreetmap.org/changeset/70609319}{I added it}, and this led me down the rabbit hole of wanting to add all the missing features around me. Since then, I have been a regular contributor, with currently almost \href{https://www.openstreetmap.org/user/GeorgeHoneywood}{2,000 changesets} made over 341 separate days. I have also made some code contributions to the \href{https://every-door.app/}{Every Door} mobile editor, specifically \href{https://github.com/Zverik/every_door/pull/338}{adding support for viewing an element's history}. 
+I have personally been involved in the OpenStreetMap project since creating an account on the 25th of May 2019. This was initially as I was using an OSM based map, and noticed that a new-build estate near my house was missing. Hence, \href{https://www.openstreetmap.org/changeset/70609319}{I added it}, and this led me down the rabbit hole of wanting to add all the missing features around me. Since then, I have been a regular contributor, with currently almost \href{https://www.openstreetmap.org/user/GeorgeHoneywood}{2,000 changesets} made over 341 separate days. I have also made some code contributions to the Every Door mobile editor, specifically adding support for viewing an element's history~\cite{every-door}. 
 
-Although online OpenStreetMap-based web maps are very popular, offline maps are much less of an explored field. On the Android platform, you have a few options for offline maps, such as the venerable \href{https://osmand.net/}{OsmAnd}, \href{https://organicmaps.app/}{Organic Maps} (FOSS fork of \href{https://maps.me}{Maps.me}), and the proprietary \href{https://www.magicearth.com/}{Magic Earth}. On desktop, the available options are more sparse. \href{https://marble.kde.org/}{KDE Marble} is one option, but it seems like the offline experience is an afterthought. It allows you to download pre-rendered Mapnik Carto style tiles, and this is limited to above zoom level 16, so fine details are not visible (\href{https://openstreetmap.org}{openstreetmap.org} renders tiles down to zoom level 19). This approach of downloading rendered raster tiles is also not very scalable, as there quickly becomes a huge number of images that need to be downloaded, and these images take up significant storage space. For example, I attempted to download the tiles for Cornwall, UK, in KDE Marble, and it would have had to fetch 58,928 tiles just for between zoom levels 11 and 16, equating to an estimated download size of 749 MB. This method is also explicitly prohibited by the OpenStreetMap Foundation's Tile Usage Policy, which states that ``In particular, downloading an area of over 250 tiles at zoom level 13 or higher for offline or later usage is forbidden.''~\cite{OSMF-tile-usage-policy}. This is because rendering map tiles is computationally expensive, and the OSMF is run with a limited budget.
+Although online OpenStreetMap-based web maps are very popular, offline maps are much less of an explored field. On the Android platform, you have a few options for offline maps, such as the venerable OsmAnd~\cite{osmand}, Organic Maps (FOSS fork of Maps.me~\cite{maps.me}), and the proprietary Magic Earth~\cite{magic-earth}. On desktop, the available options are more sparse. KDE Marble is one option~\cite{kde-marble}, but it seems like the offline experience is an afterthought. It allows you to download pre-rendered Mapnik Carto style tiles, and this is limited to above zoom level 16, so fine details are not visible (\href{https://openstreetmap.org}{openstreetmap.org} renders tiles down to zoom level 19). This approach of downloading rendered raster tiles is also not very scalable, as there quickly becomes a huge number of images that need to be downloaded, and these images take up significant storage space. For example, I attempted to download the tiles for Cornwall, UK, in KDE Marble, and it would have had to fetch 58,928 tiles just for between zoom levels 11 and 16, equating to an estimated download size of 749 MB\@. This method is also explicitly prohibited by the OpenStreetMap Foundation's Tile Usage Policy, which states that ``In particular, downloading an area of over 250 tiles at zoom level 13 or higher for offline or later usage is forbidden.''~\cite{OSMF-tile-usage-policy}. This is because rendering map tiles is computationally expensive, and the OSMF is run with a limited budget.
 
-Another option is the \href{https://wiki.openstreetmap.org/wiki/API}{OpenStreetMap API} itself. This is more promising for offline usage, as it allows you to download vector data that can be stored more efficiently than raster images. However, the API is not designed for this use case --- it is an interface specifically for map editor programs to use. As such, you can only download small geographical areas at a time, and the data is not stored in an optimal format for rendering. For example, complex structures, such as buildings with internal courtyards, are represented in OSM with multi-polygon relations, which are difficult to parse and render correctly when using raw OSM data. An additional barrier to using the editing API is that its Terms of Use explicitly prohibit read only applications~\cite{OSM-editing-API-usage-policy}.
+Another option is the OpenStreetMap API itself~\cite{osm-api-wiki}. This is more promising for offline usage, as it allows you to download vector data that can be stored more efficiently than raster images. However, the API is not designed for this use case --- it is an interface specifically for map editor programs to use. As such, you can only download small geographical areas at a time, and the data is not stored in an optimal format for rendering. For example, complex structures, such as buildings with internal courtyards, are represented in OSM with multi-polygon relations, which are difficult to parse and render correctly when using raw OSM data. An additional barrier to using the editing API is that its Terms of Use explicitly prohibit read only applications~\cite{OSM-editing-API-usage-policy}.
 
-\href{https://wiki.openstreetmap.org/wiki/Cruiser}{Cruiser} follows a more promising approach. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further.
+Cruiser follows a more promising approach~\cite{cruiser}. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further.
 
 Offline maps are a niche market, as desktop computers tend to always have an internet connection, and on mobile devices data is cheap enough to allow downloading some small vector or raster map tiles. Hence, the main use-case for an offline HTML5 map would be for when an internet connection is either prohibitively expensive or not available at all. This could be when roaming abroad, or when in an area without LTE coverage. As such, it makes sense to make support for mobile devices a priority, as they are the most likely to be in these situations.
 
 From this project I hope to learn how map data actually becomes a rendered map, as currently my understanding of this process is limited. I also hope to learn more about offline HTML applications, as I think that this type of web app has lots of room to become popular in the coming years. There are lots of apps on my phone that I think could be replaced by a PWA (progressive web app).
 
-\end{abstract}
+\chapter{Aims and objectives}
 
+Here I will list some specific features that I would like to implement in the project. These are not fixed, and some may not be implemented, or others added in their place.
 
-%%%%%%%%%%%%%%%%%%%%%%
-%%% Introduction
+\begin{itemize}
+    \item Download vector map data for a user-provided region (preferably at least as large as a UK county), allowing the user to browse the map offline
+    \item Allow the user to pan and zoom the map. They should be able to zoom out to the view the full extent of the downloaded data.
+    \item Provide a search functionality, using the Nominatim API
+    \item Allow the user to route between two points, which could be implemented using OSRM, GraphHopper or Valhalla
+    \item When an OSM element has been tagged with a reference to a Wikipedia article, it should show a description from Wikipedia
+    \item Allow the user to save and name markers for later use
+    \item When online, the application should allow the user to browse a map without having to first download any data. This could be done using raster tiles.
+\end{itemize}
+
 \chapter{Timeline and milestones}
 
 Following a timeline should help my project to proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I will focus on exploring any risky areas or technologies that I am unsure about. This will help any large questions early on in the process.
 
-\section{Term 1}
+\section{Deliverables}
+
+\begin{enumerate}
+    \item Report on offline HTML5 technologies. Will use this to decide whether it is possible to download \& store a large amount of vector map data (>100MB) for later rendering.\label{item:deliverable:offline-html}
+    \item Proof of concept basic offline HTML5 app. Can also use this to discover any limit of how files can be stored for offline use (see~\ref{sec:html5-storage-limits} in Risks \& mitigations).\label{item:deliverable:basic-offline-app}
+    \item Report on the different technologies that the program could use to get OpenStreetMap data. One possibility is the Mapsforge format, or it could use the OSM editing API\@. This should help mitigate risk of using a technology that is not suitable for the project (see~\ref{sec:difficult-technologies} in Risks \& mitigations).\label{item:deliverable:osm-data}
+    \item Report about how map projection works. Specifically the mathematics behind projecting the Web Mercator data that is produced by OpenStreetMap. This will ensure that I understand this key concept (see~\ref{sec:coordinate-systems} in Risks \& mitigations).\label{item:deliverable:map-projection}
+    \item Proof of concept that takes some way made up of latitude longitude pairs and draws a line onto a canvas. If this is too challenging, I could use a library like D3.js, as per~\ref{sec:coordinate-systems} in Risks \& mitagtions.\label{item:deliverable:draw-line}
+    \item Make proof of concept~\ref{item:deliverable:draw-line} interactive; allow the user to pan and zoom the map. This should be done with the scroll wheel on desktop and pinch zooming on mobile.\label{item:deliverable:pan-zoom}
+    \item Proof of concept that loads some actual OSM data using the technology that I decided upon in the 2nd deliverable. If the implementation proves to be too difficult, I can pivot to another technology that I had explored in the 2nd deliverable.\label{item:deliverable:load-osm-data}
+    \item Thoroughly test the application on mobile, as this will likely be the main use case for an offline map.\label{item:deliverable:mobile-testing}
+    \item Add online search functionality, using the Nominatim API.\label{item:deliverable:search}
+    \item Add online routing functionality, using OSRM, GraphHopper or Valhalla.\label{item:deliverable:routing}
+    \item Show point of interest information from Wikipedia, when an OSM element has been tagged to allow this.\label{item:deliverable:wikipedia}
+    \item Add the ability to save and name markers for later use.\label{item:deliverable:markers}
+    \item Allow the user to browse the map without first downloading data when online. This could be done using raster tiles.\label{item:deliverable:online}
+\end{enumerate}
+
+\subsection{Term 1}
 
 \begin{itemize}
-    \item \textbf{Week 3}: Proof of concept basic offline HTML5 app, and a report on the technologies used. Can also use this to discover any limit of how files can be stored for offline use (see~\ref{sec:html5-storage-limits} in Risks \& mitigations).
-    \item \textbf{Week 4}: Proof of concept that takes some way made up of latitude longitude pairs and draws a line onto an HTML canvas. If this is too challenging, could use D3.js, as per~\ref{sec:coordinate-systems}. Report about the mathematical details of projecting the map.
-    \item \textbf{Week 5}: Make the previous proof of concept interactive; allow the user to pan and zoom the map. This could be done with the scroll wheel on desktop and pinch zooming on mobile.
-    \item \textbf{Week 6--7}: Proof of concept that loads some actual OSM data from a Mapsforge file. If this is unfeasible, will pivot to some other technology like Mapbox Vector Tiles, or to using the OSM editing API\@. Report about how the data is loaded, and the steps that will have to be taken to render it.
-    \item \textbf{Week 8--9}: Proof of concept that loads data from the Mapsforge (or alternative) file, and renders it to the HTML canvas. Report about the rendering process.
-    \item \textbf{Week 10--11}: Prepare for the interim report, and presentation.
+    \item \textbf{Week 3 (2022/10/03)}: Report~\ref{item:deliverable:offline-html}.
+    \item \textbf{Week 4 (2022/10/10)}: Proof of concept~\ref{item:deliverable:basic-offline-app} \& report~\ref{item:deliverable:osm-data}.
+    \item \textbf{Week 5 (2022/10/17)}: Report~\ref{item:deliverable:map-projection} \& proof of concept~\ref{item:deliverable:draw-line}.
+    \item \textbf{Week 6--7 (2022/10/24)}: Proof of concept~\ref{item:deliverable:pan-zoom}.
+    \item \textbf{Week 8--9 (2022/11/07)}: Proof of concept~\ref{item:deliverable:load-osm-data}.
+    \item \textbf{Week 10--11 (2022/11/21)}: Prepare for the interim report, and presentation.
 \end{itemize}
 
-\section{Term 2}
+\subsection{Term 2}
 
 \begin{itemize}
-    \item \textbf{Week 1--2}: Integration of the above proof of concepts into the final program.
-    \item \textbf{Week 3--4}: Make sure that the program works well on mobile, as this will be the main use case.
-    \item \textbf{Week 5--6}: Add support for further features, such as showing points of interest, and allowing the user to view details about the these.
-    \item \textbf{Week 7--8}: Evaluate the solution so far, and decide whether to extend the project further, if time permits.
-    \item \textbf{Week 9--11}: Prepare for the final report.
+    \item \textbf{Week 1--2 (2023/01/10)}: Integration of the above proof of concepts into the final program.
+    \item \textbf{Week 3--4 (2023/01/24)}: Deliverable~\ref{item:deliverable:mobile-testing}.
+    \item \textbf{Week 5 (2023/02/07)}: Prepare an initial draft for the final report.
+    \item \textbf{Week 6--7 (2023/02/14)}: Add support for further features, such as deliverables \ref{item:deliverable:search}, \ref{item:deliverable:routing}, \ref{item:deliverable:wikipedia}, \ref{item:deliverable:markers} and \ref{item:deliverable:online}.
+    \item \textbf{Week 8 (2023/02/28)}: Evaluate the solution so far, and decide whether to extend the project further, if time permits.
+    \item \textbf{Week 9--11 (2023/03/27)}: Prepare for the final report.
 \end{itemize}
 
 
@@ -80,6 +123,12 @@ Managing risks is an important part of any project, and anticipating and mitigat
 
 Storing a large amount of map data may not be possible, as the amount of data a single website can store is likely to be limited. If this becomes a problem I will have to explore different technologies, as it could be a major issue for my project if I decide to use a data format that is too large. It will be important to discover this early on, and choose a data format that can work around these possible restrictions.
 
+\section{Difficulty in deciding which technologies to use}\label{sec:difficult-technologies}
+
+At the beginning of the project, I will explore a few different possibilities for how to design the program. For example, I need to explore which source of OSM data would be the best for my application --- traditionally students on this project use the OSM editing API, but it is not very well suited to creating a user-friendly map viewer. I may also look into developing a phone app, as it might help me create a more performant and useful application, over than making a webapp.
+
+Hence, I must be careful to not spend to long in this evaluation process, as I may get far with one technology, then realize that it has some deficiency that prevents me from using it.
+
 \section{Computational complexity of rendering vector data}
 
 Rendering vector data is a non-trivial task to complete efficiently, especially when there is a large amount of data to render. Additionally, I do not have any experience using the HTML canvas, so I will have to learn how to use it, and how to navigate any performance pitfalls that may be present. Given I want the program to be able to run well on mobile devices that often have limited resources, efficiency is paramount.
@@ -88,9 +137,15 @@ To mitigate this I will test my application with reasonable amounts of data, on 
 
 \section{Lack of experience with coordinate systems \& projections}\label{sec:coordinate-systems}
 
-Although I am familiar with the Web Mercator projection that OSM uses to represent objects, I have never had to render map data myself. This will require some mathematical equations to translate the coordinates into positions on the canvas, and I will need to learn how to do this. This will likely be a large stumbling block, as I am not a very confident mathematician.
+Although I am familiar with the Web Mercator projection that OSM uses to represent coordinates, I have never had to render map data myself. This will require some mathematical equations to translate the coordinates into positions on the canvas, and I will need to learn how to do this. This will likely be a large stumbling block, as I am not a very confident mathematician.
 
-If this proves to be a significant issue, then I could use a library like \href{https://github.com/d3/d3-geo}{D3.js} to help with this aspect of the project. \href{https://openstreetmap.org}{openstreetmap.org}'s online editor, iD, uses this library, so it should be possible to use it in my project if necessary. 
+If this proves to be a significant issue, then I could use a library like \href{https://github.com/d3/d3-geo}{D3.js} to help with this aspect of the project. \href{https://openstreetmap.org}{openstreetmap.org}'s online editor, iD, uses this library, so it should be possible to use it in my project if necessary.
+
+\section{Lack of complexity}
+
+If I am to use a map format like Mapsforge, where map data has already been compiled into a format that is easy to render, it may mean that I do not have to implement low level or complex algorithms. This puts the project at risk of being too simplistic.
+
+To mitigate this, I should ensure that I do not rely on external libraries too heavily, and implement as much as is reasonably possible by myself.
 
 \section{Lack of experience with Offline HTML5 web applications}
 
@@ -105,7 +160,7 @@ Therefore, I should be careful to assign each task a realistic timeframe, and al
 % how to cite:: ~\cite{COHEN:2013}.
 
 %%%% ADD YOUR BIBLIOGRAPHY HERE
-\newpage
+
 \begin{thebibliography}{99}
 \addcontentsline{toc}{chapter}{Bibliography}
 % \bibitem{COHEN:2013} Dave Cohen and Carlos Matos. \emph{Third Year Projects -- Rules and Guidelines}. Royal Holloway, University of London, 2013.
@@ -117,13 +172,41 @@ Therefore, I should be careful to assign each task a realistic timeframe, and al
 \begin{quote}
     Useful set of statistics about the OpenStreetMap project. This includes the number of registered users, the number of edits, and the number of objects in the database.
 \end{quote}
+\bibitem{every-door} Ilya Zverev. \emph{\href{https://every-door.app/}{Every Door}}.
+\begin{quote}
+    A new mobile OSM editor, released in 2022, focussed on adding points of interest and other data best gathered on foot. In July 2022, I added the ability to view the history of an element to the app via a \href{https://github.com/Zverik/every_door/pull/338}{pull request}.
+\end{quote}
+\bibitem{osmand} OsmAnd BV\@. \emph{\href{https://osmand.net/}{OsmAnd}}.
+\begin{quote}
+    Offline OSM map viewer for Android and iOS\@. The app is open source, and provides a swiss army knife of features.
+\end{quote}
+\bibitem{organic-maps} Organic Maps OÜ\@. \emph{\href{https://organicmaps.app/}{Organic Maps}}.
+\begin{quote}
+    Offline OSM map viewer. Fork of Maps.me, after it was acquired and made closed source.
+\end{quote}
+\bibitem{maps.me} Maps.me (Cyprus) Limited. \emph{\href{https://maps.me}{Maps.me}}.
+\begin{quote}
+    Most popular OSM-based map app on the Android platform. Was historically open source, but was acquired by another company and made closed source.
+\end{quote}
+\bibitem{magic-earth} Magic Earth. \emph{\href{https://www.magicearth.com/}{Magic Earth}}.
+\begin{quote}
+    Proprietary OSM-based mobile map viewer.
+\end{quote}
+\bibitem{kde-marble} KDE Marble Contributors. \emph{\href{https://marble.kde.org/}{KDE Marble}}.
+\begin{quote}
+    Open source map viewer for desktop, with cross-platform support. Has basic support for downloading OSM maps.
+\end{quote} 
 \bibitem{OSMF-tile-usage-policy} OpenStreetMap Foundation. \emph{\href{https://operations.osmfoundation.org/policies/tiles/\#bulk-downloading}{Tile Usage Policy: Bulk Downloading}}. Date of access: 29 Sep 2022.
+\bibitem{osm-api-wiki} OpenStreetMap Wiki Contributors. \emph{\href{https://wiki.openstreetmap.org/wiki/API}{OpenStreetMap API}}.
 \bibitem{OSM-editing-API-usage-policy} OpenStreetMap Wiki. \emph{\href{https://wiki.openstreetmap.org/wiki/API\#Terms_of_use}{API: Terms of use}}. Date of access: 29 Sep 2022.
+\bibitem{cruiser} \href{https://devemux86.github.io/}{\texttt{devemux86}}. \emph{\href{https://wiki.openstreetmap.org/wiki/Cruiser}{Cruiser}}.
+\begin{quote}
+    A cross-platform offline first OSM map viewer. Is based on the Mapsforge library, but is not open source.
+\end{quote}
 \bibitem{mapsforge-format} Mapsforge. \emph{\href{https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md}{Mapsforge Binary Map File Format Specification}}. Date of access: 29 Sep 2022.
 \begin{quote}
     The specification for the Mapsforge binary map format. This format is quite popular, and is used by a \href{https://github.com/mapsforge/mapsforge/blob/master/docs/Mapsforge-Applications.md}{number of applications}.
 \end{quote}
-
 \end{thebibliography}
 \label{endpage}
 
