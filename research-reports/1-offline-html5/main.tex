@@ -1,0 +1,171 @@
+\documentclass[a4paper,12pt]{report} %set page size, font size, and type
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx} %add pictures to document
+\usepackage{fancyhdr} %change headers and footers
+\usepackage{verbatim} %comment out sections 
+\usepackage[shortlabels]{enumitem} %change list formatting
+\usepackage{array}
+\usepackage{tabularx} %allows "X" in tables
+\usepackage{tabu} %for longtabu
+\usepackage{longtable}
+\usepackage{textcomp}
+\usepackage{wasysym} %more symbols
+\usepackage{listings} %syntax highlighting
+\usepackage{fancyvrb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{lastpage}
+%\usepackage{tweaklist} % this causes 1k+ errors ???1
+\usepackage{tocloft} %table of contents modification to make lines closer
+\usepackage[compact, nobottomtitles]{titlesec} %modify styles of titles
+\usepackage[justification=centering,
+            font={small},
+            textfont={it},
+            labelfont=bf]{caption} %make figure hyperlinks go to top of image
+\usepackage[margin=3cm, driver=pdftex]{geometry} %make the margins smaller
+\usepackage[backend=biber]{biblatex} %create bibliography
+\usepackage[pdftex,
+            colorlinks,
+            linkcolor={red!50!black},
+            citecolor={blue!50!black},
+            urlcolor={blue!80!black},
+            pdfauthor={George Honeywood},
+            pdftitle={FYP Research Report}]{hyperref} %give the pdf hyperlinks and other jazz
+
+\fancyhf{} %clear out headers and footers before creating own
+\fancyhead[L]{\begin{footnotesize}\leftmark\end{footnotesize}}
+\fancyhead[R]{\begin{footnotesize}\rightmark\end{footnotesize}}
+\fancyfoot[L]{\begin{footnotesize}George Honeywood\end{footnotesize}}
+\fancyfoot[R]{\begin{footnotesize}Research Report\end{footnotesize}}
+\fancyfoot[C]{\begin{footnotesize}\thepage{}/\pageref*{LastPage}\end{footnotesize}}
+
+\pagestyle{fancy} %put the footer on every page
+\fancypagestyle{plain}
+
+\setlength{\parskip}{1em} %stuff to reduce spacing and indents on paragraphs
+\setlength{\parindent}{0pt}
+
+\setcounter{secnumdepth}{2} %depth of numbering for section headings
+\setcounter{tocdepth}{3} %depth of headings included in the contents
+
+\setlist[itemize]{noitemsep, nolistsep} %make lists take up less room
+
+%\setlength{\skip\footins}{1cm} %something to make text move closer to footer
+
+%\setlength{\belowcaptionskip}{-80pt} % try to reduce space under table, doesn't work
+%\setlength{\textfloatsep}{-100pt} % doesn't work either
+%\setlength{\intextsep}{1000pt} % no luck here either
+\setlength{\LTpost}{0pt} % for some reason this is what longtable/longtabu use ?
+
+\setlength{\tabulinesep}{4pt} %spacing in tabu
+
+\setlength\cftparskip{0pt} %a load of guff to make toc more compact
+\setlength{\cftbeforetoctitleskip}{5pt}
+\setlength\cftbeforesecskip{4pt}
+\setlength\cftaftertoctitleskip{5pt}
+\setlength{\cftsubsubsecindent}{3.3cm} % {2.7cm}
+
+%\setlength{\textfloatsep}{0pt}
+
+\renewcommand\thechapter{\Alph{chapter}} %have top level chapters use letters instead of numbers
+
+\addbibresource{sources.bib} %references for bibtex and biber
+
+\titleformat{\chapter}{\normalfont\huge}{\thechapter.}{20pt}{\huge} %formatting for chapter headings
+\titlespacing{\chapter}{0pt}{-40pt}{-3pt}
+\titlespacing{\section}{0pt}{0pt}{-3pt}
+\titlespacing{\subsection}{0pt}{0pt}{-5pt}
+\titlespacing{\subsubsection}{0pt}{0pt}{-5pt}
+
+\setlength{\headheight}{14.5pt} % please the compiler
+
+% \newlength{\fancyvrbtopsep}
+% \newlength{\fancyvrbpartopsep}
+% \makeatletter
+% \FV@AddToHook{\FV@ListParameterHook}{\topsep=\fancyvrbtopsep\partopsep=\fancyvrbpartopsep}
+% \makeatother
+
+% \setlength{\fancyvrbtopsep}{-4pt}
+% \setlength{\fancyvrbpartopsep}{-4pt}
+
+% % this should squish lists
+% \renewcommand{\enumhook}{\setlength{\topsep}{0pt}%
+%   \setlength{\itemsep}{0pt}}
+
+\definecolor{mygreen}{rgb}{0,0.6,0} %code listing formatting stuff
+
+\lstset{language=python,
+    breaklines=true, %basicstyle=\footnotesize,
+    numbers=left,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    upquote=true,
+    %aboveskip=-14pt,
+    belowskip=-4pt,
+    aboveskip=14pt, %this is the correct indentation for my PC, dunno why it compliles different
+    frame=lines,
+    abovecaptionskip=-3pt,
+    belowcaptionskip=8pt,
+    framexleftmargin=0.5em,
+    framexrightmargin=0.5em,
+    %backgroundcolor=\color{LightCyan1},
+    basicstyle=\small\ttfamily\color{black},
+    keywordstyle=\bfseries\color{purple},
+    stringstyle=\color{orange},
+    identifierstyle=\color{blue},
+    commentstyle=\itshape\color{mygreen},
+    numberstyle=\small\ttfamily}
+
+\lstdefinestyle{table}
+    {basicstyle={\scriptsize\ttfamily},
+    identifierstyle={\color{black}},
+    tabsize=2,language={python},
+    numbersep=4pt,numbers=left,xleftmargin=0.5cm,frame=tlbr,framesep=2pt,framerule=0pt}
+
+\fvset{tabsize=4,fontsize=\footnotesize}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    {\scshape\large Royal Holloway, University of London\par}
+    \vspace{2cm}
+    {\Huge Final Year Project -- Research Report\par}
+    \vspace{0.5cm}
+    {\Large Offline HTML5 Maps Application\par}
+    \vspace{4cm}
+
+    {\Huge Offline HTML5 Technologies\par}
+    \vfill{}
+    {\large George Honeywood -- \the\month/\the\year\par}
+\end{titlepage}
+
+\renewcommand*\contentsname{\vspace{-20pt}Contents}
+
+% \tableofcontents
+%\addtocontents{toc}{~\hfill\scshape Page\par}
+\thispagestyle{fancy}
+
+% \fancyhf{} %clear out headers and footers before creating own
+% \renewcommand{\headrulewidth}{0pt}
+% % \fancyfoot[L]{\begin{small}10092159809\end{small}}
+% \fancyfoot[L]{\begin
+% \author{George Honeywood -- 100921598}
+% % \author{100921598}
+% \date{13/03/21}                                           % Activate to display a given date or no date
+
+
+
+
+% \fancyfoot[R]{\begin{small}\thepage{}/\pageref*{LastPage}\end{small}}
+
+\pagestyle{fancy} %put the footer on every page
+\fancypagestyle{plain}
+
+In order to create an offline HTML5 map application, I will first have to research how offline HTML5 applications work, and what technologies I'll need to become familiar with.
+
+
+\end{document}
