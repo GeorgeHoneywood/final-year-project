@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt]{report} %set page size, font size, and type
+\documentclass[a4paper,12pt]{article} %set page size, font size, and type
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -36,8 +36,8 @@
             pdftitle={FYP Research Report}]{hyperref} %give the pdf hyperlinks and other jazz
 
 \fancyhf{} %clear out headers and footers before creating own
-\fancyhead[L]{\begin{footnotesize}\leftmark\end{footnotesize}}
-\fancyhead[R]{\begin{footnotesize}\rightmark\end{footnotesize}}
+% \fancyhead[L]{\begin{footnotesize}\leftmark\end{footnotesize}}
+% \fancyhead[R]{\begin{footnotesize}\rightmark\end{footnotesize}}
 \fancyfoot[L]{\begin{footnotesize}George Honeywood\end{footnotesize}}
 \fancyfoot[R]{\begin{footnotesize}Research Report\end{footnotesize}}
 \fancyfoot[C]{\begin{footnotesize}\thepage{}/\pageref*{LastPage}\end{footnotesize}}
@@ -70,7 +70,7 @@
 
 %\setlength{\textfloatsep}{0pt}
 
-\renewcommand\thechapter{\Alph{chapter}} %have top level chapters use letters instead of numbers
+% \renewcommand\thechapter{\Alph{chapter}} %have top level chapters use letters instead of numbers
 
 \addbibresource{sources.bib} %references for bibtex and biber
 
@@ -129,25 +129,28 @@
 \fvset{tabsize=4,fontsize=\footnotesize}
 
 \begin{document}
-\begin{titlepage}
-    \centering
-    {\scshape\large Royal Holloway, University of London\par}
-    \vspace{2cm}
-    {\Huge Final Year Project -- Research Report\par}
-    \vspace{0.5cm}
-    {\Large Offline HTML5 Maps Application\par}
-    \vspace{4cm}
+% \begin{titlepage}
+{
+\centering
+{\scshape\large Royal Holloway, University of London\par}
+\vspace{0.5cm}
+{\Huge Final Year Project --- Research Report\par}
+\vspace{0.2cm}
+{\Large Offline HTML5 Maps Application\par}
+\vspace{0.2cm}
 
-    {\Huge Offline HTML5 Technologies\par}
-    \vfill{}
-    {\large George Honeywood -- \the\month/\the\year\par}
-\end{titlepage}
+{\Huge Offline HTML5 Technologies\par}
+\vspace{0.5cm}
+{\large George Honeywood --- \the\month/\the\year\par}
+\vspace{0.5cm}
+}
+% \end{titlepage}
 
-\renewcommand*\contentsname{\vspace{-20pt}Contents}
+% \renewcommand*\contentsname{\vspace{-20pt}Contents}
 
 % \tableofcontents
 %\addtocontents{toc}{~\hfill\scshape Page\par}
-\thispagestyle{fancy}
+% \thispagestyle{fancy}
 
 % \fancyhf{} %clear out headers and footers before creating own
 % \renewcommand{\headrulewidth}{0pt}
@@ -157,9 +160,6 @@
 % % \author{100921598}
 % \date{13/03/21}                                           % Activate to display a given date or no date
 
-
-
-
 % \fancyfoot[R]{\begin{small}\thepage{}/\pageref*{LastPage}\end{small}}
 
 \pagestyle{fancy} %put the footer on every page
@@ -167,5 +167,11 @@
 
 In order to create an offline HTML5 map application, I will first have to research how offline HTML5 applications work, and what technologies I'll need to become familiar with.
 
+There are various different APIs that one can use to store data in an offline HTML5 application, such as IndexedDB, the File and Directory Entries API~\cite{w3c-file-directories-api}~\cite{mdn-file-directories-api} and localStorage. localStorage will likely not be appropriate for my use case, as it is designed for only small amounts of data. 
+
+If I am to process and use a large precompiled map data format, like mbtiles~\cite{mbtiles-spec} or Mapsforge~\cite{mapsforge-spec}, using the File and Directory Entries API will likely be more appropriate. For optimal performance, it may be necessary to have a loading step, I transform from one of these formats into the IndexedDB, for usage by the app.
+
+
+\printbibliography{}
 
 \end{document}
