@@ -72,9 +72,21 @@
 
 In order to create an offline HTML5 map application, I will first have to research how offline HTML5 applications work, and what technologies I'll need to become familiar with.
 
-There are various different APIs that one can use to store data in an offline HTML5 application, such as IndexedDB, the File and Directory Entries API~\cite{w3c-file-directories-api}~\cite{mdn-file-directories-api} and localStorage. localStorage will likely not be appropriate for my use case, as it is designed for only small amounts of data. 
+There are various different APIs that one can use to store data in an offline HTML5 application, such as IndexedDB, the File and Directory Entries API~\cite{w3c-file-directories-api}~\cite{mdn-file-directories-api} and localStorage. localStorage will likely not be appropriate for my use case, as it is designed for only small amounts of data. There is also the Application Cache, but this has been deprecated, and support has been removed from all major browsers~\cite{whatwg-application-cache}~\cite{mdn-application-cache}. Therefore, the Application Cache will not be suitable for a new application.
 
-If I am to process and use a large precompiled map data format, like mbtiles~\cite{mbtiles-spec} or Mapsforge~\cite{mapsforge-spec}, using the File and Directory Entries API will likely be more appropriate. For optimal performance, it may be necessary to have a loading step, I transform from one of these formats into the IndexedDB, for usage by the app.
+If I am to process and use a large precompiled map data format, like mbtiles~\cite{mbtiles-spec} or Mapsforge~\cite{mapsforge-spec}, using the File and Directory Entries API will likely be more appropriate. For optimal performance, it may be necessary to have a loading step, I transform from one of these formats into the IndexedDB, for usage by the app. Hopefully this step can be avoided, as it would not be ideal to have multiple copies of the data, particularly on space constrained devices.
+
+It seems like the File and Directory Entries API~\cite{w3c-file-directories-api} will likely be most appropriate, as it has the ability to act like a local file system. This would allow my app to have a flow like:
+
+\begin{itemize}
+    \item User opens the webapp
+    \item Selects map to download from list (or as an enhancement by zooming in on desired region on a low detail world map)
+    \item App downloads the map file to sandboxed filesystem
+    \item User goes offline
+    \item Map rendered from this internally stored file
+\end{itemize}
+
+
 
 \printbibliography{}
 
