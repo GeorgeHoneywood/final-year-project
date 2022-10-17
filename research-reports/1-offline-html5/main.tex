@@ -116,8 +116,9 @@ Hence, if I wish to use the File and Directory Entries API, which would provide 
 
 One benefit of storing the map file outside the browser is that my application will not have to deal with the browser not allocating it enough storage quota for the file. For example in Chrome, you must use the Quota Management API to request persistent storage space to use~\cite{gd-offline-html5-storage}, which will prompt the user to accept the request.
 
-% TODO: service worker cache
-%One final method of storing data offline is to use 
+Another option is to use the Cache API, which is part of Service Worker specification~\cite{w3c-service-workers-caches}, and has good cross-browser support. It has a simpler interface that should work for the application --- a pair of a request and a response object are stored, and you get a cached version of the response by providing a similar request. 
+
+To determine which will be the best choice for the application, I will produce proof of concepts that employ the File API and the Cache API\@.
 
 \printbibliography{}
 
