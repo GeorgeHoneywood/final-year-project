@@ -54,6 +54,11 @@
 \setlength{\LTpost}{0pt} %reduce space under table for longtable/longtabu
 \setlength{\tabulinesep}{4pt} %spacing in tabu
 
+% prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+
 \addbibresource{sources.bib} %references for bibtex and biber
 
 \begin{document}
@@ -77,7 +82,13 @@ There are various different APIs that one can use to store data in an offline HT
 
 If I am to process and use a large precompiled map data format, like mbtiles~\cite{mbtiles-spec} or Mapsforge~\cite{mapsforge-spec}, using the File and Directory Entries API will likely be more appropriate. For optimal performance, it may be necessary to have a loading step, I transform from one of these formats into the IndexedDB, for usage by the app. Hopefully this step can be avoided, as it would not be ideal to have multiple copies of the data, particularly on space constrained devices.
 
-It seems like the File and Directory Entries API~\cite{w3c-file-directories-api} will likely be most appropriate, as it has the ability to act like a local file system. This would allow my app to have a flow like:
+\begin{quote}
+    ``The File and Directory Entries API simulates a local file system that web apps can navigate around. You can develop apps that can read, write, and create files and directories in a sandboxed, virtual file system.''
+    
+    \footnotesize{--- \fullcite{mdn-file-directories-api}}
+\end{quote}
+
+Another benefit of the File and Directory Entries API~\cite{w3c-file-directories-api}, is that it has the ability to act like a local file system. This would allow my app to have a flow like:
 
 \begin{itemize}
     \item User opens the webapp
@@ -87,7 +98,26 @@ It seems like the File and Directory Entries API~\cite{w3c-file-directories-api}
     \item Map rendered from this internally stored file
 \end{itemize}
 
+A flow like this makes sense from a user's perspective, as it follows a similar paradigm to other offline map viewers, like Organic Maps or OsmAnd (as discussed in the initial plan).
 
+If there are issues with using the File and Directory Entries API, for example file size limits in certain browsers, it should be possible to use the plain File API instead~\cite{w3c-file-api}. The File API allows access to read single files from a user's local filesystem. Importantly for my use case of loading a large map file from a user's disk, we cannot store the entire file in RAM at once. Usefully the File API provides a \texttt{.slice()} method, which allows you to work with a smaller subsection of the file. This will likely be important to avoid out-of-memory (OOM) errors.
+
+Using the plain file API will however come at a detriment to the user flow. Instead of being able to select and download a map within the app, the user will have to download the map file themselves, then point the app to the map file they have downloaded. This is not a major issue, but it would be preferable to have this process handled without user interaction.
+
+Unfortunately the Files and Directory Entries API has limited support in Firefox~\cite{mdn-file-directories-api-limitations}. Critically \texttt{window.requestFileSystem()} is not supported, and this is the function that you call to gain access to a virtual filesystem. In Firefox this API can only be used through an \texttt{<input>} element, or drag and drop. This is an issue as for my application, the app would need to be able to create the virtual filesystem programmatically.
+
+\begin{quote}
+    ``Content scripts can't create file systems or initiate access to a file system.''
+
+    \footnotesize{--- \fullcite{mdn-file-directories-api-limitations}}
+\end{quote}
+
+Hence, if I wish to use the File and Directory Entries API, which would provide a smoother user journey, I would not be able to support Firefox. For my application I think it is more important to support Firefox than have perfect UX --- so I will settle on the compromise of the user having to select the desired map file on each start, via the file picker. This will be an irritation, but unfortunately there is no widely compatible way to use a sandboxed/virtual filesystem in the browser.
+
+One benefit of storing the map file outside the browser is that my application will not have to deal with the browser not allocating it enough storage quota for the file. For example in Chrome, you must use the Quota Management API to request persistent storage space to use~\cite{gd-offline-html5-storage}, which will prompt the user to accept the request.
+
+% TODO: service worker cache
+%One final method of storing data offline is to use 
 
 \printbibliography{}
 
