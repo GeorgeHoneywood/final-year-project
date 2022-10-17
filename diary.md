@@ -8,7 +8,11 @@ Worked on the initial project plan. Read through "OpenStreetMap -- Using and Enh
 
 ### Week 3 (2022-10-03)
 
+Got feedback on initial plan from my supervisor (Reuben Rowe), and made alterations based on it. Specifically, I shorted the abstract by moving content to an introduction section, wrote a general "Aims & objectives" section, and added a "Deliverables" section, referencing these deliverables in the timeline. I also polished the "Risks & mitigations" section, and changed inline links to references.
+
 ### Week 4 (2022-10-10)
+
+Worked on the first report, about offline HTML5 applications.
 
 ### Week 5 (2022-10-17)
 
