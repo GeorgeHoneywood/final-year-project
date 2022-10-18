@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<head>
+  <!-- prevent favicon.ico requests -->
+  <link rel="icon" href="data:," />
+  <!-- install service worker -->
+  <script src="/register-sw.js"></script>
+  <script src="/offline.js"></script>
+</head>
+
+<body>
+  <h1>Proof of concept demo page</h1>
+  <p>
+    Demo HTML5 app, using the Cache API and the File API to store files for
+    later offline usage.
+  </p>
+  <p>
+    Download the
+    <a href="https://download.mapsforge.org/maps/v5/europe/albania.map"
+      >map of albania (~30MB)</a
+    >
+    to this folder to test the offline capabilities.
+  </p>
+</body>
