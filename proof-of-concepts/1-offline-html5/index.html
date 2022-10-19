@@ -5,7 +5,6 @@
   <link rel="icon" href="data:," />
   <!-- install service worker -->
   <script src="/register-sw.js"></script>
-  <script src="/offline.js"></script>
 </head>
 
 <body>
@@ -21,4 +20,10 @@
     >
     to this folder to test the offline capabilities.
   </p>
+  <p>Try refreshing the page after stopping the http server.</p>
+  <h3>File API</h3>
+  <p>Try opening the map file using this picker!</p>
+  <input type="file" id="mapFile" />
+
+  <script src="/offline.js"></script>
 </body>

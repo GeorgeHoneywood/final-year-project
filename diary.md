@@ -12,9 +12,11 @@ Got feedback on initial plan from my supervisor (Reuben Rowe), and made alterati
 
 ### Week 4 (2022-10-10)
 
-Worked on the first report, about offline HTML5 applications.
+Worked on the first report, about offline HTML5 applications (deliverable 1).
 
 ### Week 5 (2022-10-17)
+
+Worked on the offline HTML5 proof of concept (deliverable 2). Implemented a demo offline app using service workers, with the ability to load a large file either from the local disk using the File API, or from the service worker cache with the Cache API.
 
 ### Week 6 (2022-10-24)
 

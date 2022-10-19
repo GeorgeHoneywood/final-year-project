@@ -6,3 +6,5 @@ Service worker example used, from: https://github.com/mdn/dom-examples/tree/main
 
 Run `python3 -m http.server` from this directory, then go to `http://localhost:8000`.
 After loading the page once, you should then be able to load it again whilst offline.
+See the console for some output about the cached map file.
+You can also open a map file from your local disk.
