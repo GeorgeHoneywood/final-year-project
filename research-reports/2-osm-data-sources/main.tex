@@ -1,0 +1,97 @@
+\documentclass[a4paper,12pt]{article} %set page size, font size, and type
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx} %add pictures to document
+\usepackage{fancyhdr} %change headers and footers
+\usepackage{verbatim} 
+\usepackage[shortlabels]{enumitem} %change list formatting
+\usepackage{array}
+\usepackage{tabularx} %allows "X" in tables
+\usepackage{tabu} %for longtabu
+\usepackage{longtable}
+\usepackage{textcomp}
+\usepackage{wasysym} %more symbols
+\usepackage{listings} %syntax highlighting
+\usepackage{fancyvrb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{tocloft} %table of contents modification to make lines closer
+\usepackage[compact, nobottomtitles]{titlesec} %modify styles of titles
+\usepackage[justification=centering,
+            font={small},
+            textfont={it},
+            labelfont=bf]{caption} %make figure hyperlinks go to top of image
+\usepackage[margin=3cm, driver=pdftex]{geometry} %make the margins smaller
+\usepackage[backend=biber,
+            sorting=none]{biblatex} %create bibliography
+\usepackage[pdftex,
+            colorlinks,
+            linkcolor={red!50!black},
+            citecolor={blue!50!black},
+            urlcolor={blue!80!black},
+            pdfauthor={George Honeywood},
+            pdftitle={FYP Research Report}]{hyperref} %give the pdf hyperlinks and other jazz
+
+\fancyhf{} %clear out headers and footers before creating own
+\fancyfoot[L]{\begin{footnotesize}George Honeywood\end{footnotesize}}
+\fancyfoot[R]{\begin{footnotesize}Research Report\end{footnotesize}}
+\fancyfoot[C]{\begin{footnotesize}\thepage{}/\pageref*{LastPage}\end{footnotesize}}
+
+\pagestyle{fancy} %put the footer on every page
+\fancypagestyle{plain}
+
+\setlength{\parskip}{1em} %stuff to reduce spacing and indents on paragraphs
+\setlength{\parindent}{0pt}
+
+\setcounter{secnumdepth}{2} %depth of numbering for section headings
+\setcounter{tocdepth}{3} %depth of headings included in the contents
+
+\setlist[itemize]{noitemsep, nolistsep} %make lists take up less room
+
+\setlength{\LTpost}{0pt} %reduce space under table for longtable/longtabu
+\setlength{\tabulinesep}{4pt} %spacing in tabu
+
+% prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+
+\addbibresource{sources.bib} %references for bibtex and biber
+
+\begin{document}
+{
+\centering
+{\scshape\large Royal Holloway, University of London\par}
+\vspace{0.5cm}
+{\Huge Final Year Project --- Research Report\par}
+\vspace{0.2cm}
+{\Large Offline HTML5 Maps Application\par}
+\vspace{0.2cm}
+{\Huge OpenStreetMap data sources/formats\par}
+\vspace{0.5cm}
+{\large George Honeywood --- \the\month/\the\year\par}
+\vspace{0.5cm}
+}
+
+In order to produce a map using OpenStreetMap data, you first need to decide which source/format of data to use. Traditionally, for this project, students use the OpenStreetMap editing API\@. This however, has a number of limitations, some of which I have already discussed in the project plan.
+
+\begin{itemize}
+    \item It is designed for map editing applications, and the terms of service explicitly prohibit read-only uses~\cite{osm-owg-tile-usage-policy}.
+    \item You can only download a relatively limited geographical area, usually only around 2 km\(^2\). This has the effect that you will not be able to zoom out to see a large area, such an entire country~\cite{osm-wiki-limited-area}.
+    \item Complex structures (like buildings with internal courtyards) represented in OpenStreetMap as multipolyons require extensive parsing and validation to correctly display.
+\end{itemize}
+
+For online maps, it is common to use either raster or vector ``map tiles''. Raster map tiles are usually 256\(\times{}\)256 \texttt{.png} files, rendered by a Mapnik server. These tiles are named according to their zoom level, and an \(x\) and \(y\) value, where \(x\) and \(y\) are offsets from the top left most tile~\cite{osm-wiki-tile-names}. Raster tiles, however, are not appropriate for offline usage, as you have to request an extremely large amount of tiles, especially when you approach high zoom levels. For example if you downloaded 4 tiles at zoom 10, you would need to download 16 at zoom 11, 64 at zoom 12, and 262144 at zoom 18. This behaviour is unacceptable as rendering tiles is computationally expensive for the OpenStreetMap Foundation, and the size of these tiles adds up.
+
+Vector tiles use a similar scheme, with tiles also being served at Z/X/Y addresses. The key differentiator is that instead of rendered images, vector data is served to clients, and it is up to the clients to render this data into a map. This gives the clients flexibility in how chose to display the data, such as colours and labels. This is usually done through stylesheets. As vector data does not pixellate like raster images, you can ``overzoom'' on vector tiles, meaning you do not have to serve tiles to such high zoom levels. One of the most popular formats for vector map tiles are Mapbox Vector tiles. These use the Google Protobuf format to store the vector data.
+
+Vector tiles make a more appropriate offline format than raster tiles, due to their ability to ``overzoom'', and that vector data can be stored more efficiently. Unfortunately it is still not particularly suited to offline usage, as with raster tiles, you need to download many tiles to cover a large region.
+
+Therefore, it makes sense to use a dedicated storage format, that is designed to provide map data for offline applications. The OpenStreetMap Wiki provides a number of possible options for this purpose~\cite{osm-wiki-offline}. The most popular choices are mapsforge, which is used by many applications~\cite{apps-using-mapsforge}, and mbtiles (by Mapbox).
+
+\printbibliography{}
+
+\end{document}
