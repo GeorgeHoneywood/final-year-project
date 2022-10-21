@@ -1,0 +1,83 @@
+\documentclass[a4paper,12pt]{article} %set page size, font size, and type
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx} %add pictures to document
+\usepackage{fancyhdr} %change headers and footers
+\usepackage{verbatim} 
+\usepackage[shortlabels]{enumitem} %change list formatting
+\usepackage{array}
+\usepackage{tabularx} %allows "X" in tables
+\usepackage{tabu} %for longtabu
+\usepackage{longtable}
+\usepackage{textcomp}
+\usepackage{wasysym} %more symbols
+\usepackage{listings} %syntax highlighting
+\usepackage{fancyvrb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{tocloft} %table of contents modification to make lines closer
+\usepackage[compact, nobottomtitles]{titlesec} %modify styles of titles
+\usepackage[justification=centering,
+            font={small},
+            textfont={it},
+            labelfont=bf]{caption} %make figure hyperlinks go to top of image
+\usepackage[margin=3cm, driver=pdftex]{geometry} %make the margins smaller
+\usepackage[backend=biber,
+            sorting=none]{biblatex} %create bibliography
+\usepackage[pdftex,
+            colorlinks,
+            linkcolor={red!50!black},
+            citecolor={blue!50!black},
+            urlcolor={blue!80!black},
+            pdfauthor={George Honeywood},
+            pdftitle={FYP Research Report}]{hyperref} %give the pdf hyperlinks and other jazz
+
+\fancyhf{} %clear out headers and footers before creating own
+\fancyfoot[L]{\begin{footnotesize}George Honeywood\end{footnotesize}}
+\fancyfoot[R]{\begin{footnotesize}Research Report\end{footnotesize}}
+\fancyfoot[C]{\begin{footnotesize}\thepage{}/\pageref*{LastPage}\end{footnotesize}}
+
+\pagestyle{fancy} %put the footer on every page
+\fancypagestyle{plain}
+
+\setlength{\parskip}{1em} %stuff to reduce spacing and indents on paragraphs
+\setlength{\parindent}{0pt}
+
+\setcounter{secnumdepth}{2} %depth of numbering for section headings
+\setcounter{tocdepth}{3} %depth of headings included in the contents
+
+\setlist[itemize]{noitemsep, nolistsep} %make lists take up less room
+
+\setlength{\LTpost}{0pt} %reduce space under table for longtable/longtabu
+\setlength{\tabulinesep}{4pt} %spacing in tabu
+
+% prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+
+\addbibresource{sources.bib} %references for bibtex and biber
+
+\begin{document}
+{
+\centering
+{\scshape\large Royal Holloway, University of London\par}
+\vspace{0.5cm}
+{\Huge Final Year Project --- Research Report\par}
+\vspace{0.2cm}
+{\Large Offline HTML5 Maps Application\par}
+\vspace{0.2cm}
+{\Huge Projecting a map\par}
+\vspace{0.5cm}
+{\large George Honeywood --- \the\month/\the\year\par}
+\vspace{0.5cm}
+}
+
+The core of this project is being able to render a map. This in its most basic form means being able to take coordinates, which represent a position on the spherical(-ish) body that is the earth, and placing these on a 2 dimensional plane. This process is known as map projection~\cite[5]{canters2002small}.
+
+\printbibliography{}
+
+\end{document}
