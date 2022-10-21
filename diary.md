@@ -18,6 +18,8 @@ Worked on the first report, about offline HTML5 applications (deliverable 1).
 
 Worked on the offline HTML5 proof of concept (deliverable 2). Implemented a demo offline app using service workers, with the ability to load a large file either from the local disk using the File API, or from the service worker cache with the Cache API.
 
+Completed report on OpenStreetMap data sources (deliverable 3).
+
 ### Week 6 (2022-10-24)
 
 ### Week 7 (2022-10-31)
