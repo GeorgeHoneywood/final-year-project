@@ -82,7 +82,13 @@ OpenStreetMap uses the WGS84 coordinate reference system (EPSG:4326) to represen
 
 If you were to naively place coordinates from the WGS84 system on to a graph, you would get a ``plate carrée'' projected map. This projection is a form of the equirectangular projection, where the standard parallel \(\phi_1 = 0\). In plate carrée, lines of longitude are straight, vertical and equidistant, and lines of latitude are similar, albeit horizontal. Although all map projections are compromises between conformality (preservation of angle) and preservation of area, plate carré does not preserve either, meaning it is not particularly well-used.
 
-Hence, OpenSteetMap uses the variously named ``Web Mercartor'' projection (FIXME: list some others). This projection is conformal, meaning that (locally) angles on the map are the same as angles on the ground, even if lengths are not preserved.
+Hence, OpenSteetMap uses the ``Web Mercator'' projection (also known as Spherical Mercator, WGS 84/Pseudo-Mercator, Google Web Mercator, EPSG:3857). This projection is almost conformal, meaning that (local) angles on the map are the same as angles on the ground, even if lengths are not preserved~\cite{carto-implications-of-webmercator,}. It deviates from normal Mercator in that its calculations are based on the earth being a true sphere, rather than ellipsoidal. The benefit of this is that the calculations for converting between WGS84 latitude/longitude coordinates, and Web Mercator are simpler than normal Mercator~\cite{ugrc-earth-not-round}.
+
+So, to convert from latitude/longitude coordinates to Web Mercator, we can use equations 7--1a \& 7--2a from \textcite[41]{snyder1987map}, where \(\lambda{}\) is longitude and \(\phi{}\) is latitude, both in degrees:
+
+\[x = \frac{\pi R(\lambda^\circ - \lambda^\circ_0)}{180^\circ} \]
+
+\[y = R \ln \tan \left( 45^\circ + \frac{\phi^\circ}{2} \right) \]
 
 \printbibliography{}
 
