@@ -76,7 +76,13 @@
 \vspace{0.5cm}
 }
 
-The core of this project is being able to render a map. This in its most basic form means being able to take coordinates, which represent a position on the spherical(-ish) body that is the earth, and placing these on a 2 dimensional plane. This process is known as map projection~\cite[5]{canters2002small}.
+The core of this project is being able to render a map. This in its most basic form means being able to take coordinates, which represent a position on the sphere-like body that is the earth, and placing these on a two-dimensional plane. This process is known as map projection~\cite[5]{canters2002small}.
+
+OpenStreetMap uses the WGS84 coordinate reference system (EPSG:4326) to represent the positions of the nodes that make up its data~\cite{osm-wiki-wgs84}. GPS uses this CRS, and it is a popular standard~\cite{epsg.io-epsg:4326}.
+
+If you were to naively place coordinates from the WGS84 system on to a graph, you would get a ``plate carrée'' projected map. This projection is a form of the equirectangular projection, where the standard parallel \(\phi_1 = 0\). In plate carrée, lines of longitude are straight, vertical and equidistant, and lines of latitude are similar, albeit horizontal. Although all map projections are compromises between conformality (preservation of angle) and preservation of area, plate carré does not preserve either, meaning it is not particularly well-used.
+
+Hence, OpenSteetMap uses the variously named ``Web Mercartor'' projection (FIXME: list some others). This projection is conformal, meaning that (locally) angles on the map are the same as angles on the ground, even if lengths are not preserved.
 
 \printbibliography{}
 
