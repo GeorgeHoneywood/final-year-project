@@ -1,3 +1,4 @@
+// load an array of coordinates from a geojson file
 const getCoordinates = async (url) => {
     const resp = await fetch(url);
     if (!resp.ok) {
