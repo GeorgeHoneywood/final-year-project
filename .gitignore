@@ -26,3 +26,4 @@ main.pdf
 *.run.xml
 *.bcf
 proof-of-concepts/1-offline-html5/albania.map
+dist

@@ -1,5 +1,7 @@
+import { CoordArray } from "./types.js";
+
 // load an array of coordinates from a geojson file
-async function getCoordinates(url) {
+async function getCoordinates(url: string) : Promise<CoordArray> {
     const resp = await fetch(url);
     if (!resp.ok) {
         throw new Error(
