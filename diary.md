@@ -22,6 +22,8 @@ Completed report on OpenStreetMap data sources (deliverable 3). Completed report
 
 ### Week 6 (2022-10-24)
 
+Implemented the proof of concept that renders some array of wgs84 coordinates to a Mercator projected map (deliverable 5, proof-of-concepts/2-rendering-a-way). Allows you to render the boundaries of three different towns -- with manually chosen zoom factor.
+
 ### Week 7 (2022-10-31)
 
 ### Week 8 (2022-11-07)
