@@ -1,5 +1,5 @@
 // load an array of coordinates from a geojson file
-const getCoordinates = async (url) => {
+async function getCoordinates(url) {
     const resp = await fetch(url);
     if (!resp.ok) {
         throw new Error(
