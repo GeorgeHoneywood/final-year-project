@@ -21,7 +21,7 @@ townPicker.addEventListener("change", async (e) => {
 
 async function renderMap(town) {
     // coordinates is an array of longitude (λ), latitude (𝜙) wgs84 pairs
-    const wgs84_coordinates = await getCoordinates(`/data/${town}.geojson`)
+    const wgs84_coordinates = await getCoordinates(`data/${town}.geojson`)
     const projected_coordinates = projectToMercator(wgs84_coordinates);
 
     // as we are drawing from (0,0) we should reshape our data so that
