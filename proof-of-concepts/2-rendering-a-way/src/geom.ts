@@ -1,6 +1,8 @@
 // geometry helper functions
 
-function projectToMercator(wgs84_coordinates) {
+import { CoordArray } from "./types.js";
+
+function projectToMercator(wgs84_coordinates: CoordArray): CoordArray {
     const RADIANS_TO_DEGREES = 180 / Math.PI;
     const projected_coordinates = [];
     for (const [long, lat] of wgs84_coordinates) {
@@ -13,12 +15,12 @@ function projectToMercator(wgs84_coordinates) {
             (lat / RADIANS_TO_DEGREES) / 2 + Math.PI / 4
         )) * RADIANS_TO_DEGREES;
 
-        projected_coordinates.push([x, y]);
+        projected_coordinates.push([x, y] as [number, number]);
     }
     return projected_coordinates;
 }
 
-function scaleToZeroZero(projected_coordinates) {
+function scaleToZeroZero(projected_coordinates: CoordArray): CoordArray {
     const x_coordinates = projected_coordinates.map(pair => pair[0]);
     const y_coordinates = projected_coordinates.map(pair => pair[1]);
     const minimum_x = Math.min(...x_coordinates);
@@ -26,7 +28,7 @@ function scaleToZeroZero(projected_coordinates) {
 
     const scaled_coordinates = [];
     for (const [x, y] of projected_coordinates) {
-        scaled_coordinates.push([x - minimum_x, y - minmum_y]);
+        scaled_coordinates.push([x - minimum_x, y - minmum_y] as [number, number]);
     }
     return scaled_coordinates;
 }
