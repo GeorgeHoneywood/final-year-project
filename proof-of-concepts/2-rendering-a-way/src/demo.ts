@@ -11,6 +11,8 @@ const ZOOM_FACTORS: { [index: string]: number } = {
     "baden-baden": 2000,
     egham: 20000,
     ferndown: 7000,
+    "egham-detailed": 50000,
+    "ferndown-buildings": 23000,
 }
 
 townPicker.addEventListener("change", async (e) => {
@@ -23,21 +25,23 @@ townPicker.addEventListener("change", async (e) => {
 async function renderMap(town: string) {
     if (!ctx) return;
     // coordinates is an array of longitude (λ), latitude (𝜙) wgs84 pairs
-    const wgs84_coordinates = await getCoordinates(`data/${town}.geojson`)
-    const projected_coordinates = projectToMercator(wgs84_coordinates);
+    const wgs84_geometries = await getCoordinates(`data/${town}.geojson`)
+
+    const projected_geometries = projectToMercator(wgs84_geometries);
 
     // as we are drawing from (0,0) we should reshape our data so that
     // it is always around (0,0)
-    const scaled_coordinates = scaleToZeroZero(projected_coordinates);
+    const scaled_geometries = scaleToZeroZero(projected_geometries);
 
     const zoom_factor = ZOOM_FACTORS[town];
-    ctx.beginPath();
-    for (const [x, y] of scaled_coordinates) {
-        ctx.lineTo(x * zoom_factor, canvas.height - (y * zoom_factor)); // as we are drawing from 0,0 being the top left, we must flip the y-axis
+    for (const geometry of scaled_geometries) {
+        ctx.beginPath();
+        for (const [x, y] of geometry) {
+            ctx.lineTo(x * zoom_factor, canvas.height - (y * zoom_factor)); // as we are drawing from 0,0 being the top left, we must flip the y-axis
+        }
+        ctx.stroke();
     }
-    ctx.stroke();
-    
 }
 
-// default to showing Baden-Baden
-await renderMap("baden-baden")
+// default to showing Ferndown (buildings)
+await renderMap("ferndown-buildings")

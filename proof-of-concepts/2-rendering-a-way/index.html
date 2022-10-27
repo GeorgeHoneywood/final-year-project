@@ -6,16 +6,18 @@
 </head>
 
 <body>
-  <h1>Proof of concept: rendering a way</h1>
+  <h1>Proof of concept: rendering some ways</h1>
+
   <p>
     Demo app to render some list of coordinate pairs to a map.
   </p>
 
-
-  <select name="Town boundary" id="townPicker">
+  <select name="Town boundary" id="townPicker" style="display: block; margin-bottom: 15px;">
     <option value="egham">Egham</option>
     <option value="ferndown">Ferndown</option>
-    <option selected value="baden-baden">Baden-Baden</option>
+    <option value="baden-baden">Baden-Baden</option>
+    <option value="egham-detailed">Egham (detailed)</option>
+    <option selected value="ferndown-buildings">Ferndown (buildings)</option>
   </select>
 
   <canvas width="600" height="600" id="map"></canvas>
