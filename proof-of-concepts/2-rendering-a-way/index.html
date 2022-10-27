@@ -1,26 +1,40 @@
 <!DOCTYPE html>
 
-<head>
-  <!-- prevent favicon.ico requests -->
-  <link rel="icon" href="data:," />
-</head>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<body>
-  <h1>Proof of concept: rendering some ways</h1>
+    <!-- prevent favicon.ico requests -->
+    <link rel="icon" href="data:," />
+    <title>Proof of concept: rendering some way</title>
 
-  <p>
-    Demo app to render some list of coordinate pairs to a map.
-  </p>
+    <style>
+      body {
+        font-family: sans;
+        margin-left: 20px;
+      }
+    </style>
+  </head>
 
-  <select name="Town boundary" id="townPicker" style="display: block; margin-bottom: 15px;">
-    <option value="egham">Egham</option>
-    <option value="ferndown">Ferndown</option>
-    <option value="baden-baden">Baden-Baden</option>
-    <option value="egham-detailed">Egham (detailed)</option>
-    <option selected value="ferndown-buildings">Ferndown (buildings)</option>
-  </select>
+  <body>
+    <h1>Proof of concept: rendering some ways</h1>
 
-  <canvas width="600" height="600" id="map"></canvas>
+    <p>Demo app to render some list of coordinate pairs to a map.</p>
 
-  <script type="module" src="dist/demo.js"></script>
-</body>
+    <select
+      name="Town boundary"
+      id="townPicker"
+      style="display: block; margin-bottom: 15px"
+    >
+      <option value="egham">Egham</option>
+      <option value="ferndown">Ferndown</option>
+      <option value="baden-baden">Baden-Baden</option>
+      <option value="egham-detailed">Egham (detailed)</option>
+      <option selected value="ferndown-buildings">Ferndown (buildings)</option>
+    </select>
+
+    <canvas width="600" height="600" id="map"></canvas>
+
+    <script type="module" src="dist/demo.js"></script>
+  </body>
+</html>
