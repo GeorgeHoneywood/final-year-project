@@ -9,8 +9,8 @@ class CanvasMap {
     // inital zoom level, where 1 is the whole world
     private zoom_level = 1;
 
-    private x_offset = 0;
-    private y_offset = 0;
+    private x_offset = 340;
+    private y_offset = 320;
 
     public constructor(canvas: HTMLCanvasElement, geometries: GeometryArray) {
         this.canvas = canvas;
