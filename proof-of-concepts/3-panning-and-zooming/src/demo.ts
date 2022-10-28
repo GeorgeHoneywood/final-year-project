@@ -7,7 +7,7 @@ const ctx = canvas.getContext("2d");
 // inital zoom level, where 1 is the whole world
 let zoom_level = 1;
 
-let scale = 0; //
+let scale = 0;
 let x_offset = 0;
 let y_offset = 0;
 
@@ -17,16 +17,21 @@ function centerZoom(zoom_delta: number) {
         * Math.pow(2, zoom_delta);
     y_offset = canvas.height / 2 - (canvas.height / 2 - y_offset)
         * Math.pow(2, zoom_delta);
-    zoom_level += zoom_delta
+    zoom_level += zoom_delta;
 }
 
 canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
-    if (!ctx) return;
 
     e.deltaY < 0 ? centerZoom(0.1) : centerZoom(-0.1);
+    renderMap();
+});
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// FIXME: this should adjust offsets so that the centre of the map
+// stays in the centre when the window resizes
+window.addEventListener("resize", (e) => {
+    e.preventDefault();
+
     renderMap();
 });
 
@@ -54,17 +59,12 @@ document.addEventListener("keydown", (e) => {
             break;
     }
 
-    ctx!.clearRect(0, 0, canvas.width, canvas.height);
     renderMap();
 });
 
 // coordinates is an array of longitude (λ), latitude (𝜙) wgs84 pairs
 const wgs84_geometries = await getCoordinates(`data/ferndown-buildings.geojson`);
 const projected_geometries = projectToMercator(wgs84_geometries);
-
-// as we are drawing from (0,0) we should reshape our data so that
-// it is always around (0,0)
-const translated_geometries = translateToZeroZero(projected_geometries);
 
 function renderMap() {
     if (!ctx) return;
@@ -75,6 +75,8 @@ function renderMap() {
     canvas.width = window.innerWidth - 50;
     canvas.height = window.innerHeight - 200;
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     // draw a crosshair
     ctx.moveTo(canvas.width / 2, 0);
     ctx.lineTo(canvas.width / 2, canvas.height);
@@ -83,7 +85,7 @@ function renderMap() {
     ctx.lineTo(canvas.width, canvas.height / 2);
     ctx.stroke();
 
-    for (const geometry of translated_geometries) {
+    for (const geometry of projected_geometries) {
         ctx.beginPath();
         for (const [x, y] of geometry) {
             ctx.lineTo(
