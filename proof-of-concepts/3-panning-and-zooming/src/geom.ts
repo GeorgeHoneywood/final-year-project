@@ -3,9 +3,9 @@
 import {  GeometryArray } from "./types.js";
 
 function projectToMercator(wgs84_geometries: GeometryArray): GeometryArray {
+    const RADIANS_TO_DEGREES = 180 / Math.PI;
     const projected_geometries = [];
     for (const geometry of wgs84_geometries) {
-        const RADIANS_TO_DEGREES = 180 / Math.PI;
         const projected_geometry = [];
         for (const [long, lat] of geometry) {
             // equations from: https://wiki.openstreetmap.org/wiki/Mercator#C

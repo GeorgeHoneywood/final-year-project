@@ -6,34 +6,21 @@
 
     <!-- prevent favicon.ico requests -->
     <link rel="icon" href="data:," />
-    <title>Proof of concept: rendering some way</title>
+    <title>Proof of concept: panning and zooming</title>
 
     <style>
       body {
         font-family: sans;
-        margin-left: 20px;
       }
     </style>
   </head>
 
   <body>
-    <h1>Proof of concept: rendering some ways</h1>
+    <h1>Proof of concept: panning and zooming</h1>
 
-    <p>Demo app to render some list of coordinate pairs to a map.</p>
+    <p>A map that is pannable and zoomable. Use WASD to pan and the scroll wheel to zoom. Not yet mobile friendly.</p>
 
-    <select
-      name="Town boundary"
-      id="townPicker"
-      style="display: block; margin-bottom: 15px"
-    >
-      <option value="egham">Egham</option>
-      <option value="ferndown">Ferndown</option>
-      <option value="baden-baden">Baden-Baden</option>
-      <option value="egham-detailed">Egham (detailed)</option>
-      <option selected value="ferndown-buildings">Ferndown (buildings)</option>
-    </select>
-
-    <canvas width="600" height="600" id="map"></canvas>
+    <canvas id="map"></canvas>
 
     <script type="module" src="dist/demo.js"></script>
   </body>
