@@ -9,16 +9,10 @@ canvas.addEventListener("wheel", async (e) => {
     if (!ctx) return;
 
     let zoom_delta = 0;
-    if (e.deltaY > 0) {
-        // x_offset -= 10
-        // y_offset -= 10
+    if (e.deltaY < 0) {
         zoom_delta = 0.05;
-
     } else {
-        // x_offset += 10
-        // y_offset += 10
         zoom_delta = -0.05;
-
     }
 
     zoom_level += zoom_delta
