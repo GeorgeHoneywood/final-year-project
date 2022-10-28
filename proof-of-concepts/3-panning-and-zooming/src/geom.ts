@@ -24,26 +24,4 @@ function projectToMercator(wgs84_geometries: GeometryArray): GeometryArray {
     return projected_geometries;
 }
 
-function scaleToZeroZero(projected_geometries: GeometryArray): GeometryArray {
-
-    const x_coordinates: number[] = [];
-    const y_coordinates: number[] = []
-    for (const geometry of projected_geometries) {
-        x_coordinates.push(...geometry.map(pair => pair[0]));
-        y_coordinates.push(...geometry.map(pair => pair[1]));
-    }
-    const minimum_x = Math.min(...x_coordinates);
-    const minmum_y = Math.min(...y_coordinates);
-
-    const scaled_geometries = [];
-    for (const geometry of projected_geometries) {
-        const scaled_geometry = [];
-        for (const [x, y] of geometry) {
-            scaled_geometry.push([x - minimum_x, y - minmum_y] as [number, number]);
-        }
-        scaled_geometries.push(scaled_geometry);
-    }
-    return scaled_geometries;
-}
-
-export { projectToMercator, scaleToZeroZero }
+export { projectToMercator }
