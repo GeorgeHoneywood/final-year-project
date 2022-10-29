@@ -18,7 +18,19 @@
   <body>
     <h1>Proof of concept: panning and zooming</h1>
 
-    <p>A map that is pannable and zoomable. Use WASD to pan and the scroll wheel to zoom. Not yet mobile friendly.</p>
+    <p>
+      A map that is pannable and zoomable. Use WASD to pan and the scroll wheel
+      to zoom. Not yet mobile friendly.
+    </p>
+
+    <select
+      name="Layer picker"
+      id="layerPicker"
+      style="display: block; margin-bottom: 15px"
+    >
+      <option selected value="world-and-ferndown">World and Ferndown buildings</option>
+      <option value="world-hi-res">High Resolution World (slow)</option>
+    </select>
 
     <canvas id="map"></canvas>
 
