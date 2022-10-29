@@ -2,6 +2,6 @@ This proof of concept will take some latitude/longitude coordinate pairs, and wi
 
 The test data files, `data/*.geojson` are GeoJSON formatted polygons representing the boundaries of towns.
 
-Run the demo by writing `python -m http.server` in this directory, and visiting [localhost:8000](http://localhost:8000)
+Run the demo by running `tsc` and then `python -m http.server` in this directory, and visiting [localhost:8000](http://localhost:8000)
 
-All data © OpenStreetMap Contributors
+Map data © [OpenStreetMap Contributors (ODbL)](https://www.openstreetmap.org/copyright)
