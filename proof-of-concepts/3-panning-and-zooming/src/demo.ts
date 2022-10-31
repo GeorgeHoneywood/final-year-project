@@ -24,6 +24,25 @@ canvas.addEventListener("wheel", (e) => {
     e.deltaY < 0 ? map.zoom(0.2) : map.zoom(-0.2);
 });
 
+let mouseDown = false;
+
+canvas.addEventListener("mousedown", (e) => {
+    e.preventDefault()
+    mouseDown = true;
+});
+
+canvas.addEventListener("mouseup", (e) => {
+    e.preventDefault();
+    mouseDown = false;
+});
+
+canvas.addEventListener("mousemove", (e) => {
+    e.preventDefault();
+    if (mouseDown) {
+        map.translate({ x: e.movementX, y: -e.movementY });
+    }
+});
+
 // FIXME: this should adjust offsets so that the centre of the map
 // stays in the centre when the window resizes
 window.addEventListener("resize", (e) => {
