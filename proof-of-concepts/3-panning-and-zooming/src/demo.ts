@@ -43,6 +43,87 @@ canvas.addEventListener("mousemove", (e) => {
     }
 });
 
+// touch handling code: https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+
+const currentTouches: any[] = [];
+let previousPinchDistance: number | null = null;
+
+function copyTouch({ identifier, pageX, pageY }: any) {
+    return { identifier, pageX, pageY };
+}
+
+function getCurrentTouchIndex(idToFind: any) {
+    for (let i = 0; i < currentTouches.length; i++) {
+        const id = currentTouches[i].identifier;
+
+        if (id === idToFind) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+
+    const touches = e.changedTouches;
+
+    for (let i = 0; i < touches.length; i++) {
+        currentTouches.push(copyTouch(touches[i]));
+    }
+});
+
+canvas.addEventListener("touchmove", (e) => {
+    const touches = e.changedTouches;
+
+    if (touches.length == 1) {
+        const idx = getCurrentTouchIndex(touches[0].identifier);
+
+        if (idx >= 0) {
+            map.translate({
+                x: -(currentTouches[idx].pageX - touches[0].pageX),
+                y: currentTouches[idx].pageY - touches[0].pageY
+            })
+            currentTouches.splice(idx, 1, copyTouch(touches[0]));
+        }
+    } else if (touches.length === 2) {
+
+        let pinchDistance = Math.hypot(
+            (touches[0].pageX - touches[1].pageX),
+            (touches[0].pageY - touches[1].pageY),
+        );
+
+        previousPinchDistance ??= pinchDistance
+        map.zoom(-(previousPinchDistance - pinchDistance) / 100)
+
+        previousPinchDistance = pinchDistance
+    }
+});
+canvas.addEventListener("touchend", (e) => {
+    e.preventDefault();
+
+    previousPinchDistance = null;
+    const touches = e.changedTouches;
+
+    for (let i = 0; i < touches.length; i++) {
+
+        let idx = getCurrentTouchIndex(touches[i].identifier);
+
+        if (idx >= 0) {
+            // map.translate({
+            //     x: -(ongoingTouches[idx].pageX - touches[0].pageX),
+            //     y: ongoingTouches[idx].pageY - touches[0].pageY
+            // })
+            currentTouches.splice(idx, 1);
+        }
+    }
+});
+
+canvas.addEventListener("touchcancel", (e) => {
+    console.log("noop");
+});
+
+
 // FIXME: this should adjust offsets so that the centre of the map
 // stays in the centre when the window resizes
 window.addEventListener("resize", (e) => {
