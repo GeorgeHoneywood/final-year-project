@@ -44,6 +44,9 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 // touch handling code: https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+// TODO:
+// * Double tap zoom
+// * Double & hold zoom in and out
 
 const currentTouches: any[] = [];
 let previousPinchDistance: number | null = null;
@@ -74,18 +77,24 @@ canvas.addEventListener("touchstart", (e) => {
 });
 
 canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+
     const touches = e.changedTouches;
 
     if (touches.length == 1) {
+        // this handles the random single touches that occur during a pinch zoom
+        if (previousPinchDistance !== null) return;
+
         const idx = getCurrentTouchIndex(touches[0].identifier);
 
         if (idx >= 0) {
             map.translate({
                 x: -(currentTouches[idx].pageX - touches[0].pageX),
-                y: currentTouches[idx].pageY - touches[0].pageY
-            })
+                y: currentTouches[idx].pageY - touches[0].pageY,
+            });
             currentTouches.splice(idx, 1, copyTouch(touches[0]));
         }
+
     } else if (touches.length === 2) {
 
         let pinchDistance = Math.hypot(
@@ -93,16 +102,15 @@ canvas.addEventListener("touchmove", (e) => {
             (touches[0].pageY - touches[1].pageY),
         );
 
-        previousPinchDistance ??= pinchDistance
-        map.zoom(-(previousPinchDistance - pinchDistance) / 100)
+        previousPinchDistance ??= pinchDistance;
+        map.zoom(-(previousPinchDistance - pinchDistance) / 100);
 
-        previousPinchDistance = pinchDistance
+        previousPinchDistance = pinchDistance;
     }
 });
 canvas.addEventListener("touchend", (e) => {
     e.preventDefault();
 
-    previousPinchDistance = null;
     const touches = e.changedTouches;
 
     for (let i = 0; i < touches.length; i++) {
@@ -110,12 +118,14 @@ canvas.addEventListener("touchend", (e) => {
         let idx = getCurrentTouchIndex(touches[i].identifier);
 
         if (idx >= 0) {
-            // map.translate({
-            //     x: -(ongoingTouches[idx].pageX - touches[0].pageX),
-            //     y: ongoingTouches[idx].pageY - touches[0].pageY
-            // })
             currentTouches.splice(idx, 1);
         }
+    }
+
+    // if we are pinch zooming, only stop once the last touch event has ended.
+    // otherwise we get a a map jump when you remove one finger
+    if (currentTouches.length === 0) {
+        previousPinchDistance = null;
     }
 });
 
