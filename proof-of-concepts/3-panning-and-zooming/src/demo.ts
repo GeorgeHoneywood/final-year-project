@@ -6,7 +6,7 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 // wgs84_geometries is a list of arrays of longitude (λ), latitude (𝜙) wgs84 pairs
-let wgs84_geometries = await getCoordinates(`data/world-and-ferndown.geojson`);
+let wgs84_geometries = await getCoordinates(`data/${layerPicker.value}.geojson`);
 let projected_geometries = projectToMercator(wgs84_geometries);
 
 const map = new CanvasMap(canvas, projected_geometries);
