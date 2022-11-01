@@ -1,6 +1,7 @@
 import { getCoordinates } from "./load.js";
 import { projectToMercator } from "./geom.js";
 import { CanvasMap } from "./map.js";
+import { Coord } from "./types.js";
 
 const canvas = document.getElementById("map") as HTMLCanvasElement;
 const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
@@ -18,7 +19,7 @@ layerPicker.addEventListener("change", async (e) => {
     map.setGeometries(projected_geometries);
 })
 
-let mousePosition: { x: number, y: number } | null = null;
+let mousePosition: Coord | null = null;
 
 canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
@@ -61,7 +62,7 @@ canvas.addEventListener("mousemove", (e) => {
 
 const currentTouches: any[] = [];
 let previousPinchDistance: number | null = null;
-let pinchCenter: { x: number, y: number } | null = null;
+let pinchCenter: Coord | null = null;
 
 function copyTouch({ identifier, pageX, pageY }: any) {
     return { identifier, pageX, pageY };
@@ -117,8 +118,10 @@ canvas.addEventListener("touchmove", (e) => {
 
         const rect = canvas.getBoundingClientRect();
         pinchCenter ??= {
-            x: ((touches[0].pageX - rect.left) + (touches[1].pageX - rect.left)) / 2,
-            y: ((rect.bottom - touches[0].pageY) + (rect.bottom - touches[1].pageY)) / 2,
+            x: ((touches[0].pageX - rect.left)
+                + (touches[1].pageX - rect.left)) / 2,
+            y: ((rect.bottom - touches[0].pageY)
+                + (rect.bottom - touches[1].pageY)) / 2,
         };
 
         map.zoom(-(previousPinchDistance - pinchDistance) / 100, pinchCenter);

@@ -1,4 +1,4 @@
-import { GeometryArray } from "./types.js";
+import { Coord, GeometryArray } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
@@ -33,7 +33,7 @@ class CanvasMap {
         this.dirty = true;
     }
 
-    public translate({ x, y }: { x: number, y: number }) {
+    public translate({ x, y }: Coord) {
         this.x_offset += x;
         this.y_offset += y;
 
@@ -42,7 +42,7 @@ class CanvasMap {
 
     // adjust offsets so that we zoom into the centre of the map view
     public zoom(zoom_delta: number,
-        { x, y }: { x: number, y: number } = {
+        { x, y }: Coord = {
             x: this.canvas.width / 2,
             y: this.canvas.height / 2,
         }) {
