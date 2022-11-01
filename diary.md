@@ -30,7 +30,7 @@ Started work on the panning and zooming proof of concept (deliverable 6, proof-o
 
 ### Week 7 (2022-10-31)
 
-Continued work on the panning and zooming proof of concept. Implemented click panning and touch controls: pinch zoom & single finger panning.
+Continued work on the panning and zooming proof of concept. Implemented click panning and touch controls: pinch zoom & single finger panning. Also made zooming work around the mouse/pinch gesture instead of the centre of the screen.
 
 ### Week 8 (2022-11-07)
 

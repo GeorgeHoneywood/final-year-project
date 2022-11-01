@@ -18,10 +18,14 @@ layerPicker.addEventListener("change", async (e) => {
     map.setGeometries(projected_geometries);
 })
 
+let mousePosition: { x: number, y: number } | null = null;
+
 canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
 
-    e.deltaY < 0 ? map.zoom(0.2) : map.zoom(-0.2);
+    console.log(mousePosition)
+
+    e.deltaY < 0 ? map.zoom(0.2, mousePosition!) : map.zoom(-0.2, mousePosition!);
 });
 
 let mouseDown = false;
@@ -38,6 +42,13 @@ canvas.addEventListener("mouseup", (e) => {
 
 canvas.addEventListener("mousemove", (e) => {
     e.preventDefault();
+
+    const rect = canvas.getBoundingClientRect();
+    mousePosition = {
+        x: e.clientX - rect.left,
+        y: rect.bottom - e.clientY,
+    };
+
     if (mouseDown) {
         map.translate({ x: e.movementX, y: -e.movementY });
     }
@@ -50,6 +61,7 @@ canvas.addEventListener("mousemove", (e) => {
 
 const currentTouches: any[] = [];
 let previousPinchDistance: number | null = null;
+let pinchCenter: { x: number, y: number } | null = null;
 
 function copyTouch({ identifier, pageX, pageY }: any) {
     return { identifier, pageX, pageY };
@@ -96,14 +108,20 @@ canvas.addEventListener("touchmove", (e) => {
         }
 
     } else if (touches.length === 2) {
-
         let pinchDistance = Math.hypot(
             (touches[0].pageX - touches[1].pageX),
             (touches[0].pageY - touches[1].pageY),
         );
 
         previousPinchDistance ??= pinchDistance;
-        map.zoom(-(previousPinchDistance - pinchDistance) / 100);
+
+        const rect = canvas.getBoundingClientRect();
+        pinchCenter ??= {
+            x: ((touches[0].pageX - rect.left) + (touches[1].pageX - rect.left)) / 2,
+            y: ((rect.bottom - touches[0].pageY) + (rect.bottom - touches[1].pageY)) / 2,
+        };
+
+        map.zoom(-(previousPinchDistance - pinchDistance) / 100, pinchCenter);
 
         previousPinchDistance = pinchDistance;
     }
@@ -126,6 +144,7 @@ canvas.addEventListener("touchend", (e) => {
     // otherwise we get a a map jump when you remove one finger
     if (currentTouches.length === 0) {
         previousPinchDistance = null;
+        pinchCenter = null;
     }
 });
 

@@ -41,10 +41,15 @@ class CanvasMap {
     }
 
     // adjust offsets so that we zoom into the centre of the map view
-    public zoom(zoom_delta: number) {
-        this.x_offset = this.canvas.width / 2 - (this.canvas.width / 2 - this.x_offset)
+    public zoom(zoom_delta: number,
+        { x, y }: { x: number, y: number } = {
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2,
+        }) {
+
+        this.x_offset = x - (x - this.x_offset)
             * Math.pow(2, zoom_delta);
-        this.y_offset = this.canvas.height / 2 - (this.canvas.height / 2 - this.y_offset)
+        this.y_offset = y - (y - this.y_offset)
             * Math.pow(2, zoom_delta);
 
         this.zoom_level += zoom_delta;
