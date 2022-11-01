@@ -63,7 +63,7 @@ class CanvasMap {
         const begin = performance.now()
 
         // make sure the canvas takes up most of the screen
-        this.canvas.width = window.innerWidth - 50;
+        this.canvas.width = window.innerWidth - 16;
         this.canvas.height = window.innerHeight - 200;
 
         // clear canvas
