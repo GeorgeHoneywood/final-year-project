@@ -8,9 +8,7 @@ async function getCoordinates(path: string): Promise<GeometryArray> {
             `request failed; error code: ${resp.statusText || resp.status}`
         );
     }
-    const data = await resp.json()
-    // get the coordinates for the first feature in a geojson file
-    // only works for Polygon type geometries
+    const data = await resp.json();
 
     const geometries = data.features.map((e: any) => e.geometry);
     const polygons = geometries.filter(
@@ -22,7 +20,7 @@ async function getCoordinates(path: string): Promise<GeometryArray> {
 
     return [
         ...polygons.map((e: any) => e.coordinates[0]),
-        ...line_strings.map((e: any) => e.coordinates)
+        ...line_strings.map((e: any) => e.coordinates),
     ];
 }
 
