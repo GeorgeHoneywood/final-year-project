@@ -24,7 +24,13 @@ Completed report on OpenStreetMap data sources (deliverable 3). Completed report
 
 Implemented the proof of concept that renders some array of wgs84 coordinates to a Mercator projected map (deliverable 5, proof-of-concepts/2-rendering-a-way). Allows you to render the boundaries of three different towns -- with manually chosen zoom factor.
 
+Started a report on the HTML5 canvas.
+
+Started work on the panning and zooming proof of concept (deliverable 6, proof-of-concepts/3-panning-and-zooming). Got WASD panning, and scrollwheel zoom working.
+
 ### Week 7 (2022-10-31)
+
+Continued work on the panning and zooming proof of concept. Implemented click panning and touch controls: pinch zoom & single finger panning.
 
 ### Week 8 (2022-11-07)
 
