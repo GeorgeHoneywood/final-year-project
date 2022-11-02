@@ -6,6 +6,7 @@ import { Coord } from "./types.js";
 const canvas = document.getElementById("map") as HTMLCanvasElement;
 const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
+
 // wgs84_geometries is a list of arrays of longitude (λ), latitude (𝜙) wgs84 pairs
 let wgs84_geometries = await getCoordinates(`data/${layerPicker.value}.geojson`);
 let projected_geometries = projectToMercator(wgs84_geometries);
@@ -13,7 +14,7 @@ let projected_geometries = projectToMercator(wgs84_geometries);
 const map = new CanvasMap(canvas, projected_geometries);
 
 layerPicker.addEventListener("change", async (e) => {
-    wgs84_geometries = await getCoordinates(`data/${(e.target! as any).value}.geojson`);
+    wgs84_geometries = await getCoordinates(`data/${layerPicker.value}.geojson`);
     projected_geometries = projectToMercator(wgs84_geometries);
 
     map.setGeometries(projected_geometries);
@@ -23,8 +24,6 @@ let mousePosition: Coord | null = null;
 
 canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
-
-    console.log(mousePosition)
 
     e.deltaY < 0 ? map.zoom(0.2, mousePosition!) : map.zoom(-0.2, mousePosition!);
 });
