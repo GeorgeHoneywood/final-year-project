@@ -83,6 +83,7 @@ class CanvasMap {
         for (const geometry of this.geometries) {
             this.ctx.beginPath();
             for (const [x, y] of geometry) {
+                // TODO: possible optimisation: only draw lines that are actually on the canvas
                 this.ctx.lineTo(
                     (x * scale) + this.x_offset,
                     this.canvas.height - ((y * scale) + this.y_offset) // as we are drawing from 0,0 being the top left, we must flip the y-axis
