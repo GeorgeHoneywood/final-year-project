@@ -7,14 +7,23 @@ class CanvasMap {
 
     private geometries: GeometryArray;
 
-    // inital zoom level, where 1 is the whole world
-    private zoom_level = 1;
+    // zoom level, where 1 is the whole world this is scaled by calling
+    // Math.pow(2, zoom_level) to get a non-logarithmic number
+    private zoom_level = 0;
 
-    private x_offset = 340;
-    private y_offset = 320;
+    private x_offset = 0;
+    private y_offset = 0;
 
+    // when dirty, rerender the map
+    // rerendering otherwise is a waste of CPU time
     private dirty = true;
 
+    /**
+     * Create a map, linked to a canvas, to show the specified geometries.
+     * 
+     * @param canvas to render the map to
+     * @param geometries to show on the map
+     */
     public constructor(canvas: HTMLCanvasElement, geometries: GeometryArray) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d")!;
@@ -22,17 +31,28 @@ class CanvasMap {
 
         this.geometries = geometries;
 
+        // must set canvas size, otherwise we cannot centre the map properly
         this.setCanvasSize();
 
-        const [zoom_level, y, x] = window.location.hash.substring(1).split("/").map(e => +e);
+        // load the previous map position from the url hash, if possible
+        let [zoom_level, y, x] = window.location.hash.substring(1).split("/").map(e => +e);
 
-        if (zoom_level && y && x) {
-            const mercator = projectMercator({ x, y })
-
-            this.x_offset = -(mercator.x * Math.pow(2, zoom_level)) + this.canvas.width / 2
-            this.y_offset = -(mercator.y * Math.pow(2, zoom_level)) + this.canvas.height / 2
-            this.zoom_level = zoom_level
+        // if there is no previous location, default to being centred on null
+        // island
+        if (!zoom_level || !y || !x) {
+            zoom_level = 1.5;
+            y = 0;
+            x = 0;
         }
+
+        // transform the wgs84 coord into mercator space
+        const mercator = projectMercator({ x, y });
+        const scale = Math.pow(2, zoom_level);
+
+        // centre on the previous map location
+        this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
+        this.y_offset = -(mercator.y * scale) + this.canvas.height / 2;
+        this.zoom_level = zoom_level;
 
         requestAnimationFrame(() => this.render()); // ensure that this==this
     }
@@ -51,6 +71,11 @@ class CanvasMap {
         this.dirty = true;
     }
 
+    /**
+     * Scroll the map by a specified amount
+     * 
+     * @param coord specifying x/y delta to pan the map by
+     */
     public translate({ x, y }: Coord) {
         this.x_offset += x;
         this.y_offset += y;
@@ -58,7 +83,15 @@ class CanvasMap {
         this.dirty = true;
     }
 
-    // adjust offsets so that we zoom into the centre of the map view
+    /**
+     * Zoom the map in or out. Supplying a positive number will zoom in, and
+     * negative out. Optionally supply a Coord to zoom around, otherwise it will
+     * zoom to the centre of the screen.
+     * 
+     * @param zoom_delta is the amount to zoom in/out by. Supplying a delta of 1
+     * will double the scale
+     * @param coord optional Coord to zoom about, used for mousewheel zooming
+     */
     public zoom(zoom_delta: number,
         { x, y }: Coord = {
             x: this.canvas.width / 2,
@@ -75,6 +108,11 @@ class CanvasMap {
         this.dirty = true;
     }
 
+    /**
+     * Renders out the map to the canvas. Should be called via
+     * requestAnimationFrame, as this allows the map to be rendered at a stable
+     * frame rate.
+     */
     public render() {
         // if nothing has changed, don't bother re-rendering
         if (!this.dirty) {
@@ -125,6 +163,8 @@ class CanvasMap {
     }
 
     i = 0;
+    // updating the URL too often get the tab killed in firefox,
+    // so only do it every 10th update
     private updateUrlHash() {
         if (this.i !== 10) {
             this.i++; return
