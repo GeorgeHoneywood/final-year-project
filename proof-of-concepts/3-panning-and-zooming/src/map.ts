@@ -1,3 +1,4 @@
+import { projectMercator, unprojectMercator } from "./geom.js";
 import { Coord, GeometryArray } from "./types.js";
 
 class CanvasMap {
@@ -21,7 +22,24 @@ class CanvasMap {
 
         this.geometries = geometries;
 
+        this.setCanvasSize();
+
+        const [zoom_level, y, x] = window.location.hash.substring(1).split("/").map(e => +e);
+
+        if (zoom_level && y && x) {
+            const mercator = projectMercator({ x, y })
+
+            this.x_offset = -(mercator.x * Math.pow(2, zoom_level)) + this.canvas.width / 2
+            this.y_offset = -(mercator.y * Math.pow(2, zoom_level)) + this.canvas.height / 2
+            this.zoom_level = zoom_level
+        }
+
         requestAnimationFrame(() => this.render()); // ensure that this==this
+    }
+
+    private setCanvasSize() {
+        this.canvas.width = window.innerWidth - 16;
+        this.canvas.height = window.innerHeight - 200;
     }
 
     public setGeometries(geometries: GeometryArray) {
@@ -65,11 +83,10 @@ class CanvasMap {
         }
         this.dirty = false;
 
-        const begin = performance.now()
+        const begin = performance.now();
 
         // make sure the canvas takes up most of the screen
-        this.canvas.width = window.innerWidth - 16;
-        this.canvas.height = window.innerHeight - 200;
+        this.setCanvasSize();
 
         // clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -92,7 +109,9 @@ class CanvasMap {
             this.ctx.stroke();
         }
 
-        this.drawDebugInfo(begin);
+        this.drawDebugInfo(begin, scale);
+
+        this.updateUrlHash()
 
         requestAnimationFrame(() => this.render());
     }
@@ -105,9 +124,41 @@ class CanvasMap {
         this.ctx.stroke();
     }
 
-    private drawDebugInfo(begin: number) {
+    i = 0;
+    private updateUrlHash() {
+        if (this.i !== 10) {
+            this.i++; return
+        } else {
+            this.i = 0;
+        }
+
+        const scale = Math.pow(2, this.zoom_level);
+
+        const mercatorCenter: Coord = {
+            x: ((this.canvas.width / 2) - this.x_offset) / scale,
+            y: ((this.canvas.height / 2) - this.y_offset) / scale,
+        }
+
+        const wgs84Center = unprojectMercator(mercatorCenter)
+
+        window.location.hash = `${this.zoom_level.toFixed(0)}/${wgs84Center.y.toFixed(4)}/${wgs84Center.x.toFixed(4)}`
+    }
+
+    private drawDebugInfo(begin: number, scale: number) {
+        const mercatorCenter: Coord = {
+            x: ((this.canvas.width / 2) - this.x_offset) / scale,
+            y: ((this.canvas.height / 2) - this.y_offset) / scale,
+        }
+        const wgs84Center = unprojectMercator(mercatorCenter)
+
         this.ctx.fillText(
-            `z${this.zoom_level.toFixed(1)}, x=${this.x_offset.toPrecision(8)}, y=${this.y_offset.toPrecision(8)}, frame time=${(performance.now() - begin).toFixed(0)}ms`,
+            `z${this.zoom_level.toFixed(1)},
+             x=${this.x_offset.toPrecision(8)},
+             y=${this.y_offset.toPrecision(8)},
+             frame_time=${(performance.now() - begin).toFixed(0)}ms,
+             mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
+             wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)}`
+                .split("\n").map(e => e.trim()).join(" "),
             5,
             15
         );
