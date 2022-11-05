@@ -1,7 +1,7 @@
 {
 	"scripts": {
-		"build": "pnpm esbuild src/demo.ts --bundle --sourcemap --minify --target=chrome58,firefox57,safari11,edge18 --outfile=dist/bundle.js",
-		"dev": "pnpm esbuild src/demo.ts --bundle --sourcemap --servedir=./ --outfile=dist/bundle.js"
+		"build": "esbuild src/demo.ts --bundle --sourcemap --minify --target=chrome58,firefox57,safari11,edge18 --outfile=dist/bundle.js",
+		"dev": "esbuild src/demo.ts --bundle --sourcemap --servedir=./ --outfile=dist/bundle.js"
 	},
 	"devDependencies": {
 		"esbuild": "^0.15.13"
