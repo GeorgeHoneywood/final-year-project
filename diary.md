@@ -32,6 +32,8 @@ Started work on the panning and zooming proof of concept (deliverable 6, proof-o
 
 Continued work on the panning and zooming proof of concept. Implemented click panning and touch controls: pinch zoom & single finger panning. Also made zooming work around the mouse/pinch gesture instead of the centre of the screen.
 
+Add esbuild (JavaScript bundler). This means I can write JavaScript in multiple files, but have them merged together be served to the user. I can also use newer JavaScript features, and have them transpiled into older syntax.
+
 ### Week 8 (2022-11-07)
 
 ### Week 9 (2022-11-14)
