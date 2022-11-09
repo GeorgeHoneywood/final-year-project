@@ -1,3 +1,5 @@
+import { coordZToXYZ } from "./geom.js"
+
 class BBox {
     max_lat = 0
     min_lat = 0
@@ -115,7 +117,8 @@ class MapsforgeParser {
         }
 
         const header_length = new DataView(await blob.slice(20, 24).arrayBuffer()).getInt32(0)
-        const header = new DataView(await blob.slice(24, header_length + 24).arrayBuffer())
+        const header = new DataView(await blob.slice(0, header_length + 24).arrayBuffer())
+        this.offset = 24
 
         this.version = header.getInt32(this.shift(4))
         this.file_size = header.getBigInt64(this.shift(8))
@@ -186,6 +189,26 @@ class MapsforgeParser {
             this.zoom_intervals.push(zoom_level)
         }
 
+        for (const zoom_interval of this.zoom_intervals) {
+            // calculate the number of tiles, so that can load the correct
+            // amount of tile indexes
+            console.log(zoom_interval)
+            if (this.flags.has_debug_info) {
+                console.log("cannot handle debug info!")
+            }
+
+            const { x: min_x, y: min_y } = coordZToXYZ(
+                this.bbox.min_lat / 10 ** 6,
+                this.bbox.min_long / 10 ** 6,
+                zoom_interval.base_zoom_level,
+            )
+            const { x: max_x, y: max_y } = coordZToXYZ(
+                this.bbox.max_lat / 10 ** 6,
+                this.bbox.max_long / 10 ** 6,
+                zoom_interval.base_zoom_level,
+            )
+            console.log({ min_x, min_y, max_x, max_y })
+        }
         console.log(this)
     }
 }

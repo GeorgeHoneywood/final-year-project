@@ -9,7 +9,7 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
-    const mapsforgeParser = new MapsforgeParser(await loadMapBlob("data/albania.map"))
+    const mapsforgeParser = new MapsforgeParser(await loadMapBlob("data/ferndown.map"))
 
     const map = new CanvasMap(canvas, []);
 

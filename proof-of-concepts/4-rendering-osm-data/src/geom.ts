@@ -19,7 +19,7 @@ function projectGeometriesToMercator(wgs84_geometries: GeometryArray): GeometryA
 }
 
 // equations from: https://wiki.openstreetmap.org/wiki/Mercator#C
-    // I attempted to use the formula found in my research report, but I couldn't get it to work
+// I attempted to use the formula found in my research report, but I couldn't get it to work
 function projectMercator({ x, y }: Coord) {
     // calculate y/lat/𝜙
     y = Math.log(Math.tan(
@@ -35,4 +35,17 @@ function unprojectMercator({ x, y }: Coord): Coord {
     return { x, y }
 }
 
-export { projectGeometriesToMercator as projectToMercator, unprojectMercator, projectMercator }
+// convert some lat/long zoom coordinates into tiled space
+// reference: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+function coordZToXYZ(lat: number, lon: number, zoom: number) {
+    const scale = Math.pow(2, zoom)
+    const lat_radians = lat / RADIANS_TO_DEGREES
+
+    return {
+        x: (scale * (lon + 180) / 360).toFixed(0),
+        y: ((1.0 - Math.asinh(Math.tan(lat_radians)) / Math.PI) / 2.0 * scale).toFixed(0),
+        z: zoom,
+    }
+}
+
+export { projectGeometriesToMercator as projectToMercator, unprojectMercator, projectMercator, coordZToXYZ }
