@@ -1,23 +1,21 @@
-import { getCoordinates } from "./load.js";
+// import { getCoordinates } from "./load.js";
 import { projectToMercator } from "./geom.js";
+import { MapsforgeParser} from "./mapsforge.js"
+import { loadMapBlob } from "./load.js";
 import { CanvasMap } from "./map.js";
 import { Coord } from "./types.js";
 
 const canvas = document.getElementById("map") as HTMLCanvasElement;
-const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
+// const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
-async function getGeometries() {
-    // wgs84_geometries is a list of arrays of longitude (λ), latitude (𝜙) wgs84 pairs
-    let wgs84_geometries = await getCoordinates(`data/${layerPicker.value}.geojson`);
-    return projectToMercator(wgs84_geometries);
-}
+async function main() {
+    const mapsforgeParser = new MapsforgeParser(await loadMapBlob("data/albania.map"))
 
-getGeometries().then((projected) => {
-    const map = new CanvasMap(canvas, projected);
+    const map = new CanvasMap(canvas, []);
 
-    layerPicker.addEventListener("change", async (e) => {
-        map.setGeometries(await getGeometries());
-    });
+    // layerPicker.addEventListener("change", async (e) => {
+    //     // map.setGeometries(await getGeometries());
+    // });
 
     let mousePosition: Coord | null = null;
 
@@ -187,4 +185,6 @@ getGeometries().then((projected) => {
         }
     });
 
-});
+}
+
+main();
