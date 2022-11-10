@@ -1,4 +1,4 @@
-import { coordZToXYZ } from "./geom.js"
+import { coordZToXYZ } from "./geom"
 
 class BBox {
     max_lat = 0
@@ -32,6 +32,8 @@ class ZoomLevel {
 }
 
 class MapsforgeParser {
+    blob: Blob
+    header: DataView | null = null
     // offset in bytes through the header, skipping the magic bytes and the
     // header length value
     offset = 0
@@ -60,7 +62,7 @@ class MapsforgeParser {
     zoom_intervals: ZoomLevel[] = []
 
     public constructor(blob: Blob) {
-        this.readHeader(blob)
+        this.blob = blob
     }
 
     /**
@@ -76,7 +78,9 @@ class MapsforgeParser {
         return offset
     }
 
-    private decodeVariableUInt(header: DataView) {
+    private decodeVariableUInt() {
+        if (!this.header) throw new Error("this.header must be set")
+
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant
         let value = 0
@@ -84,7 +88,7 @@ class MapsforgeParser {
         let should_continue = true;
 
         while (should_continue) {
-            let current_byte = header.getUint8(this.offset + depth);
+            let current_byte = this.header.getUint8(this.offset + depth);
             // 128 64 32 16 8 4 2 1
             //   7  6  5  4 3 2 1 0
             // 1st bit has value of 128
@@ -103,37 +107,42 @@ class MapsforgeParser {
         return value
     }
 
-    async decodeString(header: DataView): Promise<string> {
-        const length = this.decodeVariableUInt(header)
-        return await new Blob([header.buffer.slice(this.shift(length), this.offset)]).text()
+    private async decodeString(): Promise<string> {
+        if (!this.header) throw new Error("this.header must be set")
+
+        const length = this.decodeVariableUInt()
+        return await new Blob([this.header.buffer.slice(this.shift(length), this.offset)]).text()
     }
 
-    private async readHeader(blob: Blob) {
-        // const textDecoder = new TextDecoder("utf-8")
-        console.log(await blob.slice(0, 300).text())
-
-        if (await blob.slice(0, 20).text() !== "mapsforge binary OSM") {
-            console.log("not a mapsforge file!")
+    public async readHeader() {
+        if (await this.blob.slice(0, 20).text() !== "mapsforge binary OSM") {
+            throw new Error("file not mapforge binary format")
         }
 
-        const header_length = new DataView(await blob.slice(20, 24).arrayBuffer()).getInt32(0)
-        const header = new DataView(await blob.slice(0, header_length + 24).arrayBuffer())
+        const header_length = new DataView(await this.blob.slice(20, 24).arrayBuffer()).getInt32(0)
+        this.header = new DataView(await this.blob.slice(0, header_length + 24).arrayBuffer())
         this.offset = 24
 
-        this.version = header.getInt32(this.shift(4))
-        this.file_size = header.getBigInt64(this.shift(8))
-        this.creation_date = new Date(Number(header.getBigInt64(this.shift(8))))
+        this.version = this.header.getInt32(this.shift(4))
+        if (this.version != 5) {
+            throw new Error("only mapsforge v5 files are supported!")
+        }
 
-        this.bbox.min_lat = header.getInt32(this.shift(4))
-        this.bbox.min_long = header.getInt32(this.shift(4))
-        this.bbox.max_lat = header.getInt32(this.shift(4))
-        this.bbox.min_long = header.getInt32(this.shift(4))
+        this.file_size = this.header.getBigInt64(this.shift(8))
 
-        this.tile_size = header.getInt16(this.shift(2))
+        // this might be problematic if the timestamp is greater than MAX_SAFE_INTEGER
+        this.creation_date = new Date(Number(this.header.getBigInt64(this.shift(8))))
 
-        this.projection = await this.decodeString(header)
+        this.bbox.min_lat = this.header.getInt32(this.shift(4))
+        this.bbox.min_long = this.header.getInt32(this.shift(4))
+        this.bbox.max_lat = this.header.getInt32(this.shift(4))
+        this.bbox.min_long = this.header.getInt32(this.shift(4))
 
-        const flag_byte = header.getUint8(this.shift(1))
+        this.tile_size = this.header.getInt16(this.shift(2))
+
+        this.projection = await this.decodeString()
+
+        const flag_byte = this.header.getUint8(this.shift(1))
         this.flags.has_debug_info = (flag_byte & 128) != 0
         this.flags.has_map_start_position = (flag_byte & 64) != 0
         this.flags.has_start_zoom_level = (flag_byte & 32) != 0
@@ -144,47 +153,47 @@ class MapsforgeParser {
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
 
-            this.map_start_location.lat = header.getInt32(this.shift(4))
-            this.map_start_location.long = header.getInt32(this.shift(4))
+            this.map_start_location.lat = this.header.getInt32(this.shift(4))
+            this.map_start_location.long = this.header.getInt32(this.shift(4))
         }
 
         if (this.flags.has_start_zoom_level) {
             this.map_start_location ??= new MapStartLocation()
 
-            this.map_start_location.zoom = header.getInt8(this.shift(1))
+            this.map_start_location.zoom = this.header.getInt8(this.shift(1))
         }
 
         if (this.flags.has_language_preference) {
-            this.language_preference = await this.decodeString(header)
+            this.language_preference = await this.decodeString()
         }
 
         if (this.flags.has_comment) {
-            this.comment = await this.decodeString(header)
+            this.comment = await this.decodeString()
         }
 
         if (this.flags.has_created_by) {
-            this.created_by = await this.decodeString(header)
+            this.created_by = await this.decodeString()
         }
 
-        this.poi_tag_count = header.getUint16(this.shift(2))
+        this.poi_tag_count = this.header.getUint16(this.shift(2))
         for (let i = 0; i < this.poi_tag_count; i++) {
-            this.poi_tags.push(await this.decodeString(header))
+            this.poi_tags.push(await this.decodeString())
         }
 
-        this.way_tag_count = header.getUint16(this.shift(2))
+        this.way_tag_count = this.header.getUint16(this.shift(2))
         for (let i = 0; i < this.way_tag_count; i++) {
-            this.way_tags.push(await this.decodeString(header))
+            this.way_tags.push(await this.decodeString())
         }
 
-        this.zoom_interval_count = header.getUint8(this.shift(1))
+        this.zoom_interval_count = this.header.getUint8(this.shift(1))
         for (let i = 0; i < this.zoom_interval_count; i++) {
             let zoom_level = new ZoomLevel()
 
-            zoom_level.base_zoom_level = header.getUint8(this.shift(1))
-            zoom_level.min_zoom_level = header.getUint8(this.shift(1))
-            zoom_level.max_zoom_level = header.getUint8(this.shift(1))
-            zoom_level.sub_file_start_position = header.getBigUint64(this.shift(8))
-            zoom_level.sub_file_length = header.getBigUint64(this.shift(8))
+            zoom_level.base_zoom_level = this.header.getUint8(this.shift(1))
+            zoom_level.min_zoom_level = this.header.getUint8(this.shift(1))
+            zoom_level.max_zoom_level = this.header.getUint8(this.shift(1))
+            zoom_level.sub_file_start_position = this.header.getBigUint64(this.shift(8))
+            zoom_level.sub_file_length = this.header.getBigUint64(this.shift(8))
 
             this.zoom_intervals.push(zoom_level)
         }
@@ -192,9 +201,8 @@ class MapsforgeParser {
         for (const zoom_interval of this.zoom_intervals) {
             // calculate the number of tiles, so that can load the correct
             // amount of tile indexes
-            console.log(zoom_interval)
             if (this.flags.has_debug_info) {
-                console.log("cannot handle debug info!")
+                throw new Error("cannot handle debug info!")
             }
 
             const { x: min_x, y: min_y } = coordZToXYZ(
@@ -207,9 +215,8 @@ class MapsforgeParser {
                 this.bbox.max_long / 10 ** 6,
                 zoom_interval.base_zoom_level,
             )
-            console.log({ min_x, min_y, max_x, max_y })
+            // console.log({ min_x, min_y, max_x, max_y })
         }
-        console.log(this)
     }
 }
 
