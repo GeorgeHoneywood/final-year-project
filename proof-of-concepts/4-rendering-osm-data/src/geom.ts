@@ -42,10 +42,22 @@ function coordZToXYZ(lat: number, lon: number, zoom: number) {
     const lat_radians = lat / RADIANS_TO_DEGREES
 
     return {
-        x: (scale * (lon + 180) / 360).toFixed(0),
-        y: ((1.0 - Math.asinh(Math.tan(lat_radians)) / Math.PI) / 2.0 * scale).toFixed(0),
+        x: (scale * (lon + 180) / 360) | 0, // round down
+        y: ((1.0 - Math.asinh(Math.tan(lat_radians)) / Math.PI) / 2.0 * scale) | 0,
         z: zoom,
     }
 }
 
-export { projectGeometriesToMercator as projectToMercator, unprojectMercator, projectMercator, coordZToXYZ }
+const MICRO_DEGREES_TO_DEGREES = 10 ** 6
+
+function microDegreesToDegrees(microDegrees: number) {
+    return microDegrees / MICRO_DEGREES_TO_DEGREES
+}
+
+export {
+    projectGeometriesToMercator as projectToMercator,
+    unprojectMercator,
+    projectMercator,
+    coordZToXYZ,
+    microDegreesToDegrees,
+}

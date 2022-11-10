@@ -1,4 +1,4 @@
-import { coordZToXYZ } from "./geom"
+import { coordZToXYZ, microDegreesToDegrees } from "./geom"
 
 class BBox {
     max_lat = 0
@@ -29,6 +29,12 @@ class ZoomLevel {
 
     sub_file_start_position = 0n
     sub_file_length = 0n
+
+    tile_height = 0
+    tile_width = 0
+    tile_total = 0
+
+    index_end_position = 0n
 }
 
 class MapsforgeParser {
@@ -124,8 +130,8 @@ class MapsforgeParser {
         this.offset = 24
 
         this.version = this.header.getInt32(this.shift(4))
-        if (this.version != 5) {
-            throw new Error("only mapsforge v5 files are supported!")
+        if (this.version <= 3 && this.version >= 5) {
+            throw new Error("only mapsforge v3-5 files are supported!")
         }
 
         this.file_size = this.header.getBigInt64(this.shift(8))
@@ -133,10 +139,10 @@ class MapsforgeParser {
         // this might be problematic if the timestamp is greater than MAX_SAFE_INTEGER
         this.creation_date = new Date(Number(this.header.getBigInt64(this.shift(8))))
 
-        this.bbox.min_lat = this.header.getInt32(this.shift(4))
-        this.bbox.min_long = this.header.getInt32(this.shift(4))
-        this.bbox.max_lat = this.header.getInt32(this.shift(4))
-        this.bbox.min_long = this.header.getInt32(this.shift(4))
+        this.bbox.min_lat = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
+        this.bbox.min_long = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
+        this.bbox.max_lat = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
+        this.bbox.max_long = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
 
         this.tile_size = this.header.getInt16(this.shift(2))
 
@@ -195,27 +201,31 @@ class MapsforgeParser {
             zoom_level.sub_file_start_position = this.header.getBigUint64(this.shift(8))
             zoom_level.sub_file_length = this.header.getBigUint64(this.shift(8))
 
-            this.zoom_intervals.push(zoom_level)
-        }
-
-        for (const zoom_interval of this.zoom_intervals) {
             // calculate the number of tiles, so that can load the correct
             // amount of tile indexes
             if (this.flags.has_debug_info) {
                 throw new Error("cannot handle debug info!")
             }
 
-            const { x: min_x, y: min_y } = coordZToXYZ(
-                this.bbox.min_lat / 10 ** 6,
-                this.bbox.min_long / 10 ** 6,
-                zoom_interval.base_zoom_level,
+            const { x: left_x, y: bottom_y } = coordZToXYZ(
+                this.bbox.min_lat,
+                this.bbox.min_long,
+                zoom_level.base_zoom_level,
             )
-            const { x: max_x, y: max_y } = coordZToXYZ(
-                this.bbox.max_lat / 10 ** 6,
-                this.bbox.max_long / 10 ** 6,
-                zoom_interval.base_zoom_level,
+            const { x: right_x, y: top_y } = coordZToXYZ(
+                this.bbox.max_lat,
+                this.bbox.max_long,
+                zoom_level.base_zoom_level,
             )
-            // console.log({ min_x, min_y, max_x, max_y })
+
+            zoom_level.tile_height = bottom_y - top_y + 1
+            zoom_level.tile_width = right_x - left_x + 1
+            zoom_level.tile_total = zoom_level.tile_height * zoom_level.tile_width
+
+            // each index is 5 bytes long
+            zoom_level.index_end_position = zoom_level.sub_file_start_position + BigInt(zoom_level.tile_total) * 5n
+
+            this.zoom_intervals.push(zoom_level)
         }
     }
 }

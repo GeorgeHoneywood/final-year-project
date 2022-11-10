@@ -9,8 +9,9 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
-    const mapsforgeParser = new MapsforgeParser(await loadMapBlob("data/ferndown.map"))
+    const parser = new MapsforgeParser(await loadMapBlob("data/ferndown.map"))
 
+    await parser.readHeader()
     const map = new CanvasMap(canvas, []);
 
     // layerPicker.addEventListener("change", async (e) => {

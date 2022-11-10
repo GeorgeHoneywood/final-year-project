@@ -30,7 +30,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(p.creation_date.toISOString())
             .toBe("2022-10-14T05:56:20.006Z")
 
-        for (const val of [
+        for (const val in [
             p.bbox.min_lat,
             p.bbox.min_long,
             p.bbox.max_lat,

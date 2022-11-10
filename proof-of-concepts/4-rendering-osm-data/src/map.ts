@@ -59,7 +59,7 @@ class CanvasMap {
 
     private setCanvasSize() {
         this.canvas.width = window.innerWidth - 16;
-        this.canvas.height = window.innerHeight - 200;
+        this.canvas.height = window.innerHeight - 76;
     }
 
     public setGeometries(geometries: GeometryArray) {
