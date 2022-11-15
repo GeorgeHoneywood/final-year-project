@@ -35,6 +35,11 @@ class ZoomLevel {
     tile_total = 0
 
     index_end_position = 0n
+
+    right_tile_x = 0
+    left_tile_x = 0
+    top_tile_y = 0
+    bottom_tile_y = 0
 }
 
 class MapsforgeParser {
@@ -222,11 +227,64 @@ class MapsforgeParser {
             zoom_level.tile_width = right_x - left_x + 1
             zoom_level.tile_total = zoom_level.tile_height * zoom_level.tile_width
 
+            zoom_level.right_tile_x = right_x
+            zoom_level.left_tile_x = left_x
+            zoom_level.top_tile_y = top_y
+            zoom_level.bottom_tile_y = bottom_y
+
             // each index is 5 bytes long
             zoom_level.index_end_position = zoom_level.sub_file_start_position + BigInt(zoom_level.tile_total) * 5n
 
             this.zoom_intervals.push(zoom_level)
         }
+    }
+
+    public async readTile(zoom: number, x: number, y: number) {
+        console.log(`loading tile z${zoom}/${x}/${y}`)
+
+        const zoom_interval = this.zoom_intervals[2]
+        const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
+        const from_block_y = Math.max(y - zoom_interval.top_tile_y, 0)
+
+        // const to_block_x = Math.min(x - zoom_interval.left_tile_x, zoom_interval.tile_width - 1)
+        // const to_block_y = Math.min(y - zoom_interval.top_tile_y, zoom_interval.tile_height - 1)
+
+        // TODO: should have a proper loop here but will do for now
+
+        const block_offset = from_block_x + zoom_interval.tile_width * from_block_y
+
+        const index_block_position = zoom_interval.sub_file_start_position + BigInt(block_offset)
+
+        const index_block = this.blob.slice(Number(index_block_position), Number(index_block_position + 5n))
+        const data = new Uint8Array(await index_block.arrayBuffer())
+        const buffer = new Uint8Array(8)
+        buffer.set(data, 3) // should be 8 bytes long
+
+        // FIXME: bit nasty. as this value is 5 bytes long, we need to use a BigUint to store it
+        const value = new DataView(buffer.buffer).getBigUint64(0)
+
+        // TODO: optimisation: check if all water here
+        console.log(value)
+
+        const block_pointer = value & 0x7FFFFFFFFFn;
+
+        // use the next pointer to figure out block length
+        const next_index_block = this.blob.slice(Number(index_block_position + 1n), Number(index_block_position + 1n + 5n))
+        // FIXME: bit nasty. as this value is 5 bytes long, we need to use a BigUint to store it
+        const next_data = new Uint8Array(await index_block.arrayBuffer())
+        const next_buffer = new Uint8Array(8)
+        buffer.set(next_data, 3) // should be 8 bytes long
+
+        const next_value = new DataView(next_buffer.buffer).getBigUint64(0)
+        const next_block_pointer = next_value & 0x7FFFFFFFFFn;
+
+        const block_length = next_block_pointer - block_pointer;
+
+        const tile_data = new DataView(await this.blob.slice(Number(block_pointer), Number(block_pointer + block_length)).arrayBuffer())
+
+        // TODO: need to get tile coordinates here, as the coordinates in the
+        // tile are all against this offset
+
     }
 }
 

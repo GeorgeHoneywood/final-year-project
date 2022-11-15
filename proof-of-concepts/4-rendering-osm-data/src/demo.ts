@@ -1,6 +1,6 @@
 // import { getCoordinates } from "./load.js";
 import { projectToMercator } from "./geom.js";
-import { MapsforgeParser} from "./mapsforge.js"
+import { MapsforgeParser } from "./mapsforge.js"
 import { loadMapBlob } from "./load.js";
 import { CanvasMap } from "./map.js";
 import { Coord } from "./types.js";
@@ -12,6 +12,10 @@ async function main() {
     const parser = new MapsforgeParser(await loadMapBlob("data/ferndown.map"))
 
     await parser.readHeader()
+
+    const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
+    const tile = await parser.readTile(zoom_level.base_zoom_level, zoom_level.top_tile_y, zoom_level.top_tile_y)
+
     const map = new CanvasMap(canvas, []);
 
     // layerPicker.addEventListener("change", async (e) => {

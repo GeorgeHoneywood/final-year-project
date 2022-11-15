@@ -39,4 +39,16 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
             expect(val).toBeTruthy()
         }
     })
+
+    test("should be able to load a map tile", async () => {
+        const albania = new Blob([await fs.readFile("./data/albania.map")])
+        const p = new MapsforgeParser(albania)
+        await p.readHeader()
+
+        const zoom_level = p.zoom_intervals[p.zoom_interval_count-1]
+       
+        const tile = await p.readTile(zoom_level.base_zoom_level, zoom_level.top_tile_y,  zoom_level.top_tile_y)
+
+        expect(tile).toBeTruthy()
+    })
 });
