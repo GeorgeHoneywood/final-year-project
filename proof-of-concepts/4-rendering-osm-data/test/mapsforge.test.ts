@@ -41,9 +41,10 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test("should be able to load a map tile", async () => {
-        const albania = new Blob([await fs.readFile("./data/albania.map")])
+        const albania = new Blob([await fs.readFile("./data/ferndown.map")])
         const p = new MapsforgeParser(albania)
         await p.readHeader()
+        console.log(p.zoom_intervals)
 
         const zoom_level = p.zoom_intervals[p.zoom_interval_count-1]
        

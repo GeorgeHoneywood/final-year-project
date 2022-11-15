@@ -106,6 +106,7 @@ class MapsforgeParser {
             should_continue = (current_byte & 128) != 0
 
             // if this not the first byte we've read, each bit is worth more
+            // TODO: optimise this
             const scale = Math.pow(2, depth * 7)
             for (let i = 7; i >= 0; i--) {
                 value += (current_byte & Math.pow(2, i)) * scale
@@ -269,22 +270,34 @@ class MapsforgeParser {
         const block_pointer = value & 0x7FFFFFFFFFn;
 
         // use the next pointer to figure out block length
-        const next_index_block = this.blob.slice(Number(index_block_position + 1n), Number(index_block_position + 1n + 5n))
-        // FIXME: bit nasty. as this value is 5 bytes long, we need to use a BigUint to store it
-        const next_data = new Uint8Array(await index_block.arrayBuffer())
+        // FIXME: handle the last block in the index
+        const next_index_block = this.blob.slice(Number(index_block_position + 5n), Number(index_block_position + 5n + 5n))
+        const next_data = new Uint8Array(await next_index_block.arrayBuffer())
         const next_buffer = new Uint8Array(8)
-        buffer.set(next_data, 3) // should be 8 bytes long
+        next_buffer.set(next_data, 3) // should be 8 bytes long
 
         const next_value = new DataView(next_buffer.buffer).getBigUint64(0)
         const next_block_pointer = next_value & 0x7FFFFFFFFFn;
 
         const block_length = next_block_pointer - block_pointer;
 
-        const tile_data = new DataView(await this.blob.slice(Number(block_pointer), Number(block_pointer + block_length)).arrayBuffer())
+        console.log({ block_pointer, next_block_pointer, block_length, next_value, next_data })
 
+        const tile_data = new DataView(await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).arrayBuffer())
+
+        console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
         // TODO: need to get tile coordinates here, as the coordinates in the
         // tile are all against this offset
+        console.log(tile_data)
 
+        // parse out the zoom table
+        const covered_zooms = zoom_interval.max_zoom_level - zoom_interval.min_zoom_level
+        const zoom_table_length = covered_zooms * 2
+
+        // should now be at the beginning of PoI data
+
+        console.log({zoom_table_length})
+        
     }
 }
 
