@@ -1,4 +1,6 @@
-import { coordZToXYZ, microDegreesToDegrees } from "./geom"
+import { coordZToXYZ, microDegreesToDegrees } from "../geom"
+import { shift, decodeString, decodeVariableUInt } from "./decoders"
+
 
 class BBox {
     max_lat = 0
@@ -77,51 +79,6 @@ class MapsforgeParser {
         this.blob = blob
     }
 
-    /**
-     * shift the offset into the binary file by the specified amount 
-     * 
-     * @param amount the number of bytes you want to read
-     * @returns the offset to read data at, in bytes
-     */
-    private shift(amount: number): number {
-        const offset = this.offset
-        this.offset += amount
-
-        return offset
-    }
-
-    private decodeVariableUInt(data : DataView) {
-        // if the first bit is 1, need to read the next byte rest of the 7 bits
-        // are the numeric value, starting with the least significant
-        let value = 0
-        let depth = 0
-        let should_continue = true;
-
-        while (should_continue) {
-            let current_byte = data.getUint8(this.offset + depth);
-            // 128 64 32 16 8 4 2 1
-            //   7  6  5  4 3 2 1 0
-            // 1st bit has value of 128
-            should_continue = (current_byte & 128) != 0
-
-            // if this not the first byte we've read, each bit is worth more
-            // TODO: optimise this
-            const scale = Math.pow(2, depth * 7)
-            for (let i = 7; i >= 0; i--) {
-                value += (current_byte & Math.pow(2, i)) * scale
-            }
-
-            depth++
-        }
-
-        this.offset += depth
-        return value
-    }
-
-    private async decodeString(data: DataView): Promise<string> {
-        const length = this.decodeVariableUInt(data)
-        return await new Blob([data.buffer.slice(this.shift(length), this.offset)]).text()
-    }
 
     public async readHeader() {
         if (await this.blob.slice(0, 20).text() !== "mapsforge binary OSM") {
@@ -130,28 +87,38 @@ class MapsforgeParser {
 
         const header_length = new DataView(await this.blob.slice(20, 24).arrayBuffer()).getInt32(0)
         this.header = new DataView(await this.blob.slice(0, header_length + 24).arrayBuffer())
-        this.offset = 24
 
-        this.version = this.header.getInt32(this.shift(4))
+        let offset = shift(24, 4)
+        this.version = this.header.getInt32(offset.before)
         if (this.version <= 3 && this.version >= 5) {
             throw new Error("only mapsforge v3-5 files are supported!")
         }
 
-        this.file_size = this.header.getBigInt64(this.shift(8))
+        offset = shift(offset.after, 8)
+        this.file_size = this.header.getBigInt64(offset.before)
 
-        // this might be problematic if the timestamp is greater than MAX_SAFE_INTEGER
-        this.creation_date = new Date(Number(this.header.getBigInt64(this.shift(8))))
+        // this might be problematic if the timestamp is greater than
+        // MAX_SAFE_INTEGER
+        offset = shift(offset.after, 8)
+        this.creation_date = new Date(Number(this.header.getBigInt64(offset.before)))
 
-        this.bbox.min_lat = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
-        this.bbox.min_long = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
-        this.bbox.max_lat = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
-        this.bbox.max_long = microDegreesToDegrees(this.header.getInt32(this.shift(4)))
+        offset = shift(offset.after, 4)
+        this.bbox.min_lat = microDegreesToDegrees(this.header.getInt32(offset.before))
+        offset = shift(offset.after, 4)
+        this.bbox.min_long = microDegreesToDegrees(this.header.getInt32(offset.before))
+        offset = shift(offset.after, 4)
+        this.bbox.max_lat = microDegreesToDegrees(this.header.getInt32(offset.before))
+        offset = shift(offset.after, 4)
+        this.bbox.max_long = microDegreesToDegrees(this.header.getInt32(offset.before))
 
-        this.tile_size = this.header.getInt16(this.shift(2))
+        offset = shift(offset.after, 2)
+        this.tile_size = this.header.getInt16(offset.before)
 
-        this.projection = await this.decodeString(this.header)
+        let result = await decodeString(offset.after, this.header)
+        this.projection = result.string_data
 
-        const flag_byte = this.header.getUint8(this.shift(1))
+        offset = shift(result.after, 1)
+        const flag_byte = this.header.getUint8(offset.before)
         this.flags.has_debug_info = (flag_byte & 128) != 0
         this.flags.has_map_start_position = (flag_byte & 64) != 0
         this.flags.has_start_zoom_level = (flag_byte & 32) != 0
@@ -162,47 +129,69 @@ class MapsforgeParser {
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
 
-            this.map_start_location.lat = this.header.getInt32(this.shift(4))
-            this.map_start_location.long = this.header.getInt32(this.shift(4))
+            offset = shift(offset.after, 4)
+            this.map_start_location.lat = this.header.getInt32(offset.before)
+            offset = shift(offset.after, 4)
+            this.map_start_location.long = this.header.getInt32(offset.before)
         }
 
         if (this.flags.has_start_zoom_level) {
             this.map_start_location ??= new MapStartLocation()
 
-            this.map_start_location.zoom = this.header.getInt8(this.shift(1))
+            offset = shift(offset.after, 1)
+            this.map_start_location.zoom = this.header.getInt8(offset.before)
         }
 
         if (this.flags.has_language_preference) {
-            this.language_preference = await this.decodeString(this.header)
+            result = await decodeString(offset.after, this.header)
+            offset.after = result.after
+            this.language_preference = result.string_data
         }
 
         if (this.flags.has_comment) {
-            this.comment = await this.decodeString(this.header)
+            result = await decodeString(offset.after, this.header)
+            offset.after = result.after
+            this.comment = result.string_data
         }
 
         if (this.flags.has_created_by) {
-            this.created_by = await this.decodeString(this.header)
+
+            result = await decodeString(offset.after, this.header)
+            offset.after = result.after
+            this.created_by = result.string_data
         }
 
-        this.poi_tag_count = this.header.getUint16(this.shift(2))
+        offset = shift(offset.after, 2)
+        this.poi_tag_count = this.header.getUint16(offset.before)
         for (let i = 0; i < this.poi_tag_count; i++) {
-            this.poi_tags.push(await this.decodeString(this.header))
+            result = await decodeString(offset.after, this.header)
+            offset.after = result.after
+            this.poi_tags.push(result.string_data)
         }
 
-        this.way_tag_count = this.header.getUint16(this.shift(2))
+        offset = shift(offset.after, 2)
+        this.way_tag_count = this.header.getUint16(offset.before)
         for (let i = 0; i < this.way_tag_count; i++) {
-            this.way_tags.push(await this.decodeString(this.header))
+            result = await decodeString(offset.after, this.header)
+            offset.after = result.after
+            this.way_tags.push(result.string_data)
         }
 
-        this.zoom_interval_count = this.header.getUint8(this.shift(1))
+        offset = shift(offset.after, 1)
+        this.zoom_interval_count = this.header.getUint8(offset.before)
         for (let i = 0; i < this.zoom_interval_count; i++) {
             let zoom_level = new ZoomLevel()
 
-            zoom_level.base_zoom_level = this.header.getUint8(this.shift(1))
-            zoom_level.min_zoom_level = this.header.getUint8(this.shift(1))
-            zoom_level.max_zoom_level = this.header.getUint8(this.shift(1))
-            zoom_level.sub_file_start_position = this.header.getBigUint64(this.shift(8))
-            zoom_level.sub_file_length = this.header.getBigUint64(this.shift(8))
+            offset = shift(offset.after, 1)
+            zoom_level.base_zoom_level = this.header.getUint8(offset.before)
+            offset = shift(offset.after, 1)
+            zoom_level.min_zoom_level = this.header.getUint8(offset.before)
+            offset = shift(offset.after, 1)
+            zoom_level.max_zoom_level = this.header.getUint8(offset.before)
+            offset = shift(offset.after, 8)
+            zoom_level.sub_file_start_position = this.header.getBigUint64(offset.before)
+            offset = shift(offset.after, 8)
+            zoom_level.sub_file_length = this.header.getBigUint64(offset.before)
 
             // calculate the number of tiles, so that can load the correct
             // amount of tile indexes
@@ -293,8 +282,8 @@ class MapsforgeParser {
 
         // should now be at the beginning of PoI data
 
-        console.log({zoom_table_length})
-        
+        console.log({ zoom_table_length })
+
     }
 }
 

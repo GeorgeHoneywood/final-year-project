@@ -1,6 +1,6 @@
 // import { getCoordinates } from "./load.js";
 import { projectToMercator } from "./geom.js";
-import { MapsforgeParser } from "./mapsforge.js"
+import { MapsforgeParser } from "./mapsforge/mapsforge.js"
 import { loadMapBlob } from "./load.js";
 import { CanvasMap } from "./map.js";
 import { Coord } from "./types.js";
