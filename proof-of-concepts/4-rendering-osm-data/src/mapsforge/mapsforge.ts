@@ -117,7 +117,7 @@ class MapsforgeParser {
         let result = await decodeString(offset.after, this.header)
         this.projection = result.string_data
 
-        if (this.projection !== "Mercator"){
+        if (this.projection !== "Mercator") {
             throw new Error("only web mercator projected files are supported")
         }
 
@@ -282,13 +282,18 @@ class MapsforgeParser {
         console.log(tile_data)
 
         // parse out the zoom table
-        const covered_zooms = zoom_interval.max_zoom_level - zoom_interval.min_zoom_level
+        const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
         const zoom_table_length = covered_zooms * 2
 
         // should now be at the beginning of PoI data
 
-        console.log({ zoom_table_length })
+        // console.log({ zoom_table_length, covered_zooms, max: zoom_interval.max_zoom_level, min: zoom_interval.min_zoom_level })
 
+        let res = decodeVariableUInt(zoom_table_length + 1, tile_data) // adding 1 feels wrong
+        console.log(res)
+
+        // FIXME: this might be wrong
+        const start_of_way_data = res.value
     }
 }
 
