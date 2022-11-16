@@ -2,7 +2,8 @@
 	"scripts": {
 		"build": "esbuild src/demo.ts --bundle --sourcemap --minify --target=chrome58,firefox57,safari11,edge18 --outfile=dist/bundle.js",
 		"dev": "esbuild src/demo.ts --bundle --sourcemap --servedir=./ --outfile=dist/bundle.js",
-		"test": "jest --verbose"
+		"test": "jest --verbose",
+		"test:watch": "jest --verbose --watch"
 	},
 	"type": "module",
 	"devDependencies": {

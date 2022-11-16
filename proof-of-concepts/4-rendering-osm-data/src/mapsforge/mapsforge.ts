@@ -117,6 +117,10 @@ class MapsforgeParser {
         let result = await decodeString(offset.after, this.header)
         this.projection = result.string_data
 
+        if (this.projection !== "Mercator"){
+            throw new Error("only web mercator projected files are supported")
+        }
+
         offset = shift(result.after, 1)
         const flag_byte = this.header.getUint8(offset.before)
         this.flags.has_debug_info = (flag_byte & 128) != 0
@@ -125,6 +129,10 @@ class MapsforgeParser {
         this.flags.has_language_preference = (flag_byte & 16) != 0
         this.flags.has_comment = (flag_byte & 8) != 0
         this.flags.has_created_by = (flag_byte & 4) != 0
+
+        if (this.flags.has_debug_info) {
+            throw new Error("cannot handle debug info!")
+        }
 
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
@@ -195,9 +203,6 @@ class MapsforgeParser {
 
             // calculate the number of tiles, so that can load the correct
             // amount of tile indexes
-            if (this.flags.has_debug_info) {
-                throw new Error("cannot handle debug info!")
-            }
 
             const { x: left_x, y: bottom_y } = coordZToXYZ(
                 this.bbox.min_lat,
