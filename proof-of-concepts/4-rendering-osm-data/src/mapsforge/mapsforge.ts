@@ -130,10 +130,6 @@ class MapsforgeParser {
         this.flags.has_comment = (flag_byte & 8) != 0
         this.flags.has_created_by = (flag_byte & 4) != 0
 
-        if (this.flags.has_debug_info) {
-            throw new Error("cannot handle debug info!")
-        }
-
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
 
@@ -237,6 +233,7 @@ class MapsforgeParser {
         const zoom_interval = this.zoom_intervals[2]
         const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
         const from_block_y = Math.max(y - zoom_interval.top_tile_y, 0)
+        console.log(from_block_x, from_block_y, zoom_interval.tile_width)
 
         // const to_block_x = Math.min(x - zoom_interval.left_tile_x, zoom_interval.tile_width - 1)
         // const to_block_y = Math.min(y - zoom_interval.top_tile_y, zoom_interval.tile_height - 1)
@@ -244,8 +241,13 @@ class MapsforgeParser {
         // TODO: should have a proper loop here but will do for now
 
         const block_offset = from_block_x + zoom_interval.tile_width * from_block_y
+        console.log(block_offset)
 
-        const index_block_position = zoom_interval.sub_file_start_position + BigInt(block_offset)
+        const index_block_position = zoom_interval.sub_file_start_position
+            + (BigInt(block_offset) * 5n)
+            + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
+
+        // console.log(await this.blob.slice(Number(index_block_position), Number(index_block_position + 16n)).text())
 
         const index_block = this.blob.slice(Number(index_block_position), Number(index_block_position + 5n))
         const data = new Uint8Array(await index_block.arrayBuffer())
@@ -259,6 +261,7 @@ class MapsforgeParser {
         console.log(value)
 
         const block_pointer = value & 0x7FFFFFFFFFn;
+        console.log({ "this": index_block_position, "next": index_block_position + 5n })
 
         // use the next pointer to figure out block length
         // FIXME: handle the last block in the index
@@ -270,29 +273,30 @@ class MapsforgeParser {
         const next_value = new DataView(next_buffer.buffer).getBigUint64(0)
         const next_block_pointer = next_value & 0x7FFFFFFFFFn;
 
+        if (next_block_pointer === block_pointer) {
+            // if the tile is empty, the index points to the next tile with data
+            throw new Error("empty tiles are not supported!")
+        }
+
         const block_length = next_block_pointer - block_pointer;
 
-        console.log({ block_pointer, next_block_pointer, block_length, next_value, next_data })
+        console.log({ block_pointer, next_block_pointer, block_length, value, "test": await index_block.arrayBuffer(), "test2": await next_index_block.arrayBuffer(), next_data })
 
         const tile_data = new DataView(await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).arrayBuffer())
 
         console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
         // TODO: need to get tile coordinates here, as the coordinates in the
         // tile are all against this offset
-        console.log(tile_data)
+        console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text()})
 
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
         const zoom_table_length = covered_zooms * 2
 
         // should now be at the beginning of PoI data
-
-        // console.log({ zoom_table_length, covered_zooms, max: zoom_interval.max_zoom_level, min: zoom_interval.min_zoom_level })
-
-        let res = decodeVariableUInt(zoom_table_length + 1, tile_data) // adding 1 feels wrong
+        let res = decodeVariableUInt(zoom_table_length, tile_data)
         console.log(res)
 
-        // FIXME: this might be wrong
         const start_of_way_data = res.value
     }
 }
