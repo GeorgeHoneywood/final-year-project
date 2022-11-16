@@ -45,6 +45,7 @@ class ZoomLevel {
 class MapsforgeParser {
     blob: Blob
     header: DataView | null = null
+    tile_data: DataView | null = null
     // offset in bytes through the header, skipping the magic bytes and the
     // header length value
     offset = 0
@@ -89,9 +90,7 @@ class MapsforgeParser {
         return offset
     }
 
-    private decodeVariableUInt() {
-        if (!this.header) throw new Error("this.header must be set")
-
+    private decodeVariableUInt(data : DataView) {
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant
         let value = 0
@@ -99,7 +98,7 @@ class MapsforgeParser {
         let should_continue = true;
 
         while (should_continue) {
-            let current_byte = this.header.getUint8(this.offset + depth);
+            let current_byte = data.getUint8(this.offset + depth);
             // 128 64 32 16 8 4 2 1
             //   7  6  5  4 3 2 1 0
             // 1st bit has value of 128
@@ -119,11 +118,9 @@ class MapsforgeParser {
         return value
     }
 
-    private async decodeString(): Promise<string> {
-        if (!this.header) throw new Error("this.header must be set")
-
-        const length = this.decodeVariableUInt()
-        return await new Blob([this.header.buffer.slice(this.shift(length), this.offset)]).text()
+    private async decodeString(data: DataView): Promise<string> {
+        const length = this.decodeVariableUInt(data)
+        return await new Blob([data.buffer.slice(this.shift(length), this.offset)]).text()
     }
 
     public async readHeader() {
@@ -152,7 +149,7 @@ class MapsforgeParser {
 
         this.tile_size = this.header.getInt16(this.shift(2))
 
-        this.projection = await this.decodeString()
+        this.projection = await this.decodeString(this.header)
 
         const flag_byte = this.header.getUint8(this.shift(1))
         this.flags.has_debug_info = (flag_byte & 128) != 0
@@ -176,25 +173,25 @@ class MapsforgeParser {
         }
 
         if (this.flags.has_language_preference) {
-            this.language_preference = await this.decodeString()
+            this.language_preference = await this.decodeString(this.header)
         }
 
         if (this.flags.has_comment) {
-            this.comment = await this.decodeString()
+            this.comment = await this.decodeString(this.header)
         }
 
         if (this.flags.has_created_by) {
-            this.created_by = await this.decodeString()
+            this.created_by = await this.decodeString(this.header)
         }
 
         this.poi_tag_count = this.header.getUint16(this.shift(2))
         for (let i = 0; i < this.poi_tag_count; i++) {
-            this.poi_tags.push(await this.decodeString())
+            this.poi_tags.push(await this.decodeString(this.header))
         }
 
         this.way_tag_count = this.header.getUint16(this.shift(2))
         for (let i = 0; i < this.way_tag_count; i++) {
-            this.way_tags.push(await this.decodeString())
+            this.way_tags.push(await this.decodeString(this.header))
         }
 
         this.zoom_interval_count = this.header.getUint8(this.shift(1))
