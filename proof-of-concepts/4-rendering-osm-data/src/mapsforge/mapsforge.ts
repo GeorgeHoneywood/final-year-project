@@ -1,5 +1,13 @@
-import { coordZToXYZ, microDegreesToDegrees } from "../geom"
-import { shift, decodeString, decodeVariableUInt } from "./decoders"
+import {
+    coordZToXYZ,
+    microDegreesToDegrees,
+} from "../geom"
+import {
+    shift,
+    decodeString,
+    decodeVariableUInt,
+    decodeVariableSInt,
+} from "./decoders"
 
 
 class BBox {
@@ -287,7 +295,7 @@ class MapsforgeParser {
         console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
         // TODO: need to get tile coordinates here, as the coordinates in the
         // tile are all against this offset
-        console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text()})
+        console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text() })
 
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
@@ -295,9 +303,24 @@ class MapsforgeParser {
 
         // should now be at the beginning of PoI data
         let res = decodeVariableUInt(zoom_table_length, tile_data)
-        console.log(res)
+        // console.log(res)
 
         const start_of_way_data = res.value
+        console.log({ start_of_way_data })
+
+        if (this.flags.has_debug_info) {
+            res.offset += 32
+        }
+
+        let more_pois = true
+        let i = 0
+        while (more_pois) {
+            if (i === 2) break
+
+            res = decodeVariableSInt(res.offset, tile_data)
+            console.log({ res }, tile_data.buffer.slice(res.offset))
+            i++
+        }
     }
 }
 
