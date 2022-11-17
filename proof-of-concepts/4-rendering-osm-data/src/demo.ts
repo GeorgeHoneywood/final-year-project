@@ -9,12 +9,14 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
-    const parser = new MapsforgeParser(await loadMapBlob("data/dorset-with-debug.map"))
+    const parser = new MapsforgeParser(await loadMapBlob("data/ferndown-with-debug.map"))
 
     await parser.readHeader()
 
+    console.log({ parser })
+
     const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
-    const tile = await parser.readTile(zoom_level.base_zoom_level, zoom_level.left_tile_x + 30, zoom_level.top_tile_y + 20)
+    const tile = await parser.readTile(zoom_level.base_zoom_level, zoom_level.left_tile_x, zoom_level.top_tile_y)
 
     const map = new CanvasMap(canvas, []);
 

@@ -8,6 +8,8 @@ import {
     decodeString,
     decodeVariableUInt,
     decodeVariableSInt,
+    decodeStringFixed,
+    printBytes,
 }
     from "./decoders"
 
@@ -299,44 +301,59 @@ class MapsforgeParser {
         // coordinates in the tile are all against this offset
         console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text() })
 
-        // parse out the zoom table
-        const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
         let offset = 0
 
         if (this.flags.has_debug_info) {
-            offset += 32
+            const res = await decodeStringFixed(offset, 32, tile_data)
+            console.log(`reading tile: ${res.string_data}`)
+            if (!res.string_data.startsWith("###TileStart")) {
+                throw new Error("###TileStart debug marker not found!")
+            }
+            offset = res.after
         }
 
+        // parse out the zoom table
+        const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
+        console.log(covered_zooms)
+        printBytes(offset, tile_data)
+
         let zoom_table: { poi: number, way: number }[] = []
+        let poi_count = 0
+        let way_count = 0
         for (let i = 0; i < covered_zooms; i++) {
             const poi = decodeVariableUInt(offset, tile_data)
             const way = decodeVariableUInt(poi.offset, tile_data)
-            offset = poi.offset
-            zoom_table.push({ poi: poi.value, way: way.value })
+            offset = way.offset
+            poi_count += poi.value
+            way_count += way.value
+            zoom_table.push({ poi: poi_count, way: way_count })
         }
 
         console.log(zoom_table)
 
         // should now be at the beginning of PoI data
         let res = decodeVariableUInt(offset, tile_data)
-        // console.log(res)
+        offset = res.offset
 
         const start_of_way_data = res.value
         console.log({ start_of_way_data })
 
-        console.log(tile_data.buffer.slice(res.offset))
-
         if (this.flags.has_debug_info) {
-            res.offset += 32
+            const res = await decodeStringFixed(offset, 32, tile_data)
+            console.log(`reading poi: ${res.string_data}`)
+            if (!res.string_data.startsWith("***POIStart")) {
+                throw new Error("***POIStart debug marker not found!")
+            }
+            offset = res.after
         }
 
         let more_pois = true
         let i = 0
         while (more_pois) {
             if (i === 2) break
-
-            res = decodeVariableSInt(res.offset, tile_data)
-            console.log({ res, i }, tile_data.buffer.slice(res.offset))
+            res = decodeVariableSInt(offset, tile_data)
+            console.log({ res, i }, tile_data.buffer.slice(offset))
+            offset = res.offset
             i++
         }
     }

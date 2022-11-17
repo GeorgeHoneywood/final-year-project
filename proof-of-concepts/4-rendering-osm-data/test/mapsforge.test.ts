@@ -87,6 +87,8 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         await expect(p.readHeader())
             .resolves
             .toBe(undefined);
+
+        console.log(p.way_tags)
             
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 

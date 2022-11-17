@@ -30,7 +30,8 @@ function decodeVariableUInt(offset: number, data: DataView) {
     }
 
     // read the seven bits from the last byte
-    value |= (data.getUint8(offset++) << shift)
+    value |= (data.getUint8(offset) << shift)
+    offset++
     return { value, offset }
 }
 
@@ -67,9 +68,31 @@ async function decodeString(offset: number, data: DataView) {
     }
 }
 
+async function decodeStringFixed(offset: number, length: number, data: DataView) {
+    return {
+        string_data: await new Blob([data.buffer.slice(offset, offset + length)]).text(),
+        after: offset + length,
+    }
+}
+
+// debug helper function, prints some bytes from a DataView in binary and hex representations
+function printBytes(offset: number, data: DataView, length = 20) {
+    let values: string[] = []
+    for (let i = offset; i < offset + length; i++) {
+        values.push(
+            data.getUint8(i).toString(2).padStart(8, "0"),
+            data.getUint8(i).toString(16).padStart(2, "0"),
+        )
+
+    }
+    console.log(values)
+}
+
 export {
     decodeString,
     decodeVariableUInt,
     decodeVariableSInt,
     shift,
+    decodeStringFixed,
+    printBytes,
 }
