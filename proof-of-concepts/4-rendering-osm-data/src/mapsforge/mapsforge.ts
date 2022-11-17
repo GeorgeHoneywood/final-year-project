@@ -3,15 +3,11 @@ import {
     microDegreesToDegrees,
 }
     from "../geom"
+import { PoI } from "./objects"
 import {
-    shift,
-    decodeString,
-    decodeVariableUInt,
-    decodeVariableSInt,
-    decodeStringFixed,
-    printBytes,
+    Reader
 }
-    from "./decoders"
+    from "./reader"
 
 
 class BBox {
@@ -58,11 +54,6 @@ class ZoomLevel {
 
 class MapsforgeParser {
     blob: Blob
-    header: DataView | null = null
-    tile_data: DataView | null = null
-    // offset in bytes through the header, skipping the magic bytes and the
-    // header length value
-    offset = 0
 
     version = 0
     file_size = 0n
@@ -97,44 +88,42 @@ class MapsforgeParser {
             throw new Error("file not mapforge binary format")
         }
 
-        const header_length = new DataView(await this.blob.slice(20, 24).arrayBuffer()).getInt32(0)
-        this.header = new DataView(await this.blob.slice(0, header_length + 24).arrayBuffer())
+        const header_length = new DataView(
+            await this.blob.slice(20, 24).arrayBuffer()
+        ).getInt32(0)
 
-        let offset = shift(24, 4)
-        this.version = this.header.getInt32(offset.before)
-        if (this.version <= 3 && this.version >= 5) {
-            throw new Error("only mapsforge v3-5 files are supported!")
+        const header = new Reader(
+            new DataView(
+                await this.blob.slice(
+                    24, header_length + 24,
+                ).arrayBuffer())
+        )
+
+        this.version = header.getInt32()
+        if (!(this.version >= 3 && this.version <= 5)) {
+            throw new Error(`only mapsforge v3-v5 files are supported! you tried to load a v${this.version} file.`)
         }
 
-        offset = shift(offset.after, 8)
-        this.file_size = this.header.getBigInt64(offset.before)
+        this.file_size = header.getBigInt64()
 
         // this might be problematic if the timestamp is greater than
         // MAX_SAFE_INTEGER
-        offset = shift(offset.after, 8)
-        this.creation_date = new Date(Number(this.header.getBigInt64(offset.before)))
+        this.creation_date = new Date(Number(header.getBigInt64()))
 
-        offset = shift(offset.after, 4)
-        this.bbox.min_lat = microDegreesToDegrees(this.header.getInt32(offset.before))
-        offset = shift(offset.after, 4)
-        this.bbox.min_long = microDegreesToDegrees(this.header.getInt32(offset.before))
-        offset = shift(offset.after, 4)
-        this.bbox.max_lat = microDegreesToDegrees(this.header.getInt32(offset.before))
-        offset = shift(offset.after, 4)
-        this.bbox.max_long = microDegreesToDegrees(this.header.getInt32(offset.before))
+        this.bbox.min_lat = microDegreesToDegrees(header.getInt32())
+        this.bbox.min_long = microDegreesToDegrees(header.getInt32())
+        this.bbox.max_lat = microDegreesToDegrees(header.getInt32())
+        this.bbox.max_long = microDegreesToDegrees(header.getInt32())
 
-        offset = shift(offset.after, 2)
-        this.tile_size = this.header.getInt16(offset.before)
+        this.tile_size = header.getInt16()
 
-        let result = await decodeString(offset.after, this.header)
-        this.projection = result.string_data
+        this.projection = await header.decodeString()
 
         if (this.projection !== "Mercator") {
             throw new Error("only web mercator projected files are supported")
         }
 
-        offset = shift(result.after, 1)
-        const flag_byte = this.header.getUint8(offset.before)
+        const flag_byte = header.getUint8()
         this.flags.has_debug_info = (flag_byte & 128) != 0
         this.flags.has_map_start_position = (flag_byte & 64) != 0
         this.flags.has_start_zoom_level = (flag_byte & 32) != 0
@@ -145,71 +134,49 @@ class MapsforgeParser {
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
 
-            offset = shift(offset.after, 4)
-            this.map_start_location.lat = this.header.getInt32(offset.before)
-            offset = shift(offset.after, 4)
-            this.map_start_location.long = this.header.getInt32(offset.before)
+            this.map_start_location.lat = header.getInt32()
+            this.map_start_location.long = header.getInt32()
         }
 
         if (this.flags.has_start_zoom_level) {
             this.map_start_location ??= new MapStartLocation()
 
-            offset = shift(offset.after, 1)
-            this.map_start_location.zoom = this.header.getInt8(offset.before)
+            this.map_start_location.zoom = header.getUint8()
         }
 
         if (this.flags.has_language_preference) {
-            result = await decodeString(offset.after, this.header)
-            offset.after = result.after
-            this.language_preference = result.string_data
+            this.language_preference = await header.decodeString()
         }
 
         if (this.flags.has_comment) {
-            result = await decodeString(offset.after, this.header)
-            offset.after = result.after
-            this.comment = result.string_data
+            this.comment = await header.decodeString()
         }
 
         if (this.flags.has_created_by) {
-
-            result = await decodeString(offset.after, this.header)
-            offset.after = result.after
-            this.created_by = result.string_data
+            this.created_by = await header.decodeString()
         }
 
-        offset = shift(offset.after, 2)
-        this.poi_tag_count = this.header.getUint16(offset.before)
+        this.poi_tag_count = header.getUint16()
         for (let i = 0; i < this.poi_tag_count; i++) {
-            result = await decodeString(offset.after, this.header)
-            offset.after = result.after
-            this.poi_tags.push(result.string_data)
+            this.poi_tags.push(await header.decodeString())
         }
 
-        offset = shift(offset.after, 2)
-        this.way_tag_count = this.header.getUint16(offset.before)
+        this.way_tag_count = header.getUint16()
         for (let i = 0; i < this.way_tag_count; i++) {
-            result = await decodeString(offset.after, this.header)
-            offset.after = result.after
-            this.way_tags.push(result.string_data)
+            this.way_tags.push(await header.decodeString())
         }
 
-        offset = shift(offset.after, 1)
-        this.zoom_interval_count = this.header.getUint8(offset.before)
+        this.zoom_interval_count = header.getUint8()
         for (let i = 0; i < this.zoom_interval_count; i++) {
             let zoom_level = new ZoomLevel()
 
-            offset = shift(offset.after, 1)
-            zoom_level.base_zoom_level = this.header.getUint8(offset.before)
-            offset = shift(offset.after, 1)
-            zoom_level.min_zoom_level = this.header.getUint8(offset.before)
-            offset = shift(offset.after, 1)
-            zoom_level.max_zoom_level = this.header.getUint8(offset.before)
-            offset = shift(offset.after, 8)
-            zoom_level.sub_file_start_position = this.header.getBigUint64(offset.before)
-            offset = shift(offset.after, 8)
-            zoom_level.sub_file_length = this.header.getBigUint64(offset.before)
+            zoom_level.base_zoom_level = header.getUint8()
+            zoom_level.min_zoom_level = header.getUint8()
+            zoom_level.max_zoom_level = header.getUint8()
+            zoom_level.sub_file_start_position = header.getBigUint64()
+            zoom_level.sub_file_length = header.getBigUint64()
 
-            // calculate the number of tiles, so that can load the correct
+            // calculate the number of tiles, so that we can load the correct
             // amount of tile indexes
 
             const { x: left_x, y: bottom_y } = coordZToXYZ(
@@ -245,45 +212,31 @@ class MapsforgeParser {
         const zoom_interval = this.zoom_intervals[2]
         const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
         const from_block_y = Math.max(y - zoom_interval.top_tile_y, 0)
-        console.log(from_block_x, from_block_y, zoom_interval.tile_width)
 
+        // TODO: should support reading a range of multiple tiles in one go
         // const to_block_x = Math.min(x - zoom_interval.left_tile_x, zoom_interval.tile_width - 1)
         // const to_block_y = Math.min(y - zoom_interval.top_tile_y, zoom_interval.tile_height - 1)
 
-        // TODO: should have a proper loop here but will do for now
-
         const block_offset = from_block_x + zoom_interval.tile_width * from_block_y
-        console.log(block_offset)
 
         const index_block_position = zoom_interval.sub_file_start_position
             + (BigInt(block_offset) * 5n)
             + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
 
-        // console.log(await this.blob.slice(Number(index_block_position), Number(index_block_position + 16n)).text())
+        // load two index blocks
+        const index = new Reader(
+            new DataView(
+                await this.blob.slice(
+                    Number(index_block_position),
+                    Number(index_block_position + 10n),
+                ).arrayBuffer()
+            )
+        )
 
-        const index_block = this.blob.slice(Number(index_block_position), Number(index_block_position + 5n))
-        const data = new Uint8Array(await index_block.arrayBuffer())
-        const buffer = new Uint8Array(8)
-        buffer.set(data, 3) // should be 8 bytes long
+        // FIXME: handle the end of file case, where there aren't any more index blocks
+        const block_pointer = index.decode5ByteBigInt() & 0x7FFFFFFFFFn;
+        const next_block_pointer = index.decode5ByteBigInt() & 0x7FFFFFFFFFn;
 
-        // FIXME: bit nasty. as this value is 5 bytes long, we need to use a BigUint to store it
-        const value = new DataView(buffer.buffer).getBigUint64(0)
-
-        // TODO: optimisation: check if all water here
-        console.log(value)
-
-        const block_pointer = value & 0x7FFFFFFFFFn;
-        console.log({ "this": index_block_position, "next": index_block_position + 5n })
-
-        // use the next pointer to figure out block length
-        // FIXME: handle the last block in the index
-        const next_index_block = this.blob.slice(Number(index_block_position + 5n), Number(index_block_position + 5n + 5n))
-        const next_data = new Uint8Array(await next_index_block.arrayBuffer())
-        const next_buffer = new Uint8Array(8)
-        next_buffer.set(next_data, 3) // should be 8 bytes long
-
-        const next_value = new DataView(next_buffer.buffer).getBigUint64(0)
-        const next_block_pointer = next_value & 0x7FFFFFFFFFn;
 
         if (next_block_pointer === block_pointer) {
             // if the tile is empty, the index points to the next tile with data
@@ -292,70 +245,65 @@ class MapsforgeParser {
 
         const block_length = next_block_pointer - block_pointer;
 
-        console.log({ block_pointer, next_block_pointer, block_length, value, "test": await index_block.arrayBuffer(), "test2": await next_index_block.arrayBuffer(), next_data })
-
-        const tile_data = new DataView(await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).arrayBuffer())
+        const tile_data = new Reader(
+            new DataView(
+                await this.blob.slice(
+                    Number(zoom_interval.sub_file_start_position + block_pointer),
+                    Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
+                ).arrayBuffer()
+            )
+        )
 
         console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
+
         // TODO: need to get tile coordinates from z/x/y values here, as the
         // coordinates in the tile are all against this offset
-        console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text() })
-
-        let offset = 0
 
         if (this.flags.has_debug_info) {
-            const res = await decodeStringFixed(offset, 32, tile_data)
-            console.log(`reading tile: ${res.string_data}`)
-            if (!res.string_data.startsWith("###TileStart")) {
+            const str = await tile_data.decodeStringFixed(32)
+            console.log(`reading tile: ${str}`)
+            if (!str.startsWith("###TileStart")) {
                 throw new Error("###TileStart debug marker not found!")
             }
-            offset = res.after
         }
 
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
-        console.log(covered_zooms)
-        printBytes(offset, tile_data)
 
-        let zoom_table: { poi: number, way: number }[] = []
+        let zoom_table: { poi_count: number, way_count: number }[] = []
         let poi_count = 0
         let way_count = 0
         for (let i = 0; i < covered_zooms; i++) {
-            const poi = decodeVariableUInt(offset, tile_data)
-            const way = decodeVariableUInt(poi.offset, tile_data)
-            offset = way.offset
-            poi_count += poi.value
-            way_count += way.value
-            zoom_table.push({ poi: poi_count, way: way_count })
+            poi_count += tile_data.decodeVariableUInt()
+            way_count += tile_data.decodeVariableUInt()
+            zoom_table.push({ poi_count, way_count })
         }
 
-        console.log(zoom_table)
-
         // should now be at the beginning of PoI data
-        let res = decodeVariableUInt(offset, tile_data)
-        offset = res.offset
-
-        const start_of_way_data = res.value
+        const start_of_way_data = tile_data.decodeVariableUInt()
         console.log({ start_of_way_data })
 
         if (this.flags.has_debug_info) {
-            const res = await decodeStringFixed(offset, 32, tile_data)
-            console.log(`reading poi: ${res.string_data}`)
-            if (!res.string_data.startsWith("***POIStart")) {
+            const str = await tile_data.decodeStringFixed(32)
+            console.log(`reading poi: ${str}`)
+            if (!str.startsWith("***POIStart")) {
                 throw new Error("***POIStart debug marker not found!")
             }
-            offset = res.after
         }
 
-        let more_pois = true
-        let i = 0
-        while (more_pois) {
-            if (i === 2) break
-            res = decodeVariableSInt(offset, tile_data)
-            console.log({ res, i }, tile_data.buffer.slice(offset))
-            offset = res.offset
-            i++
+        const pois: PoI[] = []
+        // TODO: only retrieve the PoIs for the zoom level
+        for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
+            // FIXME: make these diffs absolute
+            const lat_diff = tile_data.decodeVariableSInt()
+            const lon_diff = tile_data.decodeVariableSInt()
+
+            // FIXME: decode the rest of the PoI data
+
+            pois.push(new PoI({ y: lat_diff, x: lon_diff }))
         }
+
+        console.log(pois)
     }
 }
 
