@@ -6,9 +6,8 @@ class Reader {
     data: DataView
     offset: number = 0
 
-    constructor(data: DataView, initial_offset: number = 0) {
-        this.data = data
-        this.offset = initial_offset
+    constructor(buffer: ArrayBuffer) {
+        this.data = new DataView(buffer)
     }
 
     getUint8() {

@@ -93,10 +93,9 @@ class MapsforgeParser {
         ).getInt32(0)
 
         const header = new Reader(
-            new DataView(
-                await this.blob.slice(
-                    24, header_length + 24,
-                ).arrayBuffer())
+            await this.blob.slice(
+                24, header_length + 24,
+            ).arrayBuffer()
         )
 
         this.version = header.getInt32()
@@ -225,12 +224,10 @@ class MapsforgeParser {
 
         // load two index blocks
         const index = new Reader(
-            new DataView(
-                await this.blob.slice(
-                    Number(index_block_position),
-                    Number(index_block_position + 10n),
-                ).arrayBuffer()
-            )
+            await this.blob.slice(
+                Number(index_block_position),
+                Number(index_block_position + 10n),
+            ).arrayBuffer()
         )
 
         // FIXME: handle the end of file case, where there aren't any more index blocks
@@ -246,12 +243,10 @@ class MapsforgeParser {
         const block_length = next_block_pointer - block_pointer;
 
         const tile_data = new Reader(
-            new DataView(
-                await this.blob.slice(
-                    Number(zoom_interval.sub_file_start_position + block_pointer),
-                    Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
-                ).arrayBuffer()
-            )
+            await this.blob.slice(
+                Number(zoom_interval.sub_file_start_position + block_pointer),
+                Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
+            ).arrayBuffer()
         )
 
         console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
