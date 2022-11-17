@@ -14,29 +14,22 @@ function shift(offset: number, amount: number) {
 function decodeVariableUInt(offset: number, data: DataView) {
     // if the first bit is 1, need to read the next byte rest of the 7 bits
     // are the numeric value, starting with the least significant
-    let value = 0
-    let depth = 0
-    let should_continue = true;
+    let value = 0;
+    let shift = 0;
 
-    while (should_continue) {
-        let current_byte = data.getUint8(offset + depth);
+    // check if the continuation bit is set
+    while ((data.getUint8(offset) & 0b10000000) != 0) {
         // 128 64 32 16 8 4 2 1
         //   7  6  5  4 3 2 1 0
         // 1st bit has value of 128
-        should_continue = (current_byte & 128) != 0
 
         // if this not the first byte we've read, each bit is worth more
-        // TODO: optimise this
-        const scale = Math.pow(2, depth * 7)
-        for (let i = 7; i >= 0; i--) {
-            value += (current_byte & Math.pow(2, i)) * scale
-        }
-
-        depth++
+        value |= (data.getUint8(offset++) & 0b01111111) << shift;
+        shift += 7;
     }
 
-    offset += depth
-    return { value, offset }
+    // read the seven bits from the last byte
+    return { value: value | (data.getUint8(offset++) << shift), offset }
 }
 
 function decodeVariableSInt(offset: number, data: DataView) {
