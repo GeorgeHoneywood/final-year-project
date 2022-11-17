@@ -1,13 +1,15 @@
 import {
     coordZToXYZ,
     microDegreesToDegrees,
-} from "../geom"
+}
+    from "../geom"
 import {
     shift,
     decodeString,
     decodeVariableUInt,
     decodeVariableSInt,
-} from "./decoders"
+}
+    from "./decoders"
 
 
 class BBox {
@@ -293,20 +295,36 @@ class MapsforgeParser {
         const tile_data = new DataView(await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).arrayBuffer())
 
         console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
-        // TODO: need to get tile coordinates here, as the coordinates in the
-        // tile are all against this offset
+        // TODO: need to get tile coordinates from z/x/y values here, as the
+        // coordinates in the tile are all against this offset
         console.log({ data: await this.blob.slice(Number(zoom_interval.sub_file_start_position + block_pointer), Number(zoom_interval.sub_file_start_position + block_pointer + block_length)).text() })
 
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
-        const zoom_table_length = covered_zooms * 2
+        let offset = 0
+
+        if (this.flags.has_debug_info) {
+            offset += 32
+        }
+
+        let zoom_table: { poi: number, way: number }[] = []
+        for (let i = 0; i < covered_zooms; i++) {
+            const poi = decodeVariableUInt(offset, tile_data)
+            const way = decodeVariableUInt(poi.offset, tile_data)
+            offset = poi.offset
+            zoom_table.push({ poi: poi.value, way: way.value })
+        }
+
+        console.log(zoom_table)
 
         // should now be at the beginning of PoI data
-        let res = decodeVariableUInt(zoom_table_length, tile_data)
+        let res = decodeVariableUInt(offset, tile_data)
         // console.log(res)
 
         const start_of_way_data = res.value
         console.log({ start_of_way_data })
+
+        console.log(tile_data.buffer.slice(res.offset))
 
         if (this.flags.has_debug_info) {
             res.offset += 32
@@ -318,7 +336,7 @@ class MapsforgeParser {
             if (i === 2) break
 
             res = decodeVariableSInt(res.offset, tile_data)
-            console.log({ res }, tile_data.buffer.slice(res.offset))
+            console.log({ res, i }, tile_data.buffer.slice(res.offset))
             i++
         }
     }
