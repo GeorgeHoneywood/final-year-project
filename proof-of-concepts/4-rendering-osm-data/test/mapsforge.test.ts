@@ -80,20 +80,22 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test.only('should be able to read a file with debug info', async () => {
-        const junk_file = new Blob([await fs.readFile("./data/dorset-with-debug.map")])
+        const junk_file = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
 
         const p = new MapsforgeParser(junk_file)
 
         await expect(p.readHeader())
             .resolves
             .toBe(undefined);
-
+            
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 
         console.log(zoom_level)
         // some tiles in the middle of the extract
-        const x = zoom_level.left_tile_x + 30
-        const y = zoom_level.top_tile_y + 20
+        // const x = zoom_level.left_tile_x + 30
+        // const y = zoom_level.top_tile_y + 20
+        const x = zoom_level.left_tile_x
+        const y = zoom_level.top_tile_y
         const tile = await p.readTile(zoom_level.base_zoom_level, x, y)
     })
 
