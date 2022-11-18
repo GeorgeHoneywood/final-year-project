@@ -278,17 +278,17 @@ class MapsforgeParser {
         const start_of_way_data = tile_data.getVUint()
         console.log({ start_of_way_data })
 
-        if (this.flags.has_debug_info) {
-            const str = tile_data.getFixedString(32)
-            console.log(`reading poi: ${str}`)
-            if (!str.startsWith("***POIStart")) {
-                throw new Error("***POIStart debug marker not found!")
-            }
-        }
-
         const pois: PoI[] = []
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
+            if (this.flags.has_debug_info) {
+                const str = tile_data.getFixedString(32)
+                console.log(`reading poi: ${str}`)
+                if (!str.startsWith("***POIStart")) {
+                    throw new Error("***POIStart debug marker not found!")
+                }
+            }
+
             // FIXME: make these diffs absolute
             const lat_diff = tile_data.getVSint()
             const lon_diff = tile_data.getVSint()
