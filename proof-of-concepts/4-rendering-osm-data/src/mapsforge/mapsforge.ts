@@ -144,25 +144,25 @@ class MapsforgeParser {
         }
 
         if (this.flags.has_language_preference) {
-            this.language_preference = await header.getVString()
+            this.language_preference = header.getVString()
         }
 
         if (this.flags.has_comment) {
-            this.comment = await header.getVString()
+            this.comment = header.getVString()
         }
 
         if (this.flags.has_created_by) {
-            this.created_by = await header.getVString()
+            this.created_by = header.getVString()
         }
 
         this.poi_tag_count = header.getUint16()
         for (let i = 0; i < this.poi_tag_count; i++) {
-            this.poi_tags.push(await header.getVString())
+            this.poi_tags.push(header.getVString())
         }
 
         this.way_tag_count = header.getUint16()
         for (let i = 0; i < this.way_tag_count; i++) {
-            this.way_tags.push(await header.getVString())
+            this.way_tags.push(header.getVString())
         }
 
         this.zoom_interval_count = header.getUint8()
@@ -255,7 +255,7 @@ class MapsforgeParser {
         // coordinates in the tile are all against this offset
 
         if (this.flags.has_debug_info) {
-            const str = await tile_data.getFixedString(32)
+            const str = tile_data.getFixedString(32)
             console.log(`reading tile: ${str}`)
             if (!str.startsWith("###TileStart")) {
                 throw new Error("###TileStart debug marker not found!")
@@ -279,7 +279,7 @@ class MapsforgeParser {
         console.log({ start_of_way_data })
 
         if (this.flags.has_debug_info) {
-            const str = await tile_data.getFixedString(32)
+            const str = tile_data.getFixedString(32)
             console.log(`reading poi: ${str}`)
             if (!str.startsWith("***POIStart")) {
                 throw new Error("***POIStart debug marker not found!")

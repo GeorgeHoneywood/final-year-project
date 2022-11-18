@@ -5,6 +5,7 @@
 class Reader {
     data: DataView
     offset: number = 0
+    decoder = new TextDecoder("utf-8")
 
     constructor(buffer: ArrayBuffer) {
         this.data = new DataView(buffer)
@@ -104,17 +105,20 @@ class Reader {
     }
 
     // decode a variable length string
-    async getVString() {
+    getVString() {
         const length = this.getVUint()
-        const string = await new Blob([this.data.buffer.slice(this.offset, this.offset + length)]).text()
+        const string = this.decoder.decode(
+            this.data.buffer.slice(this.offset, this.offset + length)
+        )
         this.offset += length
         return string
     }
 
     // decode a fixed length string. used for the debug information of fixed length
-    async getFixedString(length: number) {
-        const string = await new Blob([this.data.buffer.slice(this.offset, this.offset + length)]).text()
-
+    getFixedString(length: number) {
+        const string = this.decoder.decode(
+            this.data.buffer.slice(this.offset, this.offset + length)
+        )
         this.offset += length
         return string
     }
