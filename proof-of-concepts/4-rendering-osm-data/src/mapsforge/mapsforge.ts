@@ -10,6 +10,7 @@ import {
 }
     from "./reader"
 
+type ZoomTable = { poi_count: number, way_count: number }[]
 
 class BBox {
     max_lat = 0
@@ -274,7 +275,7 @@ class MapsforgeParser {
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
 
-        let zoom_table: { poi_count: number, way_count: number }[] = []
+        let zoom_table: ZoomTable = []
         let poi_count = 0
         let way_count = 0
         for (let i = 0; i < covered_zooms; i++) {
@@ -287,6 +288,20 @@ class MapsforgeParser {
         const start_of_way_data = tile_data.getVUint()
         console.log({ start_of_way_data })
 
+        const pois: PoI[] = this.readPoIs(zoom_table, tile_data)
+
+        // should now be at the beginning of way data
+        // FIXME: add to offset here if we aren't reading all the PoIs
+
+        const ways: Way[] = this.readWays(zoom_table, tile_data)
+
+        return {
+            pois,
+            ways,
+        }
+    }
+
+    private readPoIs(zoom_table: ZoomTable, tile_data: Reader) {
         const pois: PoI[] = []
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
@@ -315,7 +330,6 @@ class MapsforgeParser {
                 const tag = this.poi_tags[tile_data.getVUint()]
 
                 // FIXME: handle wildcard tags?
-
                 tags.push(tag)
             }
 
@@ -351,10 +365,10 @@ class MapsforgeParser {
             )
             pois.push(poi)
         }
+        return pois
+    }
 
-        // should now be at the beginning of way data
-        // FIXME: add to offset here if we aren't reading all the PoIs
-
+    private readWays(zoom_table: ZoomTable, tile_data: Reader) {
         const ways: Way[] = []
         // TODO: only retrieve the Ways for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
@@ -386,7 +400,6 @@ class MapsforgeParser {
                 const tag = this.way_tags[tile_data.getVUint()]
 
                 // FIXME: handle wildcard tags?
-
                 tags.push(tag)
             }
 
@@ -441,7 +454,6 @@ class MapsforgeParser {
 
                     if (!coordinate_block_encoding) {
                         // single-delta
-
                         let previous_lat = 0
                         let previous_lon = 0
 
@@ -503,15 +515,11 @@ class MapsforgeParser {
                     name,
                     house_number,
                     ref,
-                    tags,
+                    tags
                 )
             )
         }
-        
-        return {
-            pois,
-            ways,
-        }
+        return ways
     }
 }
 
