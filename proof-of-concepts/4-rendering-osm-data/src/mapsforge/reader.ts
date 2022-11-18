@@ -44,7 +44,8 @@ class Reader {
         return value
     }
 
-    decode5ByteBigInt() {
+    // decode a 5-byte value as a BigInt. used for the index entries
+    get5ByteBigInt() {
         return BigInt(this.data.getUint8(this.offset++)) << 64n
             | BigInt(this.data.getUint8(this.offset++)) << 32n
             | BigInt(this.data.getUint8(this.offset++)) << 16n
@@ -52,7 +53,8 @@ class Reader {
             | BigInt(this.data.getUint8(this.offset++))
     }
 
-    decodeVariableUInt() {
+    // decode a variable length unsigned integer as a number
+    getVUint() {
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant
         let value = 0;
@@ -76,7 +78,8 @@ class Reader {
         return value
     }
 
-    decodeVariableSInt() {
+    // decode a variable length signed integer as a number
+    getVSint() {
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant
         let value = 0
@@ -100,24 +103,26 @@ class Reader {
         return value
     }
 
-    async decodeString() {
-        const length = this.decodeVariableUInt()
-        // console.log(length)
+    // decode a variable length string
+    async getVString() {
+        const length = this.getVUint()
         const string = await new Blob([this.data.buffer.slice(this.offset, this.offset + length)]).text()
         this.offset += length
         return string
     }
 
-    async decodeStringFixed(length: number) {
+    // decode a fixed length string. used for the debug information of fixed length
+    async getFixedString(length: number) {
         const string = await new Blob([this.data.buffer.slice(this.offset, this.offset + length)]).text()
 
         this.offset += length
         return string
     }
 
-    // debug helper function, prints some bytes from a DataView in binary and
-    // hex representations
-    // doesn't change the offset
+    // debug helper function, prints some bytes from a DataView in binary, hex
+    // and text representations
+    //
+    // doesn't alter the offset
     printBytes(length = 20) {
         let values: string[] = []
         for (let i = this.offset; i < this.offset + length; i++) {

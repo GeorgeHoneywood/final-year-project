@@ -116,7 +116,7 @@ class MapsforgeParser {
 
         this.tile_size = header.getInt16()
 
-        this.projection = await header.decodeString()
+        this.projection = await header.getVString()
 
         if (this.projection !== "Mercator") {
             throw new Error("only web mercator projected files are supported")
@@ -144,25 +144,25 @@ class MapsforgeParser {
         }
 
         if (this.flags.has_language_preference) {
-            this.language_preference = await header.decodeString()
+            this.language_preference = await header.getVString()
         }
 
         if (this.flags.has_comment) {
-            this.comment = await header.decodeString()
+            this.comment = await header.getVString()
         }
 
         if (this.flags.has_created_by) {
-            this.created_by = await header.decodeString()
+            this.created_by = await header.getVString()
         }
 
         this.poi_tag_count = header.getUint16()
         for (let i = 0; i < this.poi_tag_count; i++) {
-            this.poi_tags.push(await header.decodeString())
+            this.poi_tags.push(await header.getVString())
         }
 
         this.way_tag_count = header.getUint16()
         for (let i = 0; i < this.way_tag_count; i++) {
-            this.way_tags.push(await header.decodeString())
+            this.way_tags.push(await header.getVString())
         }
 
         this.zoom_interval_count = header.getUint8()
@@ -231,8 +231,8 @@ class MapsforgeParser {
         )
 
         // FIXME: handle the end of file case, where there aren't any more index blocks
-        const block_pointer = index.decode5ByteBigInt() & 0x7FFFFFFFFFn;
-        const next_block_pointer = index.decode5ByteBigInt() & 0x7FFFFFFFFFn;
+        const block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
+        const next_block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
 
 
         if (next_block_pointer === block_pointer) {
@@ -255,7 +255,7 @@ class MapsforgeParser {
         // coordinates in the tile are all against this offset
 
         if (this.flags.has_debug_info) {
-            const str = await tile_data.decodeStringFixed(32)
+            const str = await tile_data.getFixedString(32)
             console.log(`reading tile: ${str}`)
             if (!str.startsWith("###TileStart")) {
                 throw new Error("###TileStart debug marker not found!")
@@ -269,17 +269,17 @@ class MapsforgeParser {
         let poi_count = 0
         let way_count = 0
         for (let i = 0; i < covered_zooms; i++) {
-            poi_count += tile_data.decodeVariableUInt()
-            way_count += tile_data.decodeVariableUInt()
+            poi_count += tile_data.getVUint()
+            way_count += tile_data.getVUint()
             zoom_table.push({ poi_count, way_count })
         }
 
         // should now be at the beginning of PoI data
-        const start_of_way_data = tile_data.decodeVariableUInt()
+        const start_of_way_data = tile_data.getVUint()
         console.log({ start_of_way_data })
 
         if (this.flags.has_debug_info) {
-            const str = await tile_data.decodeStringFixed(32)
+            const str = await tile_data.getFixedString(32)
             console.log(`reading poi: ${str}`)
             if (!str.startsWith("***POIStart")) {
                 throw new Error("***POIStart debug marker not found!")
@@ -290,8 +290,8 @@ class MapsforgeParser {
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
             // FIXME: make these diffs absolute
-            const lat_diff = tile_data.decodeVariableSInt()
-            const lon_diff = tile_data.decodeVariableSInt()
+            const lat_diff = tile_data.getVSint()
+            const lon_diff = tile_data.getVSint()
 
             // FIXME: decode the rest of the PoI data
 
