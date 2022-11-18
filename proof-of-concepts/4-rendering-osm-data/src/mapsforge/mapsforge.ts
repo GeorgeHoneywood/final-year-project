@@ -3,7 +3,7 @@ import {
     microDegreesToDegrees,
 }
     from "../geom"
-import { PoI } from "./objects"
+import { PoI, Way } from "./objects"
 import {
     Reader
 }
@@ -352,6 +352,28 @@ class MapsforgeParser {
         }
 
         console.log(pois)
+
+        // should now be at the beginning of way data
+        // FIXME: add to offset here we aren't reading all the PoIs
+
+        const ways: Way[] = []
+        // TODO: only retrieve the Ways for the zoom level
+        for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
+            let osm_id: string | null = null
+            if (this.flags.has_debug_info) {
+                const str = tile_data.getFixedString(32)
+                console.log(`reading way: ${str}`)
+                if (!str.startsWith("---WayStart")) {
+                    throw new Error("---WayStart debug marker not found!")
+                }
+            }
+
+            const way_data_size = tile_data.getVUint()
+
+            // skip over the "sub tile bitmap", unsure what it is for
+            tile_data.shiftOffset(2)
+
+        }
     }
 }
 

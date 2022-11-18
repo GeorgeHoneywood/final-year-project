@@ -11,6 +11,10 @@ class Reader {
         this.data = new DataView(buffer)
     }
 
+    shiftOffset(length: number) {
+        this.offset += length
+    }
+
     getUint8() {
         return this.data.getInt8(this.offset++)
     }
