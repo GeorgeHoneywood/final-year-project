@@ -79,7 +79,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(z0.bottom_tile_y).toBe(12)
     })
 
-    test('should be able to read a file with debug info', async () => {
+    test.only('should be able to read a file with debug info', async () => {
         const junk_file = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
 
         const p = new MapsforgeParser(junk_file)
@@ -96,7 +96,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         // some tiles in the middle of the extract
         // const x = zoom_level.left_tile_x + 30
         // const y = zoom_level.top_tile_y + 20
-        const x = zoom_level.left_tile_x
+        const x = zoom_level.left_tile_x + 1
         const y = zoom_level.top_tile_y
         const tile = await p.readTile(zoom_level.base_zoom_level, x, y)
     })

@@ -52,6 +52,11 @@ class ZoomLevel {
     bottom_tile_y = 0
 }
 
+/**
+ * Reads some file encoded in the Mapsforge binary map file specification
+ * 
+ * See here: https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md
+ */
 class MapsforgeParser {
     blob: Blob
 
@@ -82,7 +87,10 @@ class MapsforgeParser {
         this.blob = blob
     }
 
-
+    /**
+     * Reads headers from the file. Must be called before you attempt to read
+     * any tile data.
+     */
     public async readHeader() {
         if (await this.blob.slice(0, 20).text() !== "mapsforge binary OSM") {
             throw new Error("file not mapforge binary format")
@@ -281,21 +289,66 @@ class MapsforgeParser {
         const pois: PoI[] = []
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
+            let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
                 console.log(`reading poi: ${str}`)
                 if (!str.startsWith("***POIStart")) {
                     throw new Error("***POIStart debug marker not found!")
                 }
+                osm_id = str.trim().replaceAll("***", "").replace("POIStart", "")
             }
 
             // FIXME: make these diffs absolute
             const lat_diff = tile_data.getVSint()
             const lon_diff = tile_data.getVSint()
 
-            // FIXME: decode the rest of the PoI data
+            const special = tile_data.getUint8()
 
-            pois.push(new PoI({ y: lat_diff, x: lon_diff }))
+            const layer = (special >> 4) - 5
+            const tag_count = (special & 0b00001111)
+
+            const tags = []
+            for (let j = 0; j < tag_count; j++) {
+                // decode each tag
+                const tag = this.poi_tags[tile_data.getVUint()]
+
+                // FIXME: handle wildcard tags?
+
+                tags.push(tag)
+            }
+
+            const flags = tile_data.getUint8()
+
+            const has_name = (flags & 0b10000000) !== 0
+            const has_house_number = (flags & 0b01000000) !== 0
+            const has_elevation = (flags & 0b00100000) !== 0
+
+            let name: string | null = null
+            if (has_name) {
+                name = tile_data.getVString()
+            }
+
+            let house_number: string | null = null
+            if (has_house_number) {
+                house_number = tile_data.getVString()
+            }
+
+            let elevation: number | null = null
+            if (has_elevation) {
+                elevation = tile_data.getVSint()
+            }
+
+            const poi = new PoI(
+                osm_id,
+                { y: lat_diff, x: lon_diff },
+                layer,
+                name,
+                house_number,
+                elevation,
+                tags
+            )
+            pois.push(poi)
         }
 
         console.log(pois)
