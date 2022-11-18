@@ -88,11 +88,11 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
             .resolves
             .toBe(undefined);
 
-        console.log(p.way_tags)
+        // console.log(p.way_tags)
 
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 
-        console.log(zoom_level)
+        // console.log(zoom_level)
         // some tiles in the middle of the extract
         // const x = zoom_level.left_tile_x + 30
         // const y = zoom_level.top_tile_y + 20
@@ -105,7 +105,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         const albania = new Blob([await fs.readFile("./data/ferndown.map")])
         const p = new MapsforgeParser(albania)
         await p.readHeader()
-        console.log(p.zoom_intervals)
+        // console.log(p.zoom_intervals)
 
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 

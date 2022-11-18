@@ -48,6 +48,17 @@ function coordZToXYZ(lat: number, lon: number, zoom: number) {
     }
 }
 
+function zxyToCoord(zoom: number, x: number, y: number) {
+    const scale = Math.pow(2, zoom)
+    const lat_radians = Math.atan(Math.sinh(Math.PI * (1 - (2 * (y / scale)))))
+
+    return {
+        x: ((x / scale) * 360) - 180,
+        y: RADIANS_TO_DEGREES * lat_radians,
+        z: zoom,
+    }
+}
+
 const MICRO_DEGREES_TO_DEGREES = 10 ** 6
 
 function microDegreesToDegrees(microDegrees: number) {
@@ -59,5 +70,6 @@ export {
     unprojectMercator,
     projectMercator,
     coordZToXYZ,
+    zxyToCoord,
     microDegreesToDegrees,
 }
