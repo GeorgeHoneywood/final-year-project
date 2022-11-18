@@ -3,6 +3,7 @@ import {
     microDegreesToDegrees,
 }
     from "../geom"
+import { Coord } from "../types"
 import { PoI, Way } from "./objects"
 import {
     Reader
@@ -351,10 +352,8 @@ class MapsforgeParser {
             pois.push(poi)
         }
 
-        console.log(pois)
-
         // should now be at the beginning of way data
-        // FIXME: add to offset here we aren't reading all the PoIs
+        // FIXME: add to offset here if we aren't reading all the PoIs
 
         const ways: Way[] = []
         // TODO: only retrieve the Ways for the zoom level
@@ -366,13 +365,152 @@ class MapsforgeParser {
                 if (!str.startsWith("---WayStart")) {
                     throw new Error("---WayStart debug marker not found!")
                 }
+                osm_id = str.trim().replaceAll("---", "").replace("WayStart", "")
             }
 
             const way_data_size = tile_data.getVUint()
 
+            console.log({ way_data_size })
+
             // skip over the "sub tile bitmap", unsure what it is for
             tile_data.shiftOffset(2)
 
+            const special = tile_data.getUint8()
+
+            const layer = (special >> 4) - 5
+            const tag_count = (special & 0b00001111)
+
+            const tags = []
+            for (let j = 0; j < tag_count; j++) {
+                // decode each tag
+                const tag = this.way_tags[tile_data.getVUint()]
+
+                // FIXME: handle wildcard tags?
+
+                tags.push(tag)
+            }
+
+            const flags = tile_data.getUint8()
+
+            const has_name = (flags & 0b10000000) !== 0
+            const has_house_number = (flags & 0b01000000) !== 0
+            const has_ref = (flags & 0b00100000) !== 0
+            const has_label_position = (flags & 0b00010000) !== 0
+            // === true means there is a single data block, otherwise multiple
+            const has_number_of_way_data_blocks = (flags & 0b00001000) !== 0
+            // === true means double-delta encoding, false means single-delta
+            const coordinate_block_encoding = (flags & 0b00001000) !== 0
+
+
+            let name: string | null = null
+            if (has_name) {
+                name = tile_data.getVString()
+            }
+
+            let house_number: string | null = null
+            if (has_house_number) {
+                house_number = tile_data.getVString()
+            }
+
+            let ref: string | null = null
+            if (has_ref) {
+                ref = tile_data.getVString()
+            }
+
+            let label_position: Coord | null = null
+            if (has_label_position) {
+                label_position = {
+                    y: tile_data.getVSint(),
+                    x: tile_data.getVSint(),
+                }
+            }
+
+            // TODO: I don't understand when number_of_way_data_blocks will be > 1
+            let number_of_way_data_blocks = 1
+            if (has_number_of_way_data_blocks) {
+                number_of_way_data_blocks = tile_data.getVUint()
+            }
+
+            const path: Coord[] = []
+            for (let j = 0; j < number_of_way_data_blocks; j++) {
+                // if this is > 1, then the way is a multipolygon 
+                const number_of_coordinate_blocks = tile_data.getVUint()
+
+                for (let k = 0; k < number_of_coordinate_blocks; k++) {
+                    const number_of_nodes = tile_data.getVUint()
+
+                    if (!coordinate_block_encoding) {
+                        // single-delta
+
+                        let previous_lat = 0
+                        let previous_lon = 0
+
+                        for (let l = 0; l < number_of_nodes; l++) {
+                            const lat = tile_data.getVSint() + previous_lat
+                            const lon = tile_data.getVSint() + previous_lon
+
+                            path.push({
+                                y: lat,
+                                x: lon,
+                            })
+
+                            previous_lat = lat
+                            previous_lon = lon
+                        }
+                    } else {
+                        // double-delta encoding
+                        let previous_lat = 0 // FIXME: this
+                        let previous_lon = 0 // FIXME: this
+
+                        let previous_lat_offset = 0
+                        let previous_lon_offset = 0
+
+                        let count = 0
+
+                        for (let l = 0; l < number_of_nodes; l++) {
+                            const encoded_lat = tile_data.getVSint()
+                            const encoded_lon = tile_data.getVSint()
+
+                            // FIXME: / 1,000,000?
+                            const lat = previous_lat + previous_lat_offset + encoded_lat
+                            const lon = previous_lon + previous_lon_offset + encoded_lon
+
+                            if (count > 0) {
+                                previous_lat_offset = lat - previous_lat
+                                previous_lon_offset = lon - previous_lat
+                            }
+
+                            path.push({
+                                y: lat,
+                                x: lon,
+                            })
+
+                            previous_lat = lat
+                            previous_lon = lon
+
+                            count++
+                        }
+                    }
+                }
+            }
+
+            ways.push(
+                new Way(
+                    osm_id,
+                    path,
+                    label_position,
+                    layer,
+                    name,
+                    house_number,
+                    ref,
+                    tags,
+                )
+            )
+        }
+        
+        return {
+            pois,
+            ways,
         }
     }
 }

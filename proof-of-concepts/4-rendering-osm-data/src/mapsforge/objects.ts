@@ -6,31 +6,34 @@ class Way {
     osm_id: string | null
 
     path: Coord[]
+    label_position: Coord | null
     layer: number
 
     name: string | null
     house_number: string | null
-    elevation: number | null
+    ref: string | null
 
     tags: string[] | null
 
     constructor(
         osm_id: string | null,
         path: Coord[],
+        label_position: Coord | null,
         layer: number,
         name: string | null,
         house_number: string | null,
-        elevation: number | null,
+        ref: string | null,
         tags: string[] | null
     ) {
         this.osm_id = osm_id
 
         this.path = path
+        this.label_position = label_position
         this.layer = layer
 
         this.name = name
         this.house_number = house_number
-        this.elevation = elevation
+        this.ref = ref
 
         this.tags = tags
     }
