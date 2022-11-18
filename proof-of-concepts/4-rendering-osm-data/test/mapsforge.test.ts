@@ -79,7 +79,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(z0.bottom_tile_y).toBe(12)
     })
 
-    test.only('should be able to read a file with debug info', async () => {
+    test('should be able to read a file with debug info', async () => {
         const junk_file = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
 
         const p = new MapsforgeParser(junk_file)

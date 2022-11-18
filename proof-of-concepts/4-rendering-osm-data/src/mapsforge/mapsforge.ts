@@ -259,14 +259,12 @@ class MapsforgeParser {
             ).arrayBuffer()
         )
 
-        console.log("reading from offset:", (zoom_interval.sub_file_start_position + block_pointer).toString(16))
-
         // TODO: need to get tile coordinates from z/x/y values here, as the
         // coordinates in the tile are all against this offset
 
         if (this.flags.has_debug_info) {
             const str = tile_data.getFixedString(32)
-            console.log(`reading tile: ${str}`)
+            // console.log(`reading tile: ${str}`)
             if (!str.startsWith("###TileStart")) {
                 throw new Error("###TileStart debug marker not found!")
             }
@@ -285,8 +283,8 @@ class MapsforgeParser {
         }
 
         // should now be at the beginning of PoI data
+        // use this to skip to the beginning of ways if we aren't reading all PoIs
         const start_of_way_data = tile_data.getVUint()
-        console.log({ start_of_way_data })
 
         const pois: PoI[] = this.readPoIs(zoom_table, tile_data)
 
@@ -308,7 +306,7 @@ class MapsforgeParser {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
-                console.log(`reading poi: ${str}`)
+                // console.log(`reading poi: ${str}`)
                 if (!str.startsWith("***POIStart")) {
                     throw new Error("***POIStart debug marker not found!")
                 }
@@ -375,16 +373,15 @@ class MapsforgeParser {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
-                console.log(`reading way: ${str}`)
+                // console.log(`reading way: ${str}`)
                 if (!str.startsWith("---WayStart")) {
                     throw new Error("---WayStart debug marker not found!")
                 }
                 osm_id = str.trim().replaceAll("---", "").replace("WayStart", "")
             }
 
+            // TODO: presumably could be used to skip over a way
             const way_data_size = tile_data.getVUint()
-
-            console.log({ way_data_size })
 
             // skip over the "sub tile bitmap", unsure what it is for
             tile_data.shiftOffset(2)
@@ -446,7 +443,7 @@ class MapsforgeParser {
 
             const path: Coord[] = []
             for (let j = 0; j < number_of_way_data_blocks; j++) {
-                // if this is > 1, then the way is a multipolygon 
+                // if number_of_coordinate_blocks is > 1, then the way is a multipolygon 
                 const number_of_coordinate_blocks = tile_data.getVUint()
 
                 for (let k = 0; k < number_of_coordinate_blocks; k++) {
