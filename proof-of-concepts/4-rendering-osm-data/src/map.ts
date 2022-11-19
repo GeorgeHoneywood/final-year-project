@@ -1,11 +1,12 @@
 import { projectMercator, unprojectMercator } from "./geom.js";
+import { Way } from "./mapsforge/objects.js";
 import { Coord, GeometryArray } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
 
-    private geometries: GeometryArray;
+    private geometries: Way[];
 
     // zoom level, where 1 is the whole world this is scaled by calling
     // Math.pow(2, zoom_level) to get a non-logarithmic number
@@ -24,7 +25,7 @@ class CanvasMap {
      * @param canvas to render the map to
      * @param geometries to show on the map
      */
-    public constructor(canvas: HTMLCanvasElement, geometries: GeometryArray) {
+    public constructor(canvas: HTMLCanvasElement, geometries: Way[]) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d")!;
         this.ctx.font = "15px Arial";
@@ -62,7 +63,7 @@ class CanvasMap {
         this.canvas.height = window.innerHeight - 76;
     }
 
-    public setGeometries(geometries: GeometryArray) {
+    public setGeometries(geometries: Way[]) {
         this.geometries = geometries;
         this.dirty = true;
     }
@@ -136,8 +137,9 @@ class CanvasMap {
         const scale = Math.pow(2, this.zoom_level);
 
         for (const geometry of this.geometries) {
+            // console.log(geometry)
             this.ctx.beginPath();
-            for (const [x, y] of geometry) {
+            for (const {x, y} of geometry.path) {
                 // TODO: possible optimisation: only draw lines that are actually on the canvas
                 this.ctx.lineTo(
                     (x * scale) + this.x_offset,

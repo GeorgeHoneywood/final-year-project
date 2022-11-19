@@ -14,16 +14,17 @@ async function main() {
     await parser.readHeader()
 
     console.log({ parser })
-
     const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
+    const x = ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0
+    const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
     const tile = await parser.readTile(
         zoom_level.base_zoom_level,
-        ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0,
-        ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0,
+        x +1,
+        y,
     )
     console.log(tile)
 
-    const map = new CanvasMap(canvas, []);
+    const map = new CanvasMap(canvas, tile.ways);
 
     // layerPicker.addEventListener("change", async (e) => {
     //     // map.setGeometries(await getGeometries());
