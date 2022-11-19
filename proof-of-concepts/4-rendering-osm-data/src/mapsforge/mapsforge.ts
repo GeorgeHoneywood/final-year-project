@@ -1,6 +1,7 @@
 import {
     coordZToXYZ,
     microDegreesToDegrees,
+    zxyToCoord,
 }
     from "../geom"
 import { Coord } from "../types"
@@ -126,7 +127,7 @@ class MapsforgeParser {
 
         this.tile_size = header.getInt16()
 
-        this.projection = await header.getVString()
+        this.projection = header.getVString()
 
         if (this.projection !== "Mercator") {
             throw new Error("only web mercator projected files are supported")
@@ -143,8 +144,12 @@ class MapsforgeParser {
         if (this.flags.has_map_start_position) {
             this.map_start_location = new MapStartLocation()
 
-            this.map_start_location.lat = header.getInt32()
-            this.map_start_location.long = header.getInt32()
+            this.map_start_location.lat = microDegreesToDegrees(
+                header.getInt32()
+            )
+            this.map_start_location.long = microDegreesToDegrees(
+                header.getInt32()
+            )
         }
 
         if (this.flags.has_start_zoom_level) {
@@ -259,7 +264,8 @@ class MapsforgeParser {
             ).arrayBuffer()
         )
 
-        // TODO: need to get tile coordinates from z/x/y values here, as the
+        const tile_top_left_coord = zxyToCoord(zoom, x, y)
+
         // coordinates in the tile are all against this offset
 
         if (this.flags.has_debug_info) {
@@ -286,12 +292,12 @@ class MapsforgeParser {
         // use this to skip to the beginning of ways if we aren't reading all PoIs
         const start_of_way_data = tile_data.getVUint()
 
-        const pois: PoI[] = this.readPoIs(zoom_table, tile_data)
+        const pois: PoI[] = this.readPoIs(zoom_table, tile_top_left_coord, tile_data)
 
         // should now be at the beginning of way data
         // FIXME: add to offset here if we aren't reading all the PoIs
 
-        const ways: Way[] = this.readWays(zoom_table, tile_data)
+        const ways: Way[] = this.readWays(zoom_table, tile_top_left_coord, tile_data)
 
         return {
             pois,
@@ -299,7 +305,7 @@ class MapsforgeParser {
         }
     }
 
-    private readPoIs(zoom_table: ZoomTable, tile_data: Reader) {
+    private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader) {
         const pois: PoI[] = []
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
@@ -313,9 +319,11 @@ class MapsforgeParser {
                 osm_id = str.trim().replaceAll("***", "").replace("POIStart", "")
             }
 
-            // FIXME: make these diffs absolute
-            const lat_diff = tile_data.getVSint()
-            const lon_diff = tile_data.getVSint()
+            const lat = microDegreesToDegrees(tile_data.getVSint())
+                + tile_top_left_coord.y
+
+            const lon = microDegreesToDegrees(tile_data.getVSint())
+                + tile_top_left_coord.x
 
             const special = tile_data.getUint8()
 
@@ -354,7 +362,7 @@ class MapsforgeParser {
 
             const poi = new PoI(
                 osm_id,
-                { y: lat_diff, x: lon_diff },
+                { y: lat, x: lon },
                 layer,
                 name,
                 house_number,
@@ -366,7 +374,7 @@ class MapsforgeParser {
         return pois
     }
 
-    private readWays(zoom_table: ZoomTable, tile_data: Reader) {
+    private readWays(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader) {
         const ways: Way[] = []
         // TODO: only retrieve the Ways for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
@@ -451,12 +459,15 @@ class MapsforgeParser {
 
                     if (!coordinate_block_encoding) {
                         // single-delta
-                        let previous_lat = 0
-                        let previous_lon = 0
+                        console.log("single")
+                        let previous_lat = tile_top_left_coord.y
+                        let previous_lon = tile_top_left_coord.x
 
                         for (let l = 0; l < number_of_nodes; l++) {
-                            const lat = tile_data.getVSint() + previous_lat
-                            const lon = tile_data.getVSint() + previous_lon
+                            const lat = microDegreesToDegrees(tile_data.getVSint())
+                                + previous_lat
+                            const lon = microDegreesToDegrees(tile_data.getVSint())
+                                + previous_lon
 
                             path.push({
                                 y: lat,
@@ -467,9 +478,10 @@ class MapsforgeParser {
                             previous_lon = lon
                         }
                     } else {
+                        console.log("double")
                         // double-delta encoding
-                        let previous_lat = 0 // FIXME: this
-                        let previous_lon = 0 // FIXME: this
+                        let previous_lat = tile_top_left_coord.y
+                        let previous_lon = tile_top_left_coord.x
 
                         let previous_lat_offset = 0
                         let previous_lon_offset = 0
@@ -480,9 +492,10 @@ class MapsforgeParser {
                             const encoded_lat = tile_data.getVSint()
                             const encoded_lon = tile_data.getVSint()
 
-                            // FIXME: / 1,000,000?
-                            const lat = previous_lat + previous_lat_offset + encoded_lat
-                            const lon = previous_lon + previous_lon_offset + encoded_lon
+                            const lat = previous_lat + previous_lat_offset
+                                + microDegreesToDegrees(encoded_lat)
+                            const lon = previous_lon + previous_lon_offset
+                                + microDegreesToDegrees(encoded_lon)
 
                             if (count > 0) {
                                 previous_lat_offset = lat - previous_lat
