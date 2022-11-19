@@ -46,8 +46,9 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(p.flags.has_comment).toBe(true)
         expect(p.flags.has_created_by).toBe(true)
 
-        expect(p.map_start_location?.lat).toBe(41145255)
-        expect(p.map_start_location?.long).toBe(19979665)
+        // toBeClose to for floating point numbers
+        expect(p.map_start_location?.lat).toBeCloseTo(41.145255)
+        expect(p.map_start_location?.long).toBeCloseTo(19.979665)
         expect(p.map_start_location?.zoom).toBe(8)
 
         expect(p.language_preference).toBe("en,de,fr,es")
