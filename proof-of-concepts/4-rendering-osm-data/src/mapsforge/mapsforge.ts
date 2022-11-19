@@ -341,9 +341,9 @@ class MapsforgeParser {
 
             const flags = tile_data.getUint8()
 
-            const has_name = (flags & 0b10000000) !== 0
-            const has_house_number = (flags & 0b01000000) !== 0
-            const has_elevation = (flags & 0b00100000) !== 0
+            const has_name = (flags & 0b1000_0000) !== 0
+            const has_house_number = (flags & 0b0100_0000) !== 0
+            const has_elevation = (flags & 0b0010_0000) !== 0
 
             let name: string | null = null
             if (has_name) {
@@ -410,14 +410,14 @@ class MapsforgeParser {
 
             const flags = tile_data.getUint8()
 
-            const has_name = (flags & 0b10000000) !== 0
-            const has_house_number = (flags & 0b01000000) !== 0
-            const has_ref = (flags & 0b00100000) !== 0
-            const has_label_position = (flags & 0b00010000) !== 0
+            const has_name = (flags & 0b1000_0000) !== 0
+            const has_house_number = (flags & 0b0100_0000) !== 0
+            const has_ref = (flags & 0b0010_0000) !== 0
+            const has_label_position = (flags & 0b0001_0000) !== 0
             // === true means there is a single data block, otherwise multiple
-            const has_number_of_way_data_blocks = (flags & 0b00001000) !== 0
+            const has_number_of_way_data_blocks = (flags & 0b0000_1000) !== 0
             // === true means double-delta encoding, false means single-delta
-            const coordinate_block_encoding = (flags & 0b00001000) !== 0
+            const coordinate_block_encoding = (flags & 0b0000_0100) !== 0
 
 
             let name: string | null = null
