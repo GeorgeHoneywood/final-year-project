@@ -66,13 +66,13 @@ class Reader {
         let shift = 0;
 
         // check if we need to continue
-        while ((this.data.getUint8(this.offset) & 0b10000000) != 0) {
+        while ((this.data.getUint8(this.offset) & 0b1000_0000) != 0) {
             // 128 64 32 16 8 4 2 1
             //   7  6  5  4 3 2 1 0
             // 1st bit has value of 128
 
             // if this not the first byte we've read, each bit is worth more
-            value |= (this.data.getUint8(this.offset) & 0b01111111) << shift
+            value |= (this.data.getUint8(this.offset) & 0b0111_1111) << shift
             this.offset++
             shift += 7
         }
@@ -91,18 +91,18 @@ class Reader {
         let shift = 0
 
         // check if we need to continue
-        while ((this.data.getUint8(this.offset) & 0b10000000) != 0) {
-            value |= (this.data.getUint8(this.offset) & 0x7f) << shift
+        while ((this.data.getUint8(this.offset) & 0b1000_0000) != 0) {
+            value |= (this.data.getUint8(this.offset) & 0b0111_1111) << shift
             this.offset++
             shift += 7
         }
 
         // get the six data bits from the last byte
-        value |= ((this.data.getUint8(this.offset) & 0b00111111) << shift)
+        value |= ((this.data.getUint8(this.offset) & 0b0011_1111) << shift)
         this.offset++
 
         // if 2nd bit is set, it is negative, invert
-        if ((this.data.getUint8(this.offset) & 0b01000000) != 0) {
+        if ((this.data.getUint8(this.offset) & 0b0100_0000) != 0) {
             value = -value
         }
         return value
