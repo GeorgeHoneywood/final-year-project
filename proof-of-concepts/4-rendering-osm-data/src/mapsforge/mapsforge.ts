@@ -377,7 +377,7 @@ class MapsforgeParser {
     private readWays(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader) {
         const ways: Way[] = []
         // TODO: only retrieve the Ways for the zoom level
-        for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
+        for (let i = 0; i < zoom_table[zoom_table.length - 1].way_count; i++) {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
