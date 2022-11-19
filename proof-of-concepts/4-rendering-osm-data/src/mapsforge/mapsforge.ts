@@ -260,7 +260,7 @@ class MapsforgeParser {
         const tile_data = new Reader(
             await this.blob.slice(
                 Number(zoom_interval.sub_file_start_position + block_pointer),
-                Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
+                Number(zoom_interval.sub_file_start_position + block_pointer + block_length+1n),
             ).arrayBuffer()
         )
 
