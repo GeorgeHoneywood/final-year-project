@@ -459,7 +459,6 @@ class MapsforgeParser {
 
                     if (!coordinate_block_encoding) {
                         // single-delta
-                        console.log("single")
                         let previous_lat = tile_top_left_coord.y
                         let previous_lon = tile_top_left_coord.x
 
@@ -478,7 +477,6 @@ class MapsforgeParser {
                             previous_lon = lon
                         }
                     } else {
-                        console.log("double")
                         // double-delta encoding
                         let previous_lat = tile_top_left_coord.y
                         let previous_lon = tile_top_left_coord.x
