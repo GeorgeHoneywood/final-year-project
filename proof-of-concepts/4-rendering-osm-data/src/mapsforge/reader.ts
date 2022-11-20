@@ -51,8 +51,8 @@ class Reader {
 
     // decode a 5-byte value as a BigInt. used for the index entries
     get5ByteBigInt() {
-        return BigInt(this.data.getUint8(this.offset++)) << 64n
-            | BigInt(this.data.getUint8(this.offset++)) << 32n
+        return BigInt(this.data.getUint8(this.offset++)) << 32n
+            | BigInt(this.data.getUint8(this.offset++)) << 24n
             | BigInt(this.data.getUint8(this.offset++)) << 16n
             | BigInt(this.data.getUint8(this.offset++)) << 8n
             | BigInt(this.data.getUint8(this.offset++))
