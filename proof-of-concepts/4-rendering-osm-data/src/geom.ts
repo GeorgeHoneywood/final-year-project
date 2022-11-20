@@ -42,19 +42,25 @@ function coordZToXYZ(lat: number, lon: number, zoom: number) {
     const lat_radians = lat / RADIANS_TO_DEGREES
 
     return {
-        x: (scale * (lon + 180) / 360) | 0, // round down
-        y: ((1.0 - Math.asinh(Math.tan(lat_radians)) / Math.PI) / 2.0 * scale) | 0,
+        x: ((lon + 180) / 360) * scale | 0, // round down
+        y: (((1.0 - (Math.asinh(Math.tan(lat_radians)) / Math.PI)) / 2.0) * scale) | 0,
         z: zoom,
     }
 }
 
-function zxyToCoord(zoom: number, x: number, y: number) {
+function zxyToMercatorCoord(zoom: number, x: number, y: number) {
     const scale = Math.pow(2, zoom)
     const lat_radians = Math.atan(Math.sinh(Math.PI * (1 - (2 * (y / scale)))))
 
-    return {
+    const unprojected = {
         x: ((x / scale) * 360) - 180,
-        y: RADIANS_TO_DEGREES * lat_radians,
+        y: lat_radians * RADIANS_TO_DEGREES,
+    }
+    const projected = projectMercator(unprojected)
+
+    return {
+        x: projected.x,
+        y: projected.y,
         z: zoom,
     }
 }
@@ -70,6 +76,6 @@ export {
     unprojectMercator,
     projectMercator,
     coordZToXYZ,
-    zxyToCoord,
+    zxyToMercatorCoord,
     microDegreesToDegrees,
 }

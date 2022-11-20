@@ -1,12 +1,12 @@
 import { projectMercator, unprojectMercator } from "./geom.js";
-import { Way } from "./mapsforge/objects.js";
+import { PoI, Way } from "./mapsforge/objects.js";
 import { Coord, GeometryArray } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
 
-    private geometries: Way[];
+    private geometries: { ways: Way[], pois: PoI[] };
 
     // zoom level, where 1 is the whole world this is scaled by calling
     // Math.pow(2, zoom_level) to get a non-logarithmic number
@@ -25,12 +25,12 @@ class CanvasMap {
      * @param canvas to render the map to
      * @param geometries to show on the map
      */
-    public constructor(canvas: HTMLCanvasElement, geometries: Way[]) {
+    public constructor(canvas: HTMLCanvasElement, tile: { ways: Way[], pois: PoI[] }) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d")!;
         this.ctx.font = "15px Arial";
 
-        this.geometries = geometries;
+        this.geometries = tile;
 
         // must set canvas size, otherwise we cannot centre the map properly
         this.setCanvasSize();
@@ -63,7 +63,7 @@ class CanvasMap {
         this.canvas.height = window.innerHeight - 76;
     }
 
-    public setGeometries(geometries: Way[]) {
+    public setGeometries(geometries: { ways: Way[], pois: PoI[] }) {
         this.geometries = geometries;
         this.dirty = true;
     }
@@ -136,11 +136,52 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
 
-        for (const geometry of this.geometries) {
-            // console.log(geometry)
+        for (const poi of this.geometries.pois) {
+            if (!poi.name) continue
+
             this.ctx.beginPath();
-            for (const {x, y} of geometry.path) {
-                // TODO: possible optimisation: only draw lines that are actually on the canvas
+            const { x, y } = poi.position
+            // TODO: possible optimisation: only draw lines that are
+            // actually on the canvas
+
+            // const proj = projectMercator({x,y})
+            this.ctx.rect(
+                (x * scale) + this.x_offset - 5,
+                this.canvas.height - ((y * scale) + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                10,
+                10,
+            );
+            this.ctx.fillText(
+                poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
+                (x * scale) + this.x_offset + 10,
+                this.canvas.height - ((y * scale) + this.y_offset) + 5
+            );
+
+            this.ctx.stroke();
+        }
+
+        for (const way of this.geometries.ways) {
+            // console.log(geometry.path)
+            if (way.double_delta) {
+                // continue
+                this.ctx.strokeStyle = "red"
+            } else {
+                this.ctx.strokeStyle = "green"
+            }
+
+            // this.ctx.fillText(
+            //     way.name ?? way.house_number ?? way.tags?.join(",") ?? "",
+            //     (way.path[0].x * scale) + this.x_offset,
+            //     this.canvas.height - ((way.path[0].y * scale) + this.y_offset) 
+            // );
+
+
+            this.ctx.beginPath();
+            for (const { x, y } of way.path) {
+                // TODO: possible optimisation: only draw lines that are
+                // actually on the canvas
+
+                // const proj = projectMercator({x,y})
                 this.ctx.lineTo(
                     (x * scale) + this.x_offset,
                     this.canvas.height - ((y * scale) + this.y_offset) // as we are drawing from 0,0 being the top left, we must flip the y-axis

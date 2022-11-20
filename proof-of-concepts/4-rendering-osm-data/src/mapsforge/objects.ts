@@ -6,6 +6,7 @@ class Way {
     osm_id: string | null
 
     path: Coord[]
+    // label_position is relative to path[0]
     label_position: Coord | null
     layer: number
 
@@ -15,6 +16,8 @@ class Way {
 
     tags: string[] | null
 
+    double_delta : boolean
+
     constructor(
         osm_id: string | null,
         path: Coord[],
@@ -23,7 +26,8 @@ class Way {
         name: string | null,
         house_number: string | null,
         ref: string | null,
-        tags: string[] | null
+        tags: string[] | null,
+        double_delta: boolean
     ) {
         this.osm_id = osm_id
 
@@ -36,6 +40,8 @@ class Way {
         this.ref = ref
 
         this.tags = tags
+
+        this.double_delta = double_delta
     }
 }
 

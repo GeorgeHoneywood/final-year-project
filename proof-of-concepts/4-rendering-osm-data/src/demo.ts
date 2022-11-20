@@ -9,22 +9,22 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
-    const parser = new MapsforgeParser(await loadMapBlob("data/ferndown-with-debug.map"))
+    const parser = new MapsforgeParser(await loadMapBlob("data/dorset-with-debug.map"))
 
     await parser.readHeader()
 
     console.log({ parser })
     const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
-    const x = ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0
-    const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
+    // const x = ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0
+    // const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
     const tile = await parser.readTile(
         zoom_level.base_zoom_level,
-        x +1,
-        y,
+        8106,// 8105,
+        5505,//5499,
     )
     console.log(tile)
 
-    const map = new CanvasMap(canvas, tile.ways);
+    const map = new CanvasMap(canvas, tile);
 
     // layerPicker.addEventListener("change", async (e) => {
     //     // map.setGeometries(await getGeometries());

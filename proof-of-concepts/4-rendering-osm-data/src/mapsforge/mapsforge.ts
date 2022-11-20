@@ -1,7 +1,7 @@
 import {
     coordZToXYZ,
     microDegreesToDegrees,
-    zxyToCoord,
+    zxyToMercatorCoord,
 }
     from "../geom"
 import { Coord } from "../types"
@@ -130,7 +130,7 @@ class MapsforgeParser {
         this.projection = header.getVString()
 
         if (this.projection !== "Mercator") {
-            throw new Error("only web mercator projected files are supported")
+            throw new Error("only web mercator projected files are supported!")
         }
 
         const flag_byte = header.getUint8()
@@ -260,11 +260,13 @@ class MapsforgeParser {
         const tile_data = new Reader(
             await this.blob.slice(
                 Number(zoom_interval.sub_file_start_position + block_pointer),
-                Number(zoom_interval.sub_file_start_position + block_pointer + block_length+1n),
+                Number(zoom_interval.sub_file_start_position + block_pointer + block_length + 1n),
             ).arrayBuffer()
         )
 
-        const tile_top_left_coord = zxyToCoord(zoom, x, y)
+        const tile_top_left_coord = zxyToMercatorCoord(zoom, x, y)
+
+        console.log({tile_top_left_coord})
 
         // coordinates in the tile are all against this offset
 
@@ -319,11 +321,11 @@ class MapsforgeParser {
                 osm_id = str.trim().replaceAll("***", "").replace("POIStart", "")
             }
 
-            const lat = microDegreesToDegrees(tile_data.getVSint())
-                + tile_top_left_coord.y
+            const lat =tile_data.getVSint()
+                // + tile_top_left_coord.y
 
-            const lon = microDegreesToDegrees(tile_data.getVSint())
-                + tile_top_left_coord.x
+            const lon = tile_data.getVSint()
+                // + tile_top_left_coord.x
 
             const special = tile_data.getUint8()
 
@@ -438,8 +440,8 @@ class MapsforgeParser {
             let label_position: Coord | null = null
             if (has_label_position) {
                 label_position = {
-                    y: tile_data.getVSint(),
-                    x: tile_data.getVSint(),
+                    y: microDegreesToDegrees(tile_data.getVSint()),
+                    x: microDegreesToDegrees(tile_data.getVSint()),
                 }
             }
 
@@ -448,21 +450,28 @@ class MapsforgeParser {
             if (has_number_of_way_data_blocks) {
                 number_of_way_data_blocks = tile_data.getVUint()
             }
+            // console.log({ number_of_way_data_blocks })
 
             const path: Coord[] = []
             for (let j = 0; j < number_of_way_data_blocks; j++) {
                 // if number_of_coordinate_blocks is > 1, then the way is a multipolygon 
                 const number_of_coordinate_blocks = tile_data.getVUint()
 
+                // console.log({ number_of_coordinate_blocks })
                 for (let k = 0; k < number_of_coordinate_blocks; k++) {
                     const number_of_nodes = tile_data.getVUint()
-
+                
                     if (!coordinate_block_encoding) {
-                        // single-delta
-                        let previous_lat = tile_top_left_coord.y
-                        let previous_lon = tile_top_left_coord.x
+                        // single-delta encoding
+                        let previous_lat = tile_top_left_coord.y + microDegreesToDegrees(tile_data.getVSint())
+                        let previous_lon = tile_top_left_coord.x + microDegreesToDegrees(tile_data.getVSint())
 
-                        for (let l = 0; l < number_of_nodes; l++) {
+                        path.push({
+                            y: previous_lat,
+                            x: previous_lon,
+                        })
+
+                        for (let l = 1; l < number_of_nodes; l++) {
                             const lat = microDegreesToDegrees(tile_data.getVSint())
                                 + previous_lat
                             const lon = microDegreesToDegrees(tile_data.getVSint())
@@ -489,6 +498,7 @@ class MapsforgeParser {
                         for (let l = 0; l < number_of_nodes; l++) {
                             const encoded_lat = tile_data.getVSint()
                             const encoded_lon = tile_data.getVSint()
+                            // console.log({ encoded_lat, encoded_lon })
 
                             const lat = previous_lat + previous_lat_offset
                                 + microDegreesToDegrees(encoded_lat)
@@ -497,7 +507,7 @@ class MapsforgeParser {
 
                             if (count > 0) {
                                 previous_lat_offset = lat - previous_lat
-                                previous_lon_offset = lon - previous_lat
+                                previous_lon_offset = lon - previous_lon
                             }
 
                             path.push({
@@ -513,18 +523,22 @@ class MapsforgeParser {
                     }
                 }
             }
+            const way = new Way(
+                osm_id,
+                path,
+                label_position,
+                layer,
+                name,
+                house_number,
+                ref,
+                tags,
+                coordinate_block_encoding
+            )
+
+            // console.log(way)
 
             ways.push(
-                new Way(
-                    osm_id,
-                    path,
-                    label_position,
-                    layer,
-                    name,
-                    house_number,
-                    ref,
-                    tags
-                )
+                way
             )
         }
         return ways
