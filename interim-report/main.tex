@@ -1,7 +1,15 @@
 \documentclass[]{final_report}
+\usepackage[backend=biber,
+            sorting=none]{biblatex} %create bibliography
 \usepackage{graphicx}
 \usepackage{hyperref}
 
+% prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+
+\addbibresource{sources.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Input project details
@@ -51,34 +59,45 @@
 
 \begin{abstract}
 
-Although web maps are commonplace, offline HTML maps are a niche that could be useful in certain situations, such as in countries internet is unreliable/unavailable, or during space exploration.
-
+    Although web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad.
+    
+    In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how map data is projected into a rendered map. It will also teach me how to successfully develop a medium-sized application.
+    
 \end{abstract}
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project Spec
 
-\chapter*{Project Specification}
-\addcontentsline{toc}{chapter}{Project Specification}
+\chapter*{Project specification}
+\addcontentsline{toc}{chapter}{Project specification}
 Your project specification goes here.
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Introduction
 \chapter{Introduction}
 
+\section{Issues}
 
-% how to cite:: ~\cite{COHEN:2013}.
+\section{Aims and goals}
 
-%%%% ADD YOUR BIBLIOGRAPHY HERE
-\newpage
-\begin{thebibliography}{99}
-\addcontentsline{toc}{chapter}{Bibliography}
-\bibitem{COHEN:2013} Dave Cohen and Carlos Matos. \emph{Third Year Projects -- Rules and Guidelines}. Royal Holloway, University of London, 2013.
-\end{thebibliography}
+\section{Motivation}
+
+\section{Related literature}
+
+\section{Milestone summary}
+
+\chapter{Offline HTML5 applications}
+
+\chapter{OpenStreetMap data sources}
+
+\chapter{Projecting map data}
+
+\chapter{Using the HTML5 canvas}
+
 \label{endpage}
 
-
+\printbibliography{}
 
 \end{document}
 

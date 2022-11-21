@@ -1,5 +1,5 @@
 \ProvidesClass{final_report}
-\LoadClass[11pt, titlepage]{report}
+\LoadClass[12pt, titlepage]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -12,13 +12,13 @@
 
 \renewcommand{\contentsname}{Table of Contents}
 
-%\usepackage{fancyhdr}
-%\pagestyle{fancy}
-%\fancyhf{}
-%\fancyhead[LO]{\small\textsf{\projecttitle}}
-%\fancyhead[RO]{\small\textsf{\studentname}}
-%\renewcommand{\headrulewidth}{0.1pt}
-%\fancyfoot[CO]{\small\textsf{Page \thepage~of~\pageref{endpage}}}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LO]{\small\textsf{\projecttitle}}
+\fancyhead[RO]{\small\textsf{\studentname}}
+\renewcommand{\headrulewidth}{0.1pt}
+\fancyfoot[CO]{\small\textsf{Page \thepage~of~\pageref*{endpage}}}
 
 
 
@@ -28,7 +28,7 @@
       \def\@evenfoot{\normalfont\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}}
 
 
-\renewcommand{\normalsize}{\fontsize{11pt}{11pt}\selectfont}
+% \renewcommand{\normalsize}{\fontsize{11pt}{11pt}\selectfont}
 \renewcommand{\title}[1]{\huge{#1}}
 \renewcommand{\author}[1]{\huge{#1}}
 \newcommand{\subtitle}[1]{\textbf{\large{#1}}}
@@ -126,12 +126,12 @@
 \begin{center}
 \title{Final Year Project Report}\\[0.25cm]
 \Large \textbf{\fullOrHalfUnit~-~\finalOrInterim}\\[0.5cm]\rule{4cm}{1pt}\\[0.7cm]
-\title{\textbf{\projecttitle}}\\[1cm]
+\title{\textbf{\projecttitle}}\\[0.5cm]
 \author{\LARGE \studentname}\\[0.5cm]\rule{4cm}{1pt}\\[0.5cm]
 {\Large  A report submitted in part fulfilment of the degree of\\[0.5cm]
 \textbf{\degree}}\\[0.5cm]
-{\Large  \textbf{Supervisor:}  \supervisorname}\\[2cm]
-\includegraphics[height=5cm]{logo}\\[2cm]
+{\Large  \textbf{Supervisor:}  \supervisorname}\\[1cm]
+\includegraphics[height=4cm]{logo}\\[1cm]
 {\Large Department of Computer Science\\
 Royal Holloway, University of London\\\vfill
 \normalsize \today}
