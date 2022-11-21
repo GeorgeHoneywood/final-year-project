@@ -1,5 +1,5 @@
 \ProvidesClass{final_report}
-\LoadClass[12pt, titlepage]{report}
+\LoadClass[11pt, titlepage]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -15,17 +15,17 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LO]{\small\textsf{\projecttitle}}
-\fancyhead[RO]{\small\textsf{\studentname}}
+\fancyhead[LO]{\small{\projecttitle}}
+\fancyhead[RO]{\small{\studentname}}
 \renewcommand{\headrulewidth}{0.1pt}
-\fancyfoot[CO]{\small\textsf{Page \thepage~of~\pageref*{endpage}}}
+\fancyfoot[CO]{\small{Page \thepage~of~\pageref*{endpage}}}
 
 
 
-\def\ps@plain{%
-      \let\@oddhead\@empty
-      \def\@oddfoot{\normalfont\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}%
-      \def\@evenfoot{\normalfont\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}}
+% \def\ps@plain{%
+%       \let\@oddhead\@empty
+%       \def\@oddfoot{\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}%
+%       \def\@evenfoot{\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}}
 
 
 % \renewcommand{\normalsize}{\fontsize{11pt}{11pt}\selectfont}
