@@ -18,7 +18,7 @@
 \fancyhead[LO]{\small{\projecttitle}}
 \fancyhead[RO]{\small{\studentname}}
 \renewcommand{\headrulewidth}{0.1pt}
-\fancyfoot[CO]{\small{Page \thepage~of~\pageref*{endpage}}}
+\fancyfoot[CO]{\small{Page \thepage~of~\pageref*{LastPage}}}
 
 
 
