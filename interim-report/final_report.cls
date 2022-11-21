@@ -1,12 +1,14 @@
 \ProvidesClass{final_report}
 \LoadClass[11pt, titlepage]{report}
-\usepackage[paperwidth=21cm,paperheight=29.7cm,includehead,headheight=1.5cm,pdftex,hmargin={3cm,2.5cm},vmargin={0cm,2cm},]{geometry} 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[paperwidth=21cm,paperheight=29.7cm,includehead,headheight=2cm,pdftex,hmargin={3cm,3cm},vmargin={1cm,2.5cm},]{geometry} 
 \usepackage{fancyhdr}
 \setlength{\headheight}{1.5cm}
 \setlength{\parindent}{0cm} 
 \renewcommand{\baselinestretch}{1.2}
 \parskip=1em
-
 
 \renewcommand{\contentsname}{Table of Contents}
 
@@ -22,15 +24,15 @@
 
 \def\ps@plain{%
       \let\@oddhead\@empty
-      \def\@oddfoot{\normalfont\hfil\small\textsf{Page \thepage~of~\pageref{endpage}}\hfil}%
-      \def\@evenfoot{\normalfont\hfil\small\textsf{Page \thepage~of~\pageref{endpage}}\hfil}}
+      \def\@oddfoot{\normalfont\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}%
+      \def\@evenfoot{\normalfont\hfil\small{Page \thepage~of~\pageref{endpage}}\hfil}}
 
 
 \renewcommand{\normalsize}{\fontsize{11pt}{11pt}\selectfont}
-\renewcommand{\title}[1]{\textsf{\Huge{#1}}}
-\renewcommand{\author}[1]{\textsf{\Huge{#1}}}
-\newcommand{\subtitle}[1]{\textsf{\textbf{\Large{#1}}}}
-\newcommand{\abstractheading}[1]{\textsf{\textbf{\LARGE{#1}}}}
+\renewcommand{\title}[1]{\huge{#1}}
+\renewcommand{\author}[1]{\huge{#1}}
+\newcommand{\subtitle}[1]{\textbf{\large{#1}}}
+\newcommand{\abstractheading}[1]{\textbf{\Large{#1}}}
 \newcommand{\code}[1]{\texttt{\footnotesize{#1}}}
 
 \renewcommand{\section}{\@startsection
@@ -39,7 +41,7 @@
 {0mm}%                        % the indent
 {6mm}%             % the beforeskip
 {4.2mm}%           % the afterskip
-{\LARGE\bfseries\sffamily}}  % the style
+{\LARGE\bfseries}}  % the style
 
 \renewcommand{\subsection}{\@startsection
 {subsection}%                    % the name
@@ -47,7 +49,7 @@
 {0mm}%                        % the indent
 {4mm}%             % the beforeskip
 {1.1mm}%           % the afterskip
-{\Large\bfseries\sffamily}}  % the style
+{\Large\bfseries}}  % the style
 
 \renewcommand{\subsubsection}{\@startsection
 {subsubsection}%                    % the name
@@ -55,7 +57,7 @@
 {0mm}%                        % the indent
 {4.2mm}%             % the beforeskip
 {1.1mm}%           % the afterskip
-{\normalsize\bfseries\sffamily}}  % the style
+{\normalsize\bfseries}}  % the style
 
 %\renewcommand\chapter{
 %  %\thispagestyle{empty}
@@ -78,12 +80,12 @@
   { \parindent \z@ \raggedright \normalfont
     %\centering
     \ifnum \c@secnumdepth >\m@ne
-        \huge\textsf{\@chapapp\space \thechapter:}
+        \huge{\@chapapp\space \thechapter:}
         % \par\nobreak
         %\vskip 20\p@
     \fi
     \interlinepenalty\@M
-    \huge \bfseries \textsf{#1}\par\nobreak
+    \huge \bfseries {#1}\par\nobreak
 %    \rule{5cm}{0.5pt}
     \vskip 20\p@
   } }
@@ -94,7 +96,7 @@
     %\centering
     \normalfont
     \interlinepenalty\@M
-    \huge \bfseries  \textsf{#1}\par\nobreak
+    \huge \bfseries  {#1}\par\nobreak
 %    \rule{5cm}{0.5pt}
     \vskip 20\p@
 
@@ -114,28 +116,28 @@
 \makeatother
 
 \def\maketitle{\begin{titlepage}
-%\thispagestyle{empty}
+\thispagestyle{empty}
 \pagenumbering{gobble}
-\thispagestyle{myheadings}
+% \thispagestyle{myheadings}
 \markright{ \hfill \textnormal{\footnotesize{\studentname, \reportyear}} \hfill }
 \let\footnotesize\small \let\footnoterule\relax \setcounter{page}{0}
-\null
-\vfil
+% \null
+% \vfil
 \begin{center}
 \title{Final Year Project Report}\\[0.25cm]
 \Large \textbf{\fullOrHalfUnit~-~\finalOrInterim}\\[0.5cm]\rule{4cm}{1pt}\\[0.7cm]
 \title{\textbf{\projecttitle}}\\[1cm]
 \author{\LARGE \studentname}\\[0.5cm]\rule{4cm}{1pt}\\[0.5cm]
-\textsf{\Large  A report submitted in part fulfilment of the degree of\\[0.5cm]
+{\Large  A report submitted in part fulfilment of the degree of\\[0.5cm]
 \textbf{\degree}}\\[0.5cm]
-\textsf{\Large  \textbf{Supervisor:}  \supervisorname}\\[2cm]
+{\Large  \textbf{Supervisor:}  \supervisorname}\\[2cm]
 \includegraphics[height=5cm]{logo}\\[2cm]
-\textsf{\Large Department of Computer Science\\
+{\Large Department of Computer Science\\
 Royal Holloway, University of London\\\vfill
 \normalsize \today}
 \end{center}
-\vfil
-\null
+% \vfil
+% \null
 \end{titlepage}
 \pagenumbering{arabic}
 }
@@ -146,10 +148,10 @@ Royal Holloway, University of London\\\vfill
 \renewcommand{\headrulewidth}{0pt}
 
 \usepackage{tocloft}
-\renewcommand{\cftchapfont}{\sffamily}
-\renewcommand{\cftsecfont}{\sffamily}
-\renewcommand{\cftchappagefont}{\sffamily}
-\renewcommand{\cftsecpagefont}{\sffamily}
-\renewcommand{\cftchapleader}{\sffamily\cftdotfill{\cftsecdotsep}}
+% \renewcommand{\cftchapfont}{\sffamily}
+% \renewcommand{\cftsecfont}{\sffamily}
+% \renewcommand{\cftchappagefont}{\sffamily}
+% \renewcommand{\cftsecpagefont}{\sffamily}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftsecdotsep}}
 \setlength{\cftbeforesecskip}{\cftbeforechapskip}
 \setcounter{tocdepth}{1}
