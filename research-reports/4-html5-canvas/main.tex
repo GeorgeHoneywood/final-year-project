@@ -31,6 +31,7 @@ The simplest operation I will need to use the canvas for is drawing the outlines
 
 Another operation I will need to perform to create a styled map is creating ``filled'' polygons. For example, on the \href{https://openstreetmap.org}{openstreetmap.org} map renders buildings with a brown infill and a darker outline. This is achieved on the canvas in a very similar way to the polygon outline, but instead of calling \texttt{ctx.stroke()} to render the path, you call \texttt{ctx.fill()}. To control the colour, you set \texttt{ctx.fillStyle} to some desired value.
 
+To render names of points of interest and ways to the map, I will need a method to write text to the canvas. This can be done using \texttt{ctx.fillText(`string', x, y);}~\cite{mdn-canvas-draw-text}. Unfortunately this does not make provisions for drawing text at an angle, which would be useful for drawing names of roads or boundaries, where the name follows the curve of the geometry. However, you can use the \texttt{ctx.measureText(`string')} method, which returns the pixel size that the text would be if drawn. This information can be used to prevent labels on the map overlapping.
 
 \printbibliography{}
 
