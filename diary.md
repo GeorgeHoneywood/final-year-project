@@ -36,7 +36,13 @@ Add esbuild (JavaScript bundler). This means I can write JavaScript in multiple 
 
 ### Week 8 (2022-11-07)
 
+Began work on the Mapsforge file parser. Added testing using Jest to help develop the Mapsforge parser. Finished decoding the file header, which contains metadata and other information needed to parse the rest of the file.
+
 ### Week 9 (2022-11-14)
+
+More Mapsforge parser work. Specifically decoding the tile data itself. First reading PoIs from the file, then Ways. Used the Mapsforge map file creator to generate map files with debug information, to make writing the parser easier. Created a `Reader` abstraction over the JavaScript `DataView` API, storing and updating the offset that the data is being read from, making the code much cleaner.
+
+Got a single tile of data to appear in the canvas map, but there is some issue with the transformation of the coordinate data.
 
 ### Week 10 (2022-11-21)
 
