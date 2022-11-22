@@ -41,7 +41,7 @@
 {0mm}%                        % the indent
 {6mm}%             % the beforeskip
 {4.2mm}%           % the afterskip
-{\LARGE\bfseries}}  % the style
+{\LARGE}}  % the style
 
 \renewcommand{\subsection}{\@startsection
 {subsection}%                    % the name
@@ -49,7 +49,7 @@
 {0mm}%                        % the indent
 {4mm}%             % the beforeskip
 {1.1mm}%           % the afterskip
-{\Large\bfseries}}  % the style
+{\Large}}  % the style
 
 \renewcommand{\subsubsection}{\@startsection
 {subsubsection}%                    % the name
@@ -57,7 +57,7 @@
 {0mm}%                        % the indent
 {4.2mm}%             % the beforeskip
 {1.1mm}%           % the afterskip
-{\normalsize\bfseries}}  % the style
+{\normalsize}}  % the style
 
 %\renewcommand\chapter{
 %  %\thispagestyle{empty}
@@ -80,12 +80,12 @@
   { \parindent \z@ \raggedright \normalfont
     %\centering
     \ifnum \c@secnumdepth >\m@ne
-        \huge{\@chapapp\space \thechapter:}
+        \huge{\thechapter:}
         % \par\nobreak
         %\vskip 20\p@
     \fi
     \interlinepenalty\@M
-    \huge \bfseries {#1}\par\nobreak
+    \huge  {#1}\par\nobreak
 %    \rule{5cm}{0.5pt}
     \vskip 20\p@
   } }
@@ -96,7 +96,7 @@
     %\centering
     \normalfont
     \interlinepenalty\@M
-    \huge \bfseries  {#1}\par\nobreak
+    \huge   {#1}\par\nobreak
 %    \rule{5cm}{0.5pt}
     \vskip 20\p@
 
@@ -106,7 +106,6 @@
       \chapter*{\abstractname}%
       \addcontentsline{toc}{chapter}{\abstractname}
  }
-     
      
 \makeatletter
 \renewcommand{\l@chapter}{\bfseries\@dottedtocline{1}{0em}{2.3em}}
@@ -152,6 +151,15 @@ Royal Holloway, University of London\\\vfill
 % \renewcommand{\cftsecfont}{\sffamily}
 % \renewcommand{\cftchappagefont}{\sffamily}
 % \renewcommand{\cftsecpagefont}{\sffamily}
-\renewcommand{\cftchapleader}{\cftdotfill{\cftsecdotsep}}
-\setlength{\cftbeforesecskip}{\cftbeforechapskip}
-\setcounter{tocdepth}{1}
+% \renewcommand{\cftchapleader}{\cftdotfill{\cftsecdotsep}}
+% \setlength{\cftbeforesecskip}{\cftbeforechapskip}
+% \setcounter{tocdepth}{1}
+
+\renewcommand{\cfttoctitlefont}{\huge}
+\setlength\cftparskip{0pt} %a load of guff to make toc more compact
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength\cftbeforechapskip{6pt}
+\setlength\cftbeforesecskip{4pt}
+\setlength\cftaftertoctitleskip{15pt}
+\setlength{\cftsubsubsecindent}{3.3cm} % {2.7cm}
+
