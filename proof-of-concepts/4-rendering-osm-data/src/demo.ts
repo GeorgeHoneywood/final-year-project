@@ -19,8 +19,8 @@ async function main() {
     // const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
     const tile = await parser.readTile(
         zoom_level.base_zoom_level,
-        8106,// 8105,
-        5505,//5499,
+        8105, // 8106
+        5499, // 5505
     )
     console.log(tile)
 

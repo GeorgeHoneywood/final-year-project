@@ -260,13 +260,13 @@ class MapsforgeParser {
         const tile_data = new Reader(
             await this.blob.slice(
                 Number(zoom_interval.sub_file_start_position + block_pointer),
-                Number(zoom_interval.sub_file_start_position + block_pointer + block_length + 1n),
+                Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
             ).arrayBuffer()
         )
 
         const tile_top_left_coord = zxyToMercatorCoord(zoom, x, y)
 
-        console.log({tile_top_left_coord})
+        console.log({ tile_top_left_coord })
 
         // coordinates in the tile are all against this offset
 
@@ -321,11 +321,11 @@ class MapsforgeParser {
                 osm_id = str.trim().replaceAll("***", "").replace("POIStart", "")
             }
 
-            const lat =tile_data.getVSint()
-                // + tile_top_left_coord.y
+            const lat = microDegreesToDegrees(tile_data.getVSint())
+                + tile_top_left_coord.y
 
-            const lon = tile_data.getVSint()
-                // + tile_top_left_coord.x
+            const lon = microDegreesToDegrees(tile_data.getVSint())
+                + tile_top_left_coord.x
 
             const special = tile_data.getUint8()
 
@@ -460,7 +460,7 @@ class MapsforgeParser {
                 // console.log({ number_of_coordinate_blocks })
                 for (let k = 0; k < number_of_coordinate_blocks; k++) {
                     const number_of_nodes = tile_data.getVUint()
-                
+
                     if (!coordinate_block_encoding) {
                         // single-delta encoding
                         let previous_lat = tile_top_left_coord.y + microDegreesToDegrees(tile_data.getVSint())

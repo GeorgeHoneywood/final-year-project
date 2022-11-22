@@ -169,11 +169,11 @@ class CanvasMap {
                 this.ctx.strokeStyle = "green"
             }
 
-            // this.ctx.fillText(
-            //     way.name ?? way.house_number ?? way.tags?.join(",") ?? "",
-            //     (way.path[0].x * scale) + this.x_offset,
-            //     this.canvas.height - ((way.path[0].y * scale) + this.y_offset) 
-            // );
+            this.ctx.fillText(
+                way.name ?? way.house_number ?? "", //?? way.tags?.join(",")  
+                (way.path[0].x * scale) + this.x_offset,
+                this.canvas.height - ((way.path[0].y * scale) + this.y_offset) 
+            );
 
 
             this.ctx.beginPath();
