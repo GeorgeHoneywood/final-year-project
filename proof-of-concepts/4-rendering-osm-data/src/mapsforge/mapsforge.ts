@@ -463,15 +463,10 @@ class MapsforgeParser {
 
                     if (!coordinate_block_encoding) {
                         // single-delta encoding
-                        let previous_lat = tile_top_left_coord.y + microDegreesToDegrees(tile_data.getVSint())
-                        let previous_lon = tile_top_left_coord.x + microDegreesToDegrees(tile_data.getVSint())
+                        let previous_lat = tile_top_left_coord.y
+                        let previous_lon = tile_top_left_coord.x
 
-                        path.push({
-                            y: previous_lat,
-                            x: previous_lon,
-                        })
-
-                        for (let l = 1; l < number_of_nodes; l++) {
+                        for (let l = 0; l < number_of_nodes; l++) {
                             const lat = microDegreesToDegrees(tile_data.getVSint())
                                 + previous_lat
                             const lon = microDegreesToDegrees(tile_data.getVSint())
