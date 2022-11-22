@@ -99,12 +99,13 @@ class Reader {
 
         // get the six data bits from the last byte
         value |= ((this.data.getUint8(this.offset) & 0b0011_1111) << shift)
-        this.offset++
 
         // if 2nd bit is set, it is negative, invert
         if ((this.data.getUint8(this.offset) & 0b0100_0000) != 0) {
             value = -value
         }
+
+        this.offset++
         return value
     }
 
