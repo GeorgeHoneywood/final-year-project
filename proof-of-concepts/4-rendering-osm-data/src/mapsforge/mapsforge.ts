@@ -190,8 +190,8 @@ class MapsforgeParser {
             zoom_level.sub_file_start_position = header.getBigUint64()
             zoom_level.sub_file_length = header.getBigUint64()
 
-            // calculate the number of tiles, so that we can load the correct
-            // amount of tile indexes
+            // calculate the number of tiles, so that we know how long the tile
+            // index section is
 
             const { x: left_x, y: bottom_y } = coordZToXYZ(
                 this.bbox.min_lat,
@@ -221,6 +221,8 @@ class MapsforgeParser {
     }
 
     public async readTile(zoom: number, x: number, y: number) {
+        // TODO: add validation:
+        // throw some error if the requested tile isn't held within the file
         console.log(`loading tile z${zoom}/${x}/${y}`)
 
         const zoom_interval = this.zoom_intervals[2]
@@ -264,11 +266,8 @@ class MapsforgeParser {
             ).arrayBuffer()
         )
 
-        const tile_top_left_coord = zxyToMercatorCoord(zoom, x, y)
-
-        console.log({ tile_top_left_coord })
-
         // coordinates in the tile are all against this offset
+        const tile_top_left_coord = zxyToMercatorCoord(zoom, x, y)
 
         if (this.flags.has_debug_info) {
             const str = tile_data.getFixedString(32)
@@ -362,7 +361,7 @@ class MapsforgeParser {
                 elevation = tile_data.getVSint()
             }
 
-            const poi = new PoI(
+            pois.push(new PoI(
                 osm_id,
                 { y: lat, x: lon },
                 layer,
@@ -370,8 +369,7 @@ class MapsforgeParser {
                 house_number,
                 elevation,
                 tags
-            )
-            pois.push(poi)
+            ))
         }
         return pois
     }
@@ -450,14 +448,12 @@ class MapsforgeParser {
             if (has_number_of_way_data_blocks) {
                 number_of_way_data_blocks = tile_data.getVUint()
             }
-            // console.log({ number_of_way_data_blocks })
 
             const path: Coord[] = []
             for (let j = 0; j < number_of_way_data_blocks; j++) {
                 // if number_of_coordinate_blocks is > 1, then the way is a multipolygon 
                 const number_of_coordinate_blocks = tile_data.getVUint()
 
-                // console.log({ number_of_coordinate_blocks })
                 for (let k = 0; k < number_of_coordinate_blocks; k++) {
                     const number_of_nodes = tile_data.getVUint()
 
@@ -488,19 +484,20 @@ class MapsforgeParser {
                         let previous_lat_offset = 0
                         let previous_lon_offset = 0
 
-                        let count = 0
+                        let first_iteration = true
 
                         for (let l = 0; l < number_of_nodes; l++) {
                             const encoded_lat = tile_data.getVSint()
                             const encoded_lon = tile_data.getVSint()
-                            // console.log({ encoded_lat, encoded_lon })
 
                             const lat = previous_lat + previous_lat_offset
                                 + microDegreesToDegrees(encoded_lat)
                             const lon = previous_lon + previous_lon_offset
                                 + microDegreesToDegrees(encoded_lon)
 
-                            if (count > 0) {
+                            if (first_iteration) {
+                                first_iteration = false
+
                                 previous_lat_offset = lat - previous_lat
                                 previous_lon_offset = lon - previous_lon
                             }
@@ -512,28 +509,23 @@ class MapsforgeParser {
 
                             previous_lat = lat
                             previous_lon = lon
-
-                            count++
                         }
                     }
                 }
             }
-            const way = new Way(
-                osm_id,
-                path,
-                label_position,
-                layer,
-                name,
-                house_number,
-                ref,
-                tags,
-                coordinate_block_encoding
-            )
-
-            // console.log(way)
 
             ways.push(
-                way
+                new Way(
+                    osm_id,
+                    path,
+                    label_position,
+                    layer,
+                    name,
+                    house_number,
+                    ref,
+                    tags,
+                    coordinate_block_encoding
+                )
             )
         }
         return ways
