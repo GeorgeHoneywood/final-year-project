@@ -497,7 +497,7 @@ class MapsforgeParser {
 
                             if (first_iteration) {
                                 first_iteration = false
-
+                            } else {
                                 previous_lat_offset = lat - previous_lat
                                 previous_lon_offset = lon - previous_lon
                             }
