@@ -169,19 +169,31 @@ class CanvasMap {
                 this.ctx.strokeStyle = "green"
             }
 
-            this.ctx.fillText(
-                way.name ?? way.house_number ?? "", //?? way.tags?.join(",")  
-                (way.path[0].x * scale) + this.x_offset,
-                this.canvas.height - ((way.path[0].y * scale) + this.y_offset) 
-            );
-
+            if (this.zoom_level > 17 && way.label_position) {
+                // draw the label centered on the geometry
+                // FIXME: this only makes sense for closed geometries -- i.e.
+                // not roads/paths
+                const size = this.ctx.measureText(way.name ?? way.house_number ?? "")
+                this.ctx.fillText(
+                    way.name ?? way.house_number ?? "",
+                    ((way.path[0].x + way.label_position.x)
+                        * scale)
+                    + this.x_offset
+                    - size.width / 2,
+                    this.canvas.height
+                    - (((way.path[0].y + way.label_position.y)
+                        * scale)
+                        + this.y_offset
+                    )
+                    + 15 / 2 // font height
+                )
+            }
 
             this.ctx.beginPath();
             for (const { x, y } of way.path) {
                 // TODO: possible optimisation: only draw lines that are
                 // actually on the canvas
 
-                // const proj = projectMercator({x,y})
                 this.ctx.lineTo(
                     (x * scale) + this.x_offset,
                     this.canvas.height - ((y * scale) + this.y_offset) // as we are drawing from 0,0 being the top left, we must flip the y-axis
