@@ -1,6 +1,7 @@
 \documentclass[]{final_report}
 \usepackage[backend=biber,
-            sorting=none]{biblatex} %create bibliography
+            sorting=none,
+            language=british]{biblatex} %create bibliography
 \usepackage{graphicx}
 \usepackage{lastpage}
 \usepackage{verbatim}
@@ -22,7 +23,7 @@
 
 \setlist[itemize]{noitemsep, nolistsep} %make lists take up less room
 
-\addbibresource{sources.bib}
+\addbibresource{../sources.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Input project details
@@ -71,11 +72,9 @@
 %%% Your Abstract here
 
 \begin{abstract}
-
     Although web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad.
     
     In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how map data is projected into a rendered map. It will also teach me how to successfully develop a medium-sized application.
-    
 \end{abstract}
 \newpage
 
@@ -90,19 +89,7 @@ Your project specification goes here.
 %%% Introduction
 \chapter{Introduction}
 
-The OpenStreetMap project began in 2004, with the aim of creating a free world map~\cite[1]{RAMM:2011}. Since then, it has met and surpassed its goals, becoming a mature, global dataset, edited by both volunteers, and corporations alike. As of late 2022, an average of 6,000 contributors edit the map daily, with more than 9 million registered in total~\cite{OSMStats}. In contrast to how cartography is traditionally carried out, OSM contributors tend to not use any specialized equipment, instead using tools like GPS and aerial imagery to create the map. The barrier of entry is low by design, making it easy for new mappers to get started. This sometimes results in inaccurate, or even vandalistic edits being made, but the community usually spots and reverts bad edits quickly.
-
-I have personally been involved in the OpenStreetMap project since creating an account on the 25th of May 2019. This was initially as I was using an OSM based map, and noticed that a new-build estate near my house was missing. Hence, \href{https://www.openstreetmap.org/changeset/70609319}{I added it}, and this led me down the rabbit hole of wanting to add all the missing features around me. Since then, I have been a regular contributor, with currently almost \href{https://www.openstreetmap.org/user/GeorgeHoneywood}{2,000 changesets} made over 341 separate days. I have also made some code contributions to the Every Door mobile editor, specifically adding support for viewing an element's history~\cite{every-door}. 
-
-Although online OpenStreetMap-based web maps are very popular, offline maps are much less of an explored field. On the Android platform, you have a few options for offline maps, such as the venerable OsmAnd~\cite{osmand}, Organic Maps (FOSS fork of Maps.me~\cite{maps.me}), and the proprietary Magic Earth~\cite{magic-earth}. On desktop, the available options are more sparse. KDE Marble is one option~\cite{kde-marble}, but it seems like the offline experience is an afterthought. It allows you to download pre-rendered Mapnik Carto style tiles, and this is limited to above zoom level 16, so fine details are not visible (\href{https://openstreetmap.org}{openstreetmap.org} renders tiles down to zoom level 19). This approach of downloading rendered raster tiles is also not very scalable, as there quickly becomes a huge number of images that need to be downloaded, and these images take up significant storage space. For example, I attempted to download the tiles for Cornwall, UK, in KDE Marble, and it would have had to fetch 58,928 tiles just for between zoom levels 11 and 16, equating to an estimated download size of 749 MB\@. This method is also explicitly prohibited by the OpenStreetMap Foundation's Tile Usage Policy, which states that ``In particular, downloading an area of over 250 tiles at zoom level 13 or higher for offline or later usage is forbidden.''~\cite{OSMF-tile-usage-policy}. This is because rendering map tiles is computationally expensive, and the OSMF is run with a limited budget.
-
-Another option is the OpenStreetMap API itself~\cite{osm-api-wiki}. This is more promising for offline usage, as it allows you to download vector data that can be stored more efficiently than raster images. However, the API is not designed for this use case --- it is an interface specifically for map editor programs to use. As such, you can only download small geographical areas at a time, and the data is not stored in an optimal format for rendering. For example, complex structures, such as buildings with internal courtyards, are represented in OSM with multi-polygon relations, which are difficult to parse and render correctly when using raw OSM data. An additional barrier to using the editing API is that its Terms of Use explicitly prohibit read only applications~\cite{OSM-editing-API-usage-policy}.
-
-Cruiser follows a more promising approach~\cite{cruiser}. Instead of downloading rendered image tiles, it uses prebuilt vector map files, in the Mapsforge binary format~\cite{mapsforge-format}. This is much more space efficient --- the whole of England is an 805 MB download. It is also much less difficult to host, as you don't need a powerful server to render the raster map tiles on the fly. One possible issue with this approach is that this may be too much data to store in a HTML5 web application, and this is something I will have to explore further.
-
-Offline maps are a niche market, as desktop computers tend to always have an internet connection, and on mobile devices data is cheap enough to allow downloading some small vector or raster map tiles. Hence, the main use-case for an offline HTML5 map would be for when an internet connection is either prohibitively expensive or not available at all. This could be when roaming abroad, or when in an area without LTE coverage. As such, it makes sense to make support for mobile devices a priority, as they are the most likely to be in these situations.
-
-From this project I hope to learn how map data actually becomes a rendered map, as currently my understanding of this process is limited. I also hope to learn more about offline HTML applications, as I think that this type of web app has lots of room to become popular in the coming years. There are lots of apps on my phone that I think could be replaced by a PWA (progressive web app).
+\input{../plan/introduction.tex}
 
 \section{Issues}
 
@@ -118,119 +105,19 @@ From this project I hope to learn how map data actually becomes a rendered map, 
 
 \section{Offline HTML5 applications}
 
-There are various different APIs that one can use to store data in an offline HTML5 application, such as IndexedDB, the File and Directory Entries API~\cite{w3c-file-directories-api}~\cite{mdn-file-directories-api} and localStorage. localStorage will likely not be appropriate for my use case, as it is designed for only small amounts of data. There is also the Application Cache, but this has been deprecated, and support has been removed from all major browsers~\cite{whatwg-application-cache}~\cite{mdn-application-cache}. Therefore, the Application Cache will not be suitable for a new application.
-
-If I am to process and use a large precompiled map data format, like mbtiles~\cite{mbtiles-spec} or Mapsforge~\cite{mapsforge-format}, using the File and Directory Entries API will likely be more appropriate. For optimal performance, it may be necessary to have a loading step, I transform from one of these formats into the IndexedDB, for usage by the app. Hopefully this step can be avoided, as it would not be ideal to have multiple copies of the data, particularly on space constrained devices.
-
-\begin{quote}
-    ``The File and Directory Entries API simulates a local file system that web apps can navigate around. You can develop apps that can read, write, and create files and directories in a sandboxed, virtual file system.''
-    
-    \footnotesize{--- \fullcite{mdn-file-directories-api}}
-\end{quote}
-
-Another benefit of the File and Directory Entries API~\cite{w3c-file-directories-api}, is that it has the ability to act like a local file system. This would allow my app to have a flow like:
-
-\begin{itemize}
-    \item User opens the webapp
-    \item Selects map to download from list (or as an enhancement by zooming in on desired region on a low detail world map)
-    \item App downloads the map file to sandboxed filesystem
-    \item User goes offline
-    \item Map rendered from this internally stored file
-\end{itemize}
-
-A flow like this makes sense from a user's perspective, as it follows a similar paradigm to other offline map viewers, like Organic Maps or OsmAnd (as discussed in the initial plan).
-
-If there are issues with using the File and Directory Entries API, for example file size limits in certain browsers, it should be possible to use the plain File API instead~\cite{w3c-file-api}. The File API allows access to read single files from a user's local filesystem. Importantly for my use case of loading a large map file from a user's disk, we cannot store the entire file in RAM at once. Usefully the File API provides a \texttt{.slice()} method, which allows you to work with a smaller subsection of the file. This will likely be important to avoid out-of-memory (OOM) errors.
-
-Using the plain file API will however come at a detriment to the user flow. Instead of being able to select and download a map within the app, the user will have to download the map file themselves, then point the app to the map file they have downloaded. This is not a major issue, but it would be preferable to have this process handled without user interaction.
-
-Unfortunately the Files and Directory Entries API has limited support in Firefox~\cite{mdn-file-directories-api-limitations}. Critically \texttt{window.requestFileSystem()} is not supported, and this is the function that you call to gain access to a virtual filesystem. In Firefox this API can only be used through an \texttt{<input>} element, or drag and drop. This is an issue as for my application, the app would need to be able to create the virtual filesystem programmatically.
-
-\begin{quote}
-    ``Content scripts can't create file systems or initiate access to a file system.''
-
-    \footnotesize{--- \fullcite{mdn-file-directories-api-limitations}}
-\end{quote}
-
-Hence, if I wish to use the File and Directory Entries API, which would provide a smoother user journey, I would not be able to support Firefox. For my application I think it is more important to support Firefox than have perfect UX --- so I will settle on the compromise of the user having to select the desired map file on each start, via the file picker. This will be an irritation, but unfortunately there is no widely compatible way to use a sandboxed/virtual filesystem in the browser.
-
-One benefit of storing the map file outside the browser is that my application will not have to deal with the browser not allocating it enough storage quota for the file. For example in Chrome, you must use the Quota Management API to request persistent storage space to use~\cite{gd-offline-html5-storage}, which will prompt the user to accept the request.
-
-Another option is to use the Cache API, which is part of Service Worker specification~\cite{w3c-service-workers-caches}, and has good cross-browser support. It has a simpler interface that should work for the application --- a pair of a request and a response object are stored, and you get a cached version of the response by providing a similar request. 
-
-To determine which will be the best choice for the application, I will produce proof of concepts that employ the File API and the Cache API\@.
+\input{../research-reports/1-offline-html5/content.tex}
 
 \section{OpenStreetMap data sources}
 
-In order to produce a map using OpenStreetMap data, you first need to decide which source/format of data to use. Traditionally, for this project, students use the OpenStreetMap editing API\@. This however, has a number of limitations, some of which I have already discussed in the project plan.
-
-\begin{itemize}
-    \item It is designed for map editing applications, and the terms of service explicitly prohibit read-only uses~\cite{OSMF-tile-usage-policy}.
-    \item You can only download a relatively limited geographical area, usually only around 2 km\(^2\). This has the effect that you will not be able to zoom out to see a large area, such an entire country~\cite{osm-wiki-limited-area}.
-    \item Complex structures (like buildings with internal courtyards) represented in OpenStreetMap as multipolyons require extensive parsing and validation to correctly display.
-\end{itemize}
-
-For online maps, it is common to use either raster or vector ``map tiles''. Raster map tiles are usually 256\(\times{}\)256 \texttt{.png} files, rendered by a Mapnik server. These tiles are named according to their zoom level, and an \(x\) and \(y\) value, where \(x\) and \(y\) are offsets from the top left most tile~\cite{osm-wiki-tile-names}. Raster tiles, however, are not particularly appropriate for offline usage, as you have to request an extremely large amount of tiles, especially when you approach high zoom levels. For example if you downloaded 4 tiles at zoom 10, you would need to download 16 at zoom 11, 64 at zoom 12, and 262144 at zoom 18. This behaviour is unacceptable as rendering tiles is computationally expensive for the OpenStreetMap Foundation, and the size of these tiles adds up.
-
-Vector tiles use a similar scheme, with tiles also being served at Z/X/Y addresses. The key differentiator is that instead of rendered images, vector data is served to clients, and it is up to the clients to render this data into a map. This gives the clients flexibility in how they can choose to display the data, such as the colours, labels, and line thicknesses. This is usually done through stylesheets. As vector data does not pixelate like raster images, you can ``overzoom'' on vector tiles, meaning you do not have to serve tiles to such high zoom levels. One of the most popular formats for vector map tiles are Mapbox Vector tiles. These use the Google Protobuf format to store the vector data.
-
-Vector tiles make a more appropriate offline format than raster tiles, due to their ability to ``overzoom'', and that vector data can be stored more efficiently. Unfortunately it is still not particularly suited to offline usage, as with raster tiles, you need to download many tiles to cover a large region.
-
-Therefore, it makes sense to use a dedicated storage format, that is designed to provide map data for offline applications. The OpenStreetMap Wiki provides a number of possible options for this purpose~\cite{osm-wiki-offline}. The most popular choices are mapsforge~\cite{mapsforge}, which is used by many applications~\cite{apps-using-mapsforge}, and MBTiles (by Mapbox)~\cite{mapbox-mbtiles}. Unfortunately, as the MBTiles format is based on an SQLite database, it can't easily be used in a HTML5 app.
-
-Mapsforge, on the other hand, uses a custom binary data format~\cite{mapsforge-format}. Mapsforge only provide libraries for the Java language and the Android platform. There is partial implementation available of a parser written in JavaScript, which only supports decoding the headers and other metadata. Hence, to use this format for my project, I would need to implement my own parser, which would add substantial complexity. I may also need to tackle issues with memory usage, as parsing and rendering the file will likely require random access within it --- meaning loading the whole file into an \texttt{ArrayBuffer} or some similar structure. Using the \texttt{Blob.slice()} method in JavaScript may allow me to work around this issue.
-
-If parsing the Mapsforge binary files is too complex, I can scale back the project to using the OSM Editing API\@. This will require less parsing work, but will still have plenty of issues to overcome in terms of rendering.
+\input{../research-reports/2-osm-data-sources/content.tex}
 
 \section{Projecting map data}
 
-The core of this project is being able to render a map. This in its most basic form means being able to take coordinates, which represent a position on the sphere-like body that is the earth, and placing these on a two-dimensional plane. This process is known as map projection~\cite[5]{canters2002small}.
-
-OpenStreetMap uses the WGS84 coordinate reference system (EPSG:4326) to represent the positions of the nodes that make up its data~\cite{osm-wiki-wgs84}. GPS uses this CRS, and it is a popular standard~\cite{epsg.io-epsg:4326}.
-
-If you were to naively place coordinates from the WGS84 system on to a graph, you would get a ``plate carrée'' projected map. This projection is a form of the equirectangular projection, where the standard parallel \(\phi_1 = 0\). In plate carrée, lines of longitude are straight, vertical and equidistant, and lines of latitude are similar, albeit horizontal. Although all map projections are compromises between conformality (preservation of angle) and preservation of area, plate carré does not preserve either, meaning it is not particularly well-used.
-
-Hence, OpenSteetMap uses the ``Web Mercator'' projection (also known as Spherical Mercator, WGS 84/Pseudo-Mercator, Google Web Mercator, EPSG:3857). This projection is almost conformal, meaning that (local) angles on the map are the same as angles on the ground, even if lengths are not preserved~\cite{carto-implications-of-webmercator,}. It deviates from normal Mercator in that its calculations are based on the earth being a true sphere, rather than ellipsoidal. The benefit of this is that the calculations for converting between WGS84 latitude/longitude coordinates, and Web Mercator are simpler than normal Mercator~\cite{ugrc-earth-not-round}.
-
-So, to convert from latitude/longitude coordinates to Web Mercator, we can use equations 7--1a \& 7--2a from \textcite[41]{snyder1987map}, where \(\lambda{}\) is longitude and \(\phi{}\) is latitude, both in degrees:
-
-\[x = \frac{\pi R(\lambda^\circ - \lambda^\circ_0)}{180^\circ} \]
-
-\[y = R \ln \tan \left( 45^\circ + \frac{\phi^\circ}{2} \right) \]
+\input{../research-reports/3-map-projections/content.tex}
 
 \section{Using the HTML5 canvas}
 
-The HTML5 Canvas provides another dimension to web applications, where bitmap animations or other data can be displayed interactively.
-
-\begin{quote}
-    ``HTML5 Canvas is an immediate mode bitmapped area of the screen that can be manipulated with JavaScript. Immediate mode refers to the way the canvas renders pixels on the screen. HTML5 Canvas completely redraws the bitmapped screen on every frame by using Canvas API calls from JavaScript.''
-
-    \footnotesize{--- \fullcite{fulton2013html5}}
-\end{quote}
-
-So, in my application, the canvas is what the map will be ``drawn'' to. The canvas API provides different interfaces that you can use, known as rendering contexts~\cite{mdn-canvas-api}. For simple 2D drawing, there is the \texttt{CanvasRenderingContext2D} interface. For more intensive 2D and 3D workloads, there is the GPU accelerated \texttt{WebGLRenderingContext}, which uses an OpenGL-like system of vertex and fragment shaders~\cite{mdn-web-gl}. This is what some existing vector web map libraries use, like Mapbox's GL JS~\cite{mapbox-gl-js}.
-
-In the long run, the \texttt{WebGLRenderingContext} would be the best choice in terms of efficiency and performance, as it is hardware accelerated. However, the \texttt{Canvas\-Rendering\-Context2D} has a far simpler API, so it makes sense to use it here.
-
-The simplest operation I will need to use the canvas for is drawing the outlines of polygonal shapes. Note that on the canvas, \texttt{(0, 0)} is at the top left. To being drawing, you first need to get an instance of \texttt{Canvas\-Rendering\-Context2D}, which is done by calling \texttt{const ctx = canvas.getContext("2d")} on some canvas element in the DOM\@. To start on the polygon, call \texttt{ctx.beginPath()} to create a new path, that you then add data to using the \texttt{ctx.lineTo(x, y)} method. If required, you can also call \texttt{ctx.moveTo(x, y)} to have the line jump from one spot to the next. Once you have made your \texttt{.moveTo()} and \texttt{.lineTo()} calls, you then execute \texttt{ctx.stroke()} to render the line out.
-
-Another operation I will need to perform to create a styled map is creating ``filled'' polygons. For example, \href{https://openstreetmap.org}{openstreetmap.org} renders buildings with a brown infill and a darker outline. This is achieved on the canvas in a very similar way to the polygon outline, but instead of calling \texttt{ctx.stroke()} to render the path, you call \texttt{ctx.fill()}. To control the colour, you set \texttt{ctx.fillStyle} to some desired value.
-
-To render names of points of interest and ways to the map, I will need a method to write text to the canvas. This can be done using \texttt{ctx.fillText(`string', x, y)}~\cite{mdn-canvas-draw-text}. Unfortunately this does not make provisions for drawing text at an angle, which would be useful for drawing names of roads or boundaries, where the name follows the curve of the geometry. However, you can use the \texttt{ctx.rotate(angle)} to achieve a similar result, albeit with some more complexity~\cite{mdn-canvas-rotating}.
-
-Another useful method for drawing a map will be the \texttt{ctx.measureText(`string')} method, which returns the pixel size that the text will be drawn at. This information can be used to prevent labels on the map overlapping, by storing each of the previously drawn labels' boundary boxes, and preventing new labels from being drawn if they are colliding.
-
-Finally, the \texttt{Path2D} interface may be useful for my application~\cite{mdn-canvas-path-2d}. It allows you to save a path, meaning you can stroke and fill some geometry, without having to draw the path twice. Hence, it should give an efficiency boost. You use it like so:
-
-\begin{Verbatim}
-const ctx = canvas.getContext(`2d');
-
-let path = new Path2D();
-path.rect(5, 5, 20, 20);
-
-ctx.stroke(path);
-ctx.fill(path);
-\end{Verbatim}
+\input{../research-reports/4-html5-canvas/content.tex}
 
 \chapter{Software engineering}
 
