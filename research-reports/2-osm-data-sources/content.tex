@@ -1,7 +1,7 @@
 In order to produce a map using OpenStreetMap data, you first need to decide which source/format of data to use. Traditionally, for this project, students use the OpenStreetMap editing API\@. This however, has a number of limitations, some of which I have already discussed in the project plan.
 
 \begin{itemize}
-    \item It is designed for map editing applications, and the terms of service explicitly prohibit read-only uses~\cite{osm-owg-tile-usage-policy}.
+    \item It is designed for map editing applications, and the terms of service explicitly prohibit read-only uses~\cite{OSMF-tile-usage-policy}.
     \item You can only download a relatively limited geographical area, usually only around 2 km\(^2\). This has the effect that you will not be able to zoom out to see a large area, such an entire country~\cite{osm-wiki-limited-area}.
     \item Complex structures (like buildings with internal courtyards) represented in OpenStreetMap as multipolyons require extensive parsing and validation to correctly display.
 \end{itemize}
@@ -14,6 +14,6 @@ Vector tiles make a more appropriate offline format than raster tiles, due to th
 
 Therefore, it makes sense to use a dedicated storage format, that is designed to provide map data for offline applications. The OpenStreetMap Wiki provides a number of possible options for this purpose~\cite{osm-wiki-offline}. The most popular choices are mapsforge~\cite{mapsforge}, which is used by many applications~\cite{apps-using-mapsforge}, and MBTiles (by Mapbox)~\cite{mapbox-mbtiles}. Unfortunately, as the MBTiles format is based on an SQLite database, it can't easily be used in a HTML5 app.
 
-Mapsforge, on the other hand, uses a custom binary data format~\cite{mapsforge-binary-format}. Mapsforge only provide libraries for the Java language and the Android platform. There is partial implementation available of a parser written in JavaScript, which only supports decoding the headers and other metadata. Hence, to use this format for my project, I would need to implement my own parser, which would add substantial complexity. I may also need to tackle issues with memory usage, as parsing and rendering the file will likely require random access within it --- meaning loading the whole file into an \texttt{ArrayBuffer} or some similar structure. Using the \texttt{Blob.slice()} method in JavaScript may allow me to work around this issue.
+Mapsforge, on the other hand, uses a custom binary data format~\cite{mapsforge-format}. Mapsforge only provide libraries for the Java language and the Android platform. There is partial implementation available of a parser written in JavaScript, which only supports decoding the headers and other metadata. Hence, to use this format for my project, I would need to implement my own parser, which would add substantial complexity. I may also need to tackle issues with memory usage, as parsing and rendering the file will likely require random access within it --- meaning loading the whole file into an \texttt{ArrayBuffer} or some similar structure. Using the \texttt{Blob.slice()} method in JavaScript may allow me to work around this issue.
 
 If parsing the Mapsforge binary files is too complex, I can scale back the project to using the OSM Editing API\@. This will require less parsing work, but will still have plenty of issues to overcome in terms of rendering.
