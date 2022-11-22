@@ -114,7 +114,9 @@ From this project I hope to learn how map data actually becomes a rendered map, 
 
 \section{Milestone summary}
 
-\chapter{Offline HTML5 applications}
+\chapter{Research}
+
+\section{Offline HTML5 applications}
 
 There are various different APIs that one can use to store data in an offline HTML5 application, such as IndexedDB, the File and Directory Entries API~\cite{w3c-file-directories-api}~\cite{mdn-file-directories-api} and localStorage. localStorage will likely not be appropriate for my use case, as it is designed for only small amounts of data. There is also the Application Cache, but this has been deprecated, and support has been removed from all major browsers~\cite{whatwg-application-cache}~\cite{mdn-application-cache}. Therefore, the Application Cache will not be suitable for a new application.
 
@@ -158,7 +160,7 @@ Another option is to use the Cache API, which is part of Service Worker specific
 
 To determine which will be the best choice for the application, I will produce proof of concepts that employ the File API and the Cache API\@.
 
-\chapter{OpenStreetMap data sources}
+\section{OpenStreetMap data sources}
 
 In order to produce a map using OpenStreetMap data, you first need to decide which source/format of data to use. Traditionally, for this project, students use the OpenStreetMap editing API\@. This however, has a number of limitations, some of which I have already discussed in the project plan.
 
@@ -180,7 +182,7 @@ Mapsforge, on the other hand, uses a custom binary data format~\cite{mapsforge-f
 
 If parsing the Mapsforge binary files is too complex, I can scale back the project to using the OSM Editing API\@. This will require less parsing work, but will still have plenty of issues to overcome in terms of rendering.
 
-\chapter{Projecting map data}
+\section{Projecting map data}
 
 The core of this project is being able to render a map. This in its most basic form means being able to take coordinates, which represent a position on the sphere-like body that is the earth, and placing these on a two-dimensional plane. This process is known as map projection~\cite[5]{canters2002small}.
 
@@ -196,7 +198,7 @@ So, to convert from latitude/longitude coordinates to Web Mercator, we can use e
 
 \[y = R \ln \tan \left( 45^\circ + \frac{\phi^\circ}{2} \right) \]
 
-\chapter{Using the HTML5 canvas}
+\section{Using the HTML5 canvas}
 
 The HTML5 Canvas provides another dimension to web applications, where bitmap animations or other data can be displayed interactively.
 
@@ -230,6 +232,36 @@ ctx.stroke(path);
 ctx.fill(path);
 \end{Verbatim}
 
+\chapter{Software engineering}
+
+\section{Testing}
+
+\section{Version control}
+
+\section{Documentation}
+
+\chapter{Proof-of-concept development process}
+
+% talk about proof of concepts here!
+% little write up of how each works, and what it achieves
+
+\section{Simple offline HTML5 app}
+
+\section{Rendering geometry to a canvas}
+
+\section{Adding interactivity --- panning and zooming}
+
+\section{Rendering tiled data from a Mapsforge file}
+
+\chapter{Final application development process}
+
+\chapter{Conclusion}
+
+\section{Professional issues}
+
+% look on the BCS website for ideas
+
+\section{Evaluation}
 
 \addcontentsline{toc}{chapter}{Bibliography}
 \printbibliography{}
