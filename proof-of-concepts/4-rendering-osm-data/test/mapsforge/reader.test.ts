@@ -82,7 +82,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
         {
             name: "3 byte max",
             value: [0b1111_1111, 0b1111_1111, 0b0111_1111],
-            want: (2 ** (7 + 7 + 7)) - 1
+            want: -((2 ** (7 + 7 + 6)) - 1)
         },
         {
             name: "4 byte min",
@@ -90,7 +90,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
             want: (2 ** ((7 + 7 + 7 + 1) - 1))
         },
     ])("should be able to decode signed variable ints", ({ name, value, want }) => {
-        test(`${name}: [${value.map(n => n.toString(2).padStart(8, "0"))}].getVUint()} == ${want}`, () => {
+        test(`${name}: [${value.map(n => n.toString(2).padStart(8, "0"))}].getVSint()} == ${want}`, () => {
             let reader = new Reader(
                 new Uint8ClampedArray(
                     value
