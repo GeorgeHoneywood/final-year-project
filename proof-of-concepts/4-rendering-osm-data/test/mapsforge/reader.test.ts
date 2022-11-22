@@ -100,4 +100,27 @@ describe("Reader should be able decode values from the mapsforge file", () => {
             expect(reader.getVSint()).toBe(want)
         })
     })
-});
+
+    describe.each([
+        {
+            name: "short",
+            value: [0b0000_1000, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37],
+            want: "01234567"
+        },
+        {
+            name: "long",
+            value: [0b1000_0000, 0b0000_0001, ...Array.from({ length: 126 }, () => 0x61)],
+            want: Array.from({ length: 126 }, () => "a").join("")
+        },
+    ])("should be able to variable length strings", ({ name, value, want }) => {
+        test(`${name}: [${value}].getVString()} == ${want}`, () => {
+            let reader = new Reader(
+                new Uint8ClampedArray(
+                    value
+                ).buffer
+            )
+
+            expect(reader.getVString()).toBe(want)
+        })
+    })
+})
