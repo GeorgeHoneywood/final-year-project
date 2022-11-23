@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
+\usepackage[dvipsnames]{xcolor}
 \usepackage[paperwidth=21cm,paperheight=29.7cm,includehead,headheight=2cm,pdftex,hmargin={3cm,3cm},vmargin={1cm,2.5cm},]{geometry} 
 \usepackage{fancyhdr}
 \setlength{\headheight}{1.5cm}
@@ -163,3 +164,43 @@ Royal Holloway, University of London\\\vfill
 \setlength\cftaftertoctitleskip{15pt}
 \setlength{\cftsubsubsecindent}{3.3cm} % {2.7cm}
 
+\usepackage{listings} %syntax highlighting
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, false, finally, for, function, if, in, instanceof, new, null, return, switch, this, throw, true, try, typeof, var, void, while, with},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  sensitive=true
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0} %code listing formatting stuff
+
+\lstset{language=JavaScript,
+    breaklines=true, %basicstyle=\footnotesize,
+    numbers=left,
+    showspaces=false,
+    showstringspaces=false,
+    columns=fullflexible,
+    upquote=true,
+    %aboveskip=-14pt,
+    belowskip=-4pt,
+    aboveskip=14pt,
+    % frame=lines,
+    abovecaptionskip=-3pt,
+    belowcaptionskip=8pt,
+    framexleftmargin=0.5em,
+    framexrightmargin=0.5em,
+    %backgroundcolor=\color{LightCyan1},
+    basicstyle=\footnotesize\ttfamily\color{black},
+    keywordstyle=\bfseries\color{purple},
+    stringstyle=\color{orange},
+    % identifierstyle=\color{blue},
+    commentstyle=\itshape\color{mygreen},
+    numberstyle=\footnotesize\ttfamily}

@@ -7,7 +7,6 @@
 \usepackage{verbatim}
 \usepackage{fancyvrb}
 \usepackage[shortlabels]{enumitem} %change list formatting
-\usepackage[dvipsnames]{xcolor}
 \usepackage[pdftex,
             colorlinks,
             linkcolor={black},
@@ -160,7 +159,7 @@ Following a timeline should help my project to proceed without any major unexpec
 
 \chapter{Research}
 
-\section{Offline HTML5 applications}
+\section{Offline HTML5 applications}\label{sec:offline-html-applications}
 
 \input{../research-reports/1-offline-html5/content.tex}
 
@@ -189,9 +188,39 @@ Following a timeline should help my project to proceed without any major unexpec
 % talk about proof of concepts here!
 % little write up of how each works, and what it achieves
 
+As part of the development process, I have created a number of proof-of-concepts, that each build on each other. These have helped me to understand, test and evaluate various technologies that I could use to build the final application.
+
 \section{Simple offline HTML5 app}
 
+My first proof of concept was a basic offline HTML5 application, employing the techniques that I researched in Section~\ref{sec:offline-html-applications}. Since the \texttt{Application Cache} has been deprecated, the accepted way to create an offline HTML5 app is to use Service Workers~\cite{w3c-service-workers-caches}. The concept behind this is that the Service Worker intercepts all HTTP requests that are made on the website, and can then respond to this request with a result from a prepopulated cache.
 
+In addition to creating an offline HTML5 app, I also learned how to store a large binary blob. This will be necessary for my project, as this is how the map data will be stored. To this end I looked at using both the Service Worker cache, and the File API\@.
+
+The File API works like a traditional file picker --- allowing the user to choose some file from their local filesystem~\cite{w3c-file-api}. This is useful, but does not provide an excellent user experience. For example the user would have to download a map file to some location on their computer, then select it in the file picker every time they want to view a map. This violates Nielsen's ``Recognition, not recall'' heuristic~\cite{nielsen-heuristics}, as the application should work without the user having to remember where they saved the map file.
+
+Therefore, it is preferred to use the Service Worker cache method, where you store the file inside the web browser's cache. Storing binary blobs works like using the Service Worker cache for normal website resources:
+
+\begin{lstlisting}[caption=Using the Service Worker cache]
+self.addEventListener('install', (event) =>  event.waitUntil(
+        addResourcesToCache(['/index.html', '/blob.map']) // prepopulate cache
+));
+
+const cacheFirst = async ({ request }) => {
+    const responseFromCache = await caches.match(request);
+    if (responseFromCache) { // try to get the resource from the cache
+        return responseFromCache;
+    }
+
+    return new Response('could not retrieve from cache', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' },
+        });
+};
+
+self.addEventListener('fetch', (event) => event.respondWith(
+        cacheFirst({request: event.request})
+));
+\end{lstlisting}
 
 \section{Rendering geometry to a canvas}
 
