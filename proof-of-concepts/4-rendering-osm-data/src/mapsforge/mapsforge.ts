@@ -6,7 +6,7 @@ import {
 }
     from "../geom"
 import { Coord } from "../types"
-import { PoI, Way } from "./objects"
+import { PoI, Tile, Way } from "./objects"
 import {
     Reader
 }
@@ -221,17 +221,17 @@ class MapsforgeParser {
         }
     }
 
-    public async readTile(zoom: number, x: number, y: number) {     
+    public async readTile(zoom: number, x: number, y: number): Promise<Tile | null> {
         console.log(`loading tile z${zoom}/${x}/${y}`)
 
         const zoom_interval = this.zoom_intervals[2]
-        if (x< zoom_interval.left_tile_x || x > zoom_interval.right_tile_x){
+        if (x < zoom_interval.left_tile_x || x > zoom_interval.right_tile_x) {
             console.log("tile not found!")
-            return {ways: [], pois: []}
+            return null
         }
-        if (y <zoom_interval.top_tile_y || y > zoom_interval.bottom_tile_y){
+        if (y < zoom_interval.top_tile_y || y > zoom_interval.bottom_tile_y) {
             console.log("tile not found!")
-            return {ways: [], pois: []}
+            return null
         }
 
         const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
@@ -264,7 +264,7 @@ class MapsforgeParser {
             // if the tile is empty, the index points to the next tile with data
             // throw new Error("empty tiles are not supported!")
             console.log("tile not found!")
-            return {ways: [], pois: []}
+            return null
         }
 
         const block_length = next_block_pointer - block_pointer;
@@ -279,7 +279,7 @@ class MapsforgeParser {
         // coordinates in the tile are all against this offset
         const tile_top_left_coord = unprojectMercator(
             zxyToMercatorCoord(zoom, x, y)
-            )
+        )
 
         if (this.flags.has_debug_info) {
             const str = tile_data.getFixedString(32)
@@ -312,13 +312,13 @@ class MapsforgeParser {
 
         const ways: Way[] = this.readWays(zoom_table, tile_top_left_coord, tile_data)
 
-        return {
+        return new Tile(
             pois,
             ways,
-        }
+        )
     }
 
-    private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader) {
+    private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): PoI[] {
         const pois: PoI[] = []
         // TODO: only retrieve the PoIs for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
@@ -386,7 +386,7 @@ class MapsforgeParser {
         return pois
     }
 
-    private readWays(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader) {
+    private readWays(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): Way[] {
         const ways: Way[] = []
         // TODO: only retrieve the Ways for the zoom level
         for (let i = 0; i < zoom_table[zoom_table.length - 1].way_count; i++) {

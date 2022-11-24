@@ -1,7 +1,7 @@
 import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
 import { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import { PoI, Way } from "./mapsforge/objects.js";
-import { Coord, GeometryArray } from "./types.js";
+import { Tile } from "./mapsforge/objects.js";
+import { Coord } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
@@ -9,7 +9,7 @@ class CanvasMap {
 
     private parser: MapsforgeParser;
 
-    private tile_cache = {}
+    private tile_cache: { [id: string]: Tile | null } = {}
 
     // zoom level, where 1 is the whole world this is scaled by calling
     // Math.pow(2, zoom_level) to get a non-logarithmic number
@@ -44,12 +44,19 @@ class CanvasMap {
             .split("/")
             .map((e) => +e);
 
-        // if there is no previous location, default to being centred on null
-        // island
+        // if there is no previous location, try to use the map_start_position
         if (!zoom_level || !y || !x) {
-            zoom_level = 1.5;
-            y = 0;
-            x = 0;
+            if (parser.map_start_location) {
+                zoom_level = parser.map_start_location.zoom;
+                y = parser.map_start_location.lat;
+                x = parser.map_start_location.long;
+            } else {
+                // FIXME: should instead go to the middle of the available tiles
+                // if no map start position, centre on null island
+                zoom_level = 1.5;
+                y = 0;
+                x = 0;
+            }
         }
 
         // transform the wgs84 coord into mercator space
@@ -139,24 +146,24 @@ class CanvasMap {
         const top_left = // unprojectMercator(
             coordZToXYZ(
                 (this.ctx.canvas.height - this.y_offset) / scale,
-                -(this.ctx.canvas.width / scale),
+                -(this.x_offset / scale),
                 this.zoom_level,
             )
         //)
 
-        const top_left_coord = {
-            y: (this.ctx.canvas.height - this.y_offset) / scale,
-            x: (this.ctx.canvas.width - this.x_offset) / scale,
-        }
+        // const top_left_coord = {
+        //     y: (this.ctx.canvas.height - this.y_offset) / scale,
+        //     x: (this.ctx.canvas.width - this.x_offset) / scale,
+        // }
 
         const bottom_right = //unprojectMercator(
             coordZToXYZ(
                 -(this.y_offset / scale),
-                (this.x_offset - this.x_offset) / scale,
+                ((this.ctx.canvas.width - this.x_offset) / scale),
                 this.zoom_level,
             )
         //)
-        const bottom_right_coord = { y: -(this.y_offset / scale), x: -(this.x_offset / scale) }
+        // const bottom_right_coord = { y: -(this.y_offset / scale), x: -(this.x_offset / scale) }
 
         const required_tiles: { x: number, y: number, z: number }[] = []
 
@@ -171,21 +178,25 @@ class CanvasMap {
 
             }
         }
-        console.log(required_tiles)
+        // console.log(required_tiles)
 
-        console.log({
-            top_left,
-            bottom_right,
-            x_diff: bottom_right.x - top_left.x,
-            y_diff: bottom_right.y - top_left.y,
-            top_left_coord,
-            bottom_right_coord
-        })
+        // console.log({
+        //     top_left,
+        //     bottom_right,
+        //     x_diff: bottom_right.x - top_left.x,
+        //     y_diff: bottom_right.y - top_left.y,
+        //     top_left_coord,
+        //     bottom_right_coord
+        // })
 
         for (const get_tile of required_tiles) {
             const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
             if (!this.tile_cache[tile_index]) {
-                this.tile_cache[tile_index] = await this.parser.readTile(14, get_tile.x, get_tile.y)
+                this.tile_cache[tile_index] = await this.parser.readTile(
+                    14,
+                    get_tile.x,
+                    get_tile.y,
+                )
             }
         }
 
@@ -195,10 +206,14 @@ class CanvasMap {
         //     const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
         for (const tile of Object.values(this.tile_cache)) {
             // const tile = this.tile_cache[tile_index]
+            if (!tile) {
+                continue
+            }
+
             for (const poi of tile.pois) {
                 if (!poi.name) continue;
 
-                console.log("rendering at", poi.position)
+                // console.log("rendering at", poi.position)
 
                 this.ctx.beginPath();
                 const { x, y } = poi.position;

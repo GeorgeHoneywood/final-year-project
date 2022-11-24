@@ -80,4 +80,13 @@ class PoI {
     }
 }
 
-export { Way, PoI }
+class Tile {
+    pois: PoI[]
+    ways: Way[]
+    constructor(pois: PoI[], ways: Way[] ){
+        this.pois = pois
+        this.ways = ways
+    }
+}
+
+export { Way, PoI, Tile }

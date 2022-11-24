@@ -82,9 +82,9 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test('should be able to read a file with debug info', async () => {
-        const junk_file = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
+        const ferndown_debug = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
 
-        const p = new MapsforgeParser(junk_file)
+        const p = new MapsforgeParser(ferndown_debug)
 
         await expect(p.readHeader())
             .resolves
@@ -104,8 +104,8 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test("should be able to load a map tile", async () => {
-        const albania = new Blob([await fs.readFile("./data/ferndown.map")])
-        const p = new MapsforgeParser(albania)
+        const ferndown = new Blob([await fs.readFile("./data/ferndown.map")])
+        const p = new MapsforgeParser(ferndown)
         await p.readHeader()
         // console.log(p.zoom_intervals)
 
