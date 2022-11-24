@@ -211,10 +211,10 @@ class CanvasMap {
 
 
         console.log(this.tile_cache)
-        // for (const get_tile of required_tiles) {
-        //     const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
-        for (const tile of Object.values(this.tile_cache)) {
-            // const tile = this.tile_cache[tile_index]
+        for (const get_tile of required_tiles) {
+            const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
+            // for (const tile of Object.values(this.tile_cache)) {
+            const tile = this.tile_cache[tile_index]
             if (!tile) {
                 continue
             }
