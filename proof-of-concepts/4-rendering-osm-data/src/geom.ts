@@ -38,13 +38,13 @@ function unprojectMercator({ x, y }: Coord): Coord {
 // convert some lat/long zoom coordinates into tiled space
 // reference: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 function coordZToXYZ(lat: number, lon: number, zoom: number) {
-    const scale = Math.pow(2, zoom)
+    const scale = Math.pow(2, zoom | 0)
     const lat_radians = lat / RADIANS_TO_DEGREES
 
     return {
         x: ((lon + 180) / 360) * scale | 0, // round down
         y: (((1.0 - (Math.asinh(Math.tan(lat_radians)) / Math.PI)) / 2.0) * scale) | 0,
-        z: zoom,
+        z: zoom | 0,
     }
 }
 
