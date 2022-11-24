@@ -17,14 +17,24 @@ async function main() {
     const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
     // const x = ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0
     // const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
-    const tile = await parser.readTile(
-        zoom_level.base_zoom_level,
-        8105, // 8106
-        5499, // 5505
-    )
-    console.log(tile)
+    // const tile1 = await parser.readTile(
+    //     zoom_level.base_zoom_level,
+    //     8105, // 8106
+    //     5499, // 5505
+    // )
+    // const tile2 = await parser.readTile(
+    //     zoom_level.base_zoom_level,
+    //     8105, // 8106
+    //     5500, // 5505
+    // )
+    // const tile3 = await parser.readTile(
+    //     zoom_level.base_zoom_level,
+    //     8106, // 8106
+    //     5499, // 5505
+    // )
+    // console.log(tile1)
 
-    const map = new CanvasMap(canvas, tile);
+    const map = new CanvasMap(canvas, parser);
 
     // layerPicker.addEventListener("change", async (e) => {
     //     // map.setGeometries(await getGeometries());
@@ -118,7 +128,7 @@ async function main() {
             }
 
         } else if (touches.length === 2) {
-            let pinchDistance = Math.hypot(
+            const pinchDistance = Math.hypot(
                 (touches[0].pageX - touches[1].pageX),
                 (touches[0].pageY - touches[1].pageY),
             );
@@ -145,7 +155,7 @@ async function main() {
 
         for (let i = 0; i < touches.length; i++) {
 
-            let idx = getCurrentTouchIndex(touches[i].identifier);
+            const idx = getCurrentTouchIndex(touches[i].identifier);
 
             if (idx >= 0) {
                 currentTouches.splice(idx, 1);

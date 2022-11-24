@@ -59,8 +59,8 @@ function zxyToMercatorCoord(zoom: number, x: number, y: number) {
     const projected = projectMercator(unprojected)
 
     return {
-        x: projected.x,
-        y: projected.y,
+        x: unprojected.x,
+        y: unprojected.y,
         z: zoom,
     }
 }

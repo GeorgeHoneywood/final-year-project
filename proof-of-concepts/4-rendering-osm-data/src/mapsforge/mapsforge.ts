@@ -1,6 +1,7 @@
 import {
     coordZToXYZ,
     microDegreesToDegrees,
+    unprojectMercator,
     zxyToMercatorCoord,
 }
     from "../geom"
@@ -182,7 +183,7 @@ class MapsforgeParser {
 
         this.zoom_interval_count = header.getUint8()
         for (let i = 0; i < this.zoom_interval_count; i++) {
-            let zoom_level = new ZoomLevel()
+            const zoom_level = new ZoomLevel()
 
             zoom_level.base_zoom_level = header.getUint8()
             zoom_level.min_zoom_level = header.getUint8()
@@ -220,12 +221,19 @@ class MapsforgeParser {
         }
     }
 
-    public async readTile(zoom: number, x: number, y: number) {
-        // TODO: add validation:
-        // throw some error if the requested tile isn't held within the file
+    public async readTile(zoom: number, x: number, y: number) {     
         console.log(`loading tile z${zoom}/${x}/${y}`)
 
         const zoom_interval = this.zoom_intervals[2]
+        if (x< zoom_interval.left_tile_x || x > zoom_interval.right_tile_x){
+            console.log("tile not found!")
+            return {ways: [], pois: []}
+        }
+        if (y <zoom_interval.top_tile_y || y > zoom_interval.bottom_tile_y){
+            console.log("tile not found!")
+            return {ways: [], pois: []}
+        }
+
         const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
         const from_block_y = Math.max(y - zoom_interval.top_tile_y, 0)
 
@@ -254,7 +262,9 @@ class MapsforgeParser {
 
         if (next_block_pointer === block_pointer) {
             // if the tile is empty, the index points to the next tile with data
-            throw new Error("empty tiles are not supported!")
+            // throw new Error("empty tiles are not supported!")
+            console.log("tile not found!")
+            return {ways: [], pois: []}
         }
 
         const block_length = next_block_pointer - block_pointer;
@@ -267,7 +277,9 @@ class MapsforgeParser {
         )
 
         // coordinates in the tile are all against this offset
-        const tile_top_left_coord = zxyToMercatorCoord(zoom, x, y)
+        const tile_top_left_coord = unprojectMercator(
+            zxyToMercatorCoord(zoom, x, y)
+            )
 
         if (this.flags.has_debug_info) {
             const str = tile_data.getFixedString(32)
@@ -280,7 +292,7 @@ class MapsforgeParser {
         // parse out the zoom table
         const covered_zooms = (zoom_interval.max_zoom_level - zoom_interval.min_zoom_level) + 1
 
-        let zoom_table: ZoomTable = []
+        const zoom_table: ZoomTable = []
         let poi_count = 0
         let way_count = 0
         for (let i = 0; i < covered_zooms; i++) {
