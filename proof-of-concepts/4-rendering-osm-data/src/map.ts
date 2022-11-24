@@ -143,26 +143,35 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
 
-        const top_left = // unprojectMercator(
-            coordZToXYZ(
-                (this.ctx.canvas.height - this.y_offset) / scale,
-                -(this.x_offset / scale),
-                this.zoom_level,
-            )
-        //)
+        const tl = unprojectMercator({
+            y: (this.ctx.canvas.height - this.y_offset) / scale,
+            x: -(this.x_offset / scale),
+        })
+
+        const top_left = coordZToXYZ(
+            tl.y,
+            tl.x,
+            this.zoom_level,
+        )
+
 
         // const top_left_coord = {
         //     y: (this.ctx.canvas.height - this.y_offset) / scale,
         //     x: (this.ctx.canvas.width - this.x_offset) / scale,
         // }
 
-        const bottom_right = //unprojectMercator(
+        const br = unprojectMercator({
+            y: -(this.y_offset / scale),
+            x: ((this.ctx.canvas.width - this.x_offset) / scale),
+        })
+
+        const bottom_right =
             coordZToXYZ(
-                -(this.y_offset / scale),
-                ((this.ctx.canvas.width - this.x_offset) / scale),
+                br.y,
+                br.x,
                 this.zoom_level,
             )
-        //)
+
         // const bottom_right_coord = { y: -(this.y_offset / scale), x: -(this.x_offset / scale) }
 
         const required_tiles: { x: number, y: number, z: number }[] = []
@@ -279,7 +288,7 @@ class CanvasMap {
             }
         }
 
-        this.drawDebugInfo(begin, scale);
+        this.drawDebugInfo(begin, scale, top_left);
 
         // this.updateUrlHash();
 
@@ -317,7 +326,7 @@ class CanvasMap {
         window.location.hash = `${this.zoom_level.toFixed(0)}/${wgs84Center.y.toFixed(4)}/${wgs84Center.x.toFixed(4)}`
     }
 
-    private drawDebugInfo(begin: number, scale: number) {
+    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }) {
         const mercatorCenter: Coord = {
             x: ((this.canvas.width / 2) - this.x_offset) / scale,
             y: ((this.canvas.height / 2) - this.y_offset) / scale,
@@ -330,7 +339,8 @@ class CanvasMap {
              y=${this.y_offset.toPrecision(8)},
              frame_time=${(performance.now() - begin).toFixed(0)}ms,
              mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
-             wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)}`
+             wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)}
+             tile_x,y=${top_left.x},${top_left.y}`
                 .split("\n").map(e => e.trim()).join(" "),
             5,
             15,
