@@ -151,7 +151,7 @@ class CanvasMap {
         const top_left = coordZToXYZ(
             tl.y,
             tl.x,
-            this.zoom_level,
+            14//this.zoom_level,
         )
 
 
@@ -169,7 +169,7 @@ class CanvasMap {
             coordZToXYZ(
                 br.y,
                 br.x,
-                this.zoom_level,
+                14//this.zoom_level,
             )
 
         // const bottom_right_coord = { y: -(this.y_offset / scale), x: -(this.x_offset / scale) }
