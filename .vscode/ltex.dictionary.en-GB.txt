@@ -10,3 +10,5 @@ OSMF
 Carto
 Mapnik
 slippy
+conformality
+carrée

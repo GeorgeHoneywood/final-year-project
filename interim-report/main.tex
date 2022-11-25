@@ -159,21 +159,25 @@ Following a timeline should help my project to proceed without any major unexpec
 
 \chapter{Research}
 
+\section{Basic HTML5 technologies}
+
+% write another report here, only on basic stuff.
+
 \section{Offline HTML5 applications}\label{sec:offline-html-applications}
 
 \input{../research-reports/1-offline-html5/content.tex}
+
+\section{Using the HTML5 canvas}
+
+\input{../research-reports/4-html5-canvas/content.tex}
 
 \section{OpenStreetMap data sources}
 
 \input{../research-reports/2-osm-data-sources/content.tex}
 
-\section{Projecting map data}
+\section{Projecting map data}\label{sec:projecting-map-data}
 
 \input{../research-reports/3-map-projections/content.tex}
-
-\section{Using the HTML5 canvas}
-
-\input{../research-reports/4-html5-canvas/content.tex}
 
 \chapter{Software engineering}
 
@@ -191,6 +195,8 @@ Following a timeline should help my project to proceed without any major unexpec
 As part of the development process, I have created a number of proof-of-concepts, that each build on each other. These have helped me to understand, test and evaluate various technologies that I could use to build the final application.
 
 \section{Simple offline HTML5 app}
+
+\hfill \texttt{proof-of-concepts/1-offline-html5}
 
 My first proof of concept was a basic offline HTML5 application, employing the techniques that I researched in Section~\ref{sec:offline-html-applications}. Since the \texttt{Application Cache} has been deprecated, the accepted way to create an offline HTML5 app is to use Service Workers~\cite{w3c-service-workers-caches}. The concept behind this is that the Service Worker intercepts all HTTP requests that are made on the website, and can then respond to this request with a result from a prepopulated cache.
 
@@ -224,9 +230,33 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 \section{Rendering geometry to a canvas}
 
+\hfill \texttt{proof-of-concepts/2-rendering-a-way}
+
+My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is \emph{currently} \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
+
+The main challenge I wanted to solve in this proof of concept was projecting the data. This stage is necessary, as OpenStreetMap data comes in the WGS84 CRS, and while this can be naively plotted on a graph as (x,y) coordinates, this would result in the ``plate carrée'' projection, as detailed in Section~\ref{sec:projecting-map-data}. The ``plate carrée'' projection is not particularly desirable, as it does not have any useful properties like conformality (preservation of angle) or preservation of area. Hence, for my application I chose to use Web Mercator, which preserves conformality, and is the de facto standard for web maps.
+
+Initially, I attempted to use the algorithm from \textcite[41]{snyder1987map}, as shown in Section~\ref{sec:projecting-map-data}. Unfortunately I had some issues with getting these equations to produce reasonable results. Therefore, I turned to the OpenStreetMap Wiki, which helpfully provides a reference for transforming WGS84 data into the Web Mercator projection~\cite{osm-wiki-mercator}. I translated the C example into TypeScript, and it correctly projected the data.
+
+\begin{lstlisting}[caption=Projecting to Web Mercator]
+const RADIANS_TO_DEGREES = 180 / Math.PI;
+
+// calculate x/long
+const x = long;
+// calculate y/lat
+const y = Math.log(Math.tan(
+    (lat / RADIANS_TO_DEGREES) / 2 + Math.PI / 4
+)) * RADIANS_TO_DEGREES;
+\end{lstlisting}
+
+
 \section{Adding interactivity --- panning and zooming}
 
+\hfill \texttt{proof-of-concepts/3-panning-and-zooming}
+
 \section{Rendering tiled data from a Mapsforge file}
+
+\hfill \texttt{proof-of-concepts/4-rendering-osm-data}
 
 %% for final report:
 %\chapter{Final application development process}
