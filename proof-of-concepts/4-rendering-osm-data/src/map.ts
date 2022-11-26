@@ -200,17 +200,20 @@ class CanvasMap {
 
         for (const get_tile of required_tiles) {
             const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
-            if (!this.tile_cache[tile_index]) {
-                this.tile_cache[tile_index] = await this.parser.readTile(
+            if (this.tile_cache[tile_index] === undefined) {
+                this.tile_cache[tile_index] = null
+                this.parser.readTile(
                     14,
                     get_tile.x,
                     get_tile.y,
-                )
+                ).then((res) => {
+                    this.tile_cache[tile_index] = res
+                    this.dirty = true
+                })
             }
         }
 
-
-        console.log(this.tile_cache)
+        // console.log(this.tile_cache)
         for (const get_tile of required_tiles) {
             const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
             // for (const tile of Object.values(this.tile_cache)) {
