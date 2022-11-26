@@ -189,25 +189,29 @@ async function main() {
     });
 
     document.addEventListener("keydown", (e) => {
-        e.preventDefault();
-
         switch (e.key) {
             case "w":
+                e.preventDefault();
                 map.translate({ x: 0, y: -20 });
                 break;
             case "s":
+                e.preventDefault();
                 map.translate({ x: 0, y: 20 })
                 break;
             case "a":
+                e.preventDefault();
                 map.translate({ x: 20, y: 0 });
                 break;
             case "d":
+                e.preventDefault();
                 map.translate({ x: -20, y: 0 })
                 break;
             case "+":
+                e.preventDefault();
                 map.zoom(1);
                 break;
             case "-":
+                e.preventDefault();
                 map.zoom(-1);
                 break;
         }
