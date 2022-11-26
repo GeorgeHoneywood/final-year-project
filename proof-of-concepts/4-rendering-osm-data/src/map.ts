@@ -54,11 +54,11 @@ class CanvasMap {
                 y = parser.map_start_location.lat;
                 x = parser.map_start_location.long;
             } else {
-                // FIXME: should instead go to the middle of the available tiles
-                // if no map start position, centre on null island
-                zoom_level = 1.5;
-                y = 0;
-                x = 0;
+                // centre to the middle of the data bbox if no map start
+                // position available
+                zoom_level = 15;
+                y = (this.parser.bbox.max_lat + this.parser.bbox.min_lat) / 2
+                x = (this.parser.bbox.max_long + this.parser.bbox.min_long) / 2
             }
         }
 
