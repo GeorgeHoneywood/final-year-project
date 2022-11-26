@@ -9,7 +9,7 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
-    const parser = new MapsforgeParser(await loadMapBlob("data/dorset-with-debug.map"))
+    const parser = new MapsforgeParser(await loadMapBlob("data/dorset.map"))
 
     await parser.readHeader()
 
@@ -56,6 +56,11 @@ async function main() {
     });
 
     canvas.addEventListener("mouseup", (e) => {
+        e.preventDefault();
+        mouseDown = false;
+    });
+
+    canvas.addEventListener("mouseout", (e) => {
         e.preventDefault();
         mouseDown = false;
     });
