@@ -249,10 +249,25 @@ const y = Math.log(Math.tan(
 )) * RADIANS_TO_DEGREES;
 \end{lstlisting}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../proof-of-concepts/2-rendering-a-way/screenshots/ferndown-buildings.png}
+    \caption{Rendering some GeoJSON data to the canvas}
+\end{figure}\label{fig:rendering-geometry}
+
+This proof of concept was entirely static, with the viewport and zoom level hardcoded into the program. To make the implementation simpler I wrote a function that scaled all the coordinates to be around (0,0), so that I didn't have to handle offsetting the viewport.
 
 \section{Adding interactivity --- panning and zooming}
 
 \hfill \texttt{proof-of-concepts/3-panning-and-zooming}
+
+The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
+
+The first part I tackled was the zooming. This turned out to be as simple as multiplying each projected coordinate by some scale factor, which I was already doing in the previous proof of concept. To modify this scale factor, the user can use the +/- buttons, the mouse scroll wheel, or a pinch gesture on a touch device. Pinch gestures were the most challenging to implement, as you have to handle and interpret \texttt{Touch} events for each separate finger on the screen.
+
+Panning also turned out to be relatively easy --- my implementation involved adding some offsets to the projected and scaled coordinates in the latitude and longitude axis. What was more complicated was having the map zoom about some arbitrary point. For example, on desktop, you expect a map to zoom into the position of your mouse cursor, on into the middle of your pinch gesture on mobile. To achieve this, I update the x and y offsets whenever you zoom, with a smaller offset change when zooming into the top left, and a larger one for the bottom right. Another issue I had to handle is that at a low zoom level, zooming was relatively quick, but once you reached higher zoom levels, it got slower and slower. To compensate for this I made the scale factor logarithmic.
+
+% TODO: talk about magic earth
 
 \section{Rendering tiled data from a Mapsforge file}
 
