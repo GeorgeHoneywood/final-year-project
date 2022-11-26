@@ -1,5 +1,3 @@
-// import { getCoordinates } from "./load.js";
-import { projectToMercator } from "./geom.js";
 import { MapsforgeParser } from "./mapsforge/mapsforge.js"
 import { loadMapBlob } from "./load.js";
 import { CanvasMap } from "./map.js";
@@ -14,25 +12,6 @@ async function main() {
     await parser.readHeader()
 
     console.log({ parser })
-    const zoom_level = parser.zoom_intervals[parser.zoom_interval_count - 1]
-    // const x = ((zoom_level.left_tile_x + zoom_level.right_tile_x) / 2) | 0
-    // const y = ((zoom_level.top_tile_y + zoom_level.bottom_tile_y) / 2) | 0
-    // const tile1 = await parser.readTile(
-    //     zoom_level.base_zoom_level,
-    //     8105, // 8106
-    //     5499, // 5505
-    // )
-    // const tile2 = await parser.readTile(
-    //     zoom_level.base_zoom_level,
-    //     8105, // 8106
-    //     5500, // 5505
-    // )
-    // const tile3 = await parser.readTile(
-    //     zoom_level.base_zoom_level,
-    //     8106, // 8106
-    //     5499, // 5505
-    // )
-    // console.log(tile1)
 
     const map = new CanvasMap(canvas, parser);
 
