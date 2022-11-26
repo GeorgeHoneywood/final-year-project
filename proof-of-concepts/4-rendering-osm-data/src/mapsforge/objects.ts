@@ -16,7 +16,7 @@ class Way {
 
     tags: string[] | null
 
-    double_delta : boolean
+    double_delta: boolean
 
     constructor(
         osm_id: string | null,
@@ -83,10 +83,17 @@ class PoI {
 class Tile {
     pois: PoI[]
     ways: Way[]
-    constructor(pois: PoI[], ways: Way[] ){
+    constructor(pois: PoI[], ways: Way[]) {
         this.pois = pois
         this.ways = ways
     }
 }
 
+type TilePosition = {
+    z: number,
+    y: number,
+    x: number,
+}
+
 export { Way, PoI, Tile }
+export type { TilePosition }

@@ -1,6 +1,6 @@
 import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
 import { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import { Tile } from "./mapsforge/objects.js";
+import { Tile, TilePosition } from "./mapsforge/objects.js";
 import { Coord } from "./types.js";
 
 class CanvasMap {
@@ -9,6 +9,9 @@ class CanvasMap {
 
     private parser: MapsforgeParser;
 
+    // store each tile we have fetched from the map file,
+    // so that we do not need to re-fetch it if the user scrolls back
+    // FIXME: should think about cache invalidation
     private tile_cache: { [id: string]: Tile | null } = {}
 
     // zoom level, where 1 is the whole world this is scaled by calling
@@ -143,63 +146,55 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
 
-        const tl = unprojectMercator({
+        const top_left_coord = unprojectMercator({
             y: (this.ctx.canvas.height - this.y_offset) / scale,
             x: -(this.x_offset / scale),
         })
 
+        // FIXME: use the subfiles properly. at the moment, this always renders
+        // the third subfile, with the tiles at base zoom 14
+        //
+        // to handle low zoom in a performant way, we need to switch to
+        // rendering from the lower detail subfiles when the user zooms out.
+        //
+        // the first part of this involves scaling the the zoom level x,y tile
+        // coord the map is at, into the zoom level that the subfile is stored
+        // in.
         const top_left = coordZToXYZ(
-            tl.y,
-            tl.x,
+            top_left_coord.y,
+            top_left_coord.x,
             14//this.zoom_level,
         )
 
-
-        // const top_left_coord = {
-        //     y: (this.ctx.canvas.height - this.y_offset) / scale,
-        //     x: (this.ctx.canvas.width - this.x_offset) / scale,
-        // }
-
-        const br = unprojectMercator({
+        const bottom_right_coord = unprojectMercator({
             y: -(this.y_offset / scale),
             x: ((this.ctx.canvas.width - this.x_offset) / scale),
         })
 
-        const bottom_right =
-            coordZToXYZ(
-                br.y,
-                br.x,
-                14//this.zoom_level,
-            )
+        const bottom_right = coordZToXYZ(
+            bottom_right_coord.y,
+            bottom_right_coord.x,
+            14//this.zoom_level,
+        )
 
-        // const bottom_right_coord = { y: -(this.y_offset / scale), x: -(this.x_offset / scale) }
-
-        const required_tiles: { x: number, y: number, z: number }[] = []
-
+        // loop over the gap between the top left and bottom right of the screen
+        // in z/y/x tilespace, as these are the tiles we need to fetch
+        const required_tiles: TilePosition[] = []
         for (let x = top_left.x; x < bottom_right.x + 1; x++) {
-
             for (let y = top_left.y; y < bottom_right.y + 1; y++) {
                 required_tiles.push({
                     x,
                     y,
                     z: this.zoom_level | 0,
                 })
-
             }
         }
-        // console.log(required_tiles)
 
-        // console.log({
-        //     top_left,
-        //     bottom_right,
-        //     x_diff: bottom_right.x - top_left.x,
-        //     y_diff: bottom_right.y - top_left.y,
-        //     top_left_coord,
-        //     bottom_right_coord
-        // })
-
+        // read each tile we need to render
         for (const get_tile of required_tiles) {
             const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
+            // only fetch if we haven't already -- must check undefined, as a
+            // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
                 this.tile_cache[tile_index] = null
                 this.parser.readTile(
@@ -208,55 +203,52 @@ class CanvasMap {
                     get_tile.y,
                 ).then((res) => {
                     this.tile_cache[tile_index] = res
+                    // once the tile loads, we must set dirty, so we render
                     this.dirty = true
                 })
             }
         }
 
-        // console.log(this.tile_cache)
         for (const get_tile of required_tiles) {
             const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
-            // for (const tile of Object.values(this.tile_cache)) {
             const tile = this.tile_cache[tile_index]
             if (!tile) {
+                // tile is either empty, or not loaded yet. skip for now
                 continue
             }
 
+            // render out points of interest
             for (const poi of tile.pois) {
-                if (!poi.name) continue;
-
-                // console.log("rendering at", poi.position)
+                if (!poi.name || this.zoom_level < 16) continue;
 
                 this.ctx.beginPath();
                 const { x, y } = poi.position;
-                // TODO: possible optimisation: only draw lines that are
-                // actually on the canvas
+                const proj = projectMercator({ x, y });
 
-                // const proj = projectMercator({x,y})
                 this.ctx.rect(
-                    x * scale + this.x_offset - 5,
-                    this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                    proj.x * scale + this.x_offset - 5,
+                    this.canvas.height - (proj.y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     10,
                     10,
                 );
                 this.ctx.fillText(
                     poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
-                    x * scale + this.x_offset + 10,
-                    this.canvas.height - (y * scale + this.y_offset) + 5,
+                    proj.x * scale + this.x_offset + 10,
+                    this.canvas.height - (proj.y * scale + this.y_offset) + 5,
                 );
 
                 this.ctx.stroke();
             }
 
+            // render out the ways
             for (const way of tile.ways) {
-                // console.log(geometry.path)
                 if (way.double_delta) {
-                    // continue
                     this.ctx.strokeStyle = "red";
                 } else {
                     this.ctx.strokeStyle = "green";
                 }
 
+                // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
                     // draw the label centered on the geometry
                     // FIXME: this only makes sense for closed geometries -- i.e.
@@ -264,13 +256,15 @@ class CanvasMap {
                     const size = this.ctx.measureText(
                         way.name ?? way.house_number ?? "",
                     );
+                    const proj = projectMercator({ x: way.path[0].x, y: way.path[0].y });
+
                     this.ctx.fillText(
                         way.name ?? way.house_number ?? "",
-                        (way.path[0].x + way.label_position.x) * scale +
+                        (proj.x + way.label_position.x) * scale +
                         this.x_offset -
                         size.width / 2,
                         this.canvas.height -
-                        ((way.path[0].y + way.label_position.y) * scale +
+                        ((proj.y + way.label_position.y) * scale +
                             this.y_offset) +
                         15 / 2, // font height
                     );
@@ -278,9 +272,6 @@ class CanvasMap {
 
                 this.ctx.beginPath();
                 for (const { x, y } of way.path) {
-                    // TODO: possible optimisation: only draw lines that are
-                    // actually on the canvas
-
                     const proj = projectMercator({ x, y });
                     this.ctx.lineTo(
                         proj.x * scale + this.x_offset,
@@ -293,7 +284,7 @@ class CanvasMap {
 
         this.drawDebugInfo(begin, scale, top_left);
 
-        // this.updateUrlHash();
+        this.updateUrlHash();
 
         requestAnimationFrame(() => this.render());
     }
@@ -329,6 +320,13 @@ class CanvasMap {
         window.location.hash = `${this.zoom_level.toFixed(0)}/${wgs84Center.y.toFixed(4)}/${wgs84Center.x.toFixed(4)}`
     }
 
+    /**
+     * Draw some debug information to the top left of the map canvas
+     * 
+     * @param begin time we started rendering the frame at
+     * @param scale the current zoom scale
+     * @param top_left the top left tile x,y coordinate
+     */
     private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }) {
         const mercatorCenter: Coord = {
             x: ((this.canvas.width / 2) - this.x_offset) / scale,
