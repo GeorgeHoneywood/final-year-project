@@ -6,7 +6,7 @@ import {
 }
     from "../geom"
 import { Coord } from "../types"
-import { PoI, Tile, Way } from "./objects"
+import { PoI, Tile, TilePosition, Way } from "./objects"
 import {
     Reader
 }
@@ -224,7 +224,8 @@ class MapsforgeParser {
     public async readTile(zoom: number, x: number, y: number): Promise<Tile | null> {
         console.log(`loading tile z${zoom}/${x}/${y}`)
 
-        const zoom_interval = this.zoom_intervals[2]
+        const zoom_interval = this.getBaseZoom(zoom)
+
         if (x < zoom_interval.left_tile_x || x > zoom_interval.right_tile_x) {
             console.log("tile not found!")
             return null
@@ -316,6 +317,43 @@ class MapsforgeParser {
             pois,
             ways,
         )
+    }
+
+    private getBaseZoom(zoom: number) {
+        let zoom_interval = this.zoom_intervals[0]
+
+        for (const z of this.zoom_intervals) {
+            if (zoom > z.max_zoom_level) {
+                continue
+            }
+            zoom_interval = z
+            break
+        }
+
+        return zoom_interval
+    }
+
+    private getBaseTilePosition(original: TilePosition, interval: ZoomLevel): TilePosition {
+        const scaled = original
+        if (original.z === interval.base_zoom_level) {
+            // when the base zoom is the same as requested zoom, we do nothing
+            return original
+        } else if (original.z < interval.base_zoom_level) {
+            // zoom in
+            for (let i = original.z; i < interval.base_zoom_level; i++) {
+                scaled.x *= 2
+                scaled.y *= 2
+            }
+        } else {
+            // zoom out
+            for (let i = original.z; i > interval.base_zoom_level; i--) {
+                scaled.x /= 2
+                scaled.y /= 2
+            }
+        }
+
+        scaled.z = interval.base_zoom_level
+        return scaled
     }
 
     private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): PoI[] {
