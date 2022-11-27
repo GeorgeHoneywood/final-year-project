@@ -90,29 +90,49 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
             .resolves
             .toBe(undefined);
 
-        // console.log(p.way_tags)
-
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 
-        // console.log(zoom_level)
-        // some tiles in the middle of the extract
-        // const x = zoom_level.left_tile_x + 30
-        // const y = zoom_level.top_tile_y + 20
         const x = zoom_level.left_tile_x + 1
         const y = zoom_level.top_tile_y
         const tile = await p.readTile(zoom_level.base_zoom_level, x, y)
+
+        expect(tile).toBeTruthy()
     })
 
     test("should be able to load a map tile", async () => {
         const ferndown = new Blob([await fs.readFile("./data/ferndown.map")])
         const p = new MapsforgeParser(ferndown)
         await p.readHeader()
-        // console.log(p.zoom_intervals)
 
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 
-        const tile = await p.readTile(zoom_level.base_zoom_level, zoom_level.left_tile_x, zoom_level.top_tile_y)
+        const tile = (await p.readTile(
+            zoom_level.base_zoom_level,
+            zoom_level.left_tile_x + 1,
+            zoom_level.top_tile_y + 1,
+        ))!
 
         expect(tile).toBeTruthy()
+
+        expect(tile.pois.length).toBe(36)
+        expect(tile.ways.length).toBe(410);
+
+        const poi = tile.pois[2]!
+        expect(poi.name).toBe("Old Forge Road")
+        expect(poi.tags).toStrictEqual(["highway=bus_stop"])
+        expect(poi.position.x).toBeCloseTo(-1.91829175)
+        expect(poi.position.y).toBeCloseTo(50.80641726)
+
+        const way = tile.ways[40]
+        expect(way.name).toBe("Haviland Road")
+        expect(way.tags).toStrictEqual(["highway=unclassified"])
+        expect(way.double_delta).toBe(false)
+
+        const first = way.path[0];
+        expect(first.x).toBeCloseTo(-1.91370475)
+        expect(first.y).toBeCloseTo(50.80959926)
+        const last = way.path[11];
+        expect(last.x).toBeCloseTo(-1.91624574, 7)
+        expect(last.y).toBeCloseTo(50.81180926, 7)
     })
 });
