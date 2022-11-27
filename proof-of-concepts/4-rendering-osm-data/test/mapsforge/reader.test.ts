@@ -43,7 +43,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
         },
     ])("should be able to decode unsigned variable length ints", ({ name, value, want }) => {
         test(`${name}: [${value.map(n => n.toString(2).padStart(8, "0"))}].getVUint()} == ${want}`, () => {
-            let reader = new Reader(
+            const reader = new Reader(
                 new Uint8ClampedArray(
                     value
                 ).buffer
@@ -91,7 +91,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
         },
     ])("should be able to decode signed variable ints", ({ name, value, want }) => {
         test(`${name}: [${value.map(n => n.toString(2).padStart(8, "0"))}].getVSint()} == ${want}`, () => {
-            let reader = new Reader(
+            const reader = new Reader(
                 new Uint8ClampedArray(
                     value
                 ).buffer
@@ -114,7 +114,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
         },
     ])("should be able to variable length strings", ({ name, value, want }) => {
         test(`${name}: [${value}].getVString()} == ${want}`, () => {
-            let reader = new Reader(
+            const reader = new Reader(
                 new Uint8ClampedArray(
                     value
                 ).buffer
