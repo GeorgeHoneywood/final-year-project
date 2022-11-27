@@ -58,7 +58,7 @@
 {0mm}%                        % the indent
 {4.2mm}%             % the beforeskip
 {1.1mm}%           % the afterskip
-{\normalsize}}  % the style
+{\normalsize\bfseries}}  % the style
 
 %\renewcommand\chapter{
 %  %\thispagestyle{empty}

@@ -12,3 +12,4 @@ Mapnik
 slippy
 conformality
 carrée
+multipolygon

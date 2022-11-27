@@ -117,16 +117,16 @@ Here I will list some specific features that I would like to implement in the pr
 
 % FIXME: presumably this should be in past tense
 
-Following a timeline should help my project to proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I will focus on exploring any risky areas or technologies that I am unsure about. This will help any large questions early on in the process.
+Following a timeline should help my project to proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
 
 \begin{enumerate}
-    \item Report on offline HTML5 technologies. Will use this to decide whether it is possible to download \& store a large amount of vector map data (>100 MB) for later rendering.\label{item:deliverable:offline-html}
-    \item Proof of concept basic offline HTML5 app. Can also use this to discover any limit of how files can be stored for offline use.\label{item:deliverable:basic-offline-app}
-    \item Report on the different technologies that the program could use to get OpenStreetMap data. One possibility is the Mapsforge format, or it could use the OSM editing API\@. This should help mitigate risk of using a technology that is not suitable for the project.\label{item:deliverable:osm-data}
-    \item Report about how map projection works. Specifically the mathematics behind projecting the Web Mercator data that is produced by OpenStreetMap. This will ensure that I understand this key concept.\label{item:deliverable:map-projection}
-    \item Proof of concept that takes some way made up of latitude longitude pairs and draws a line onto a canvas. If this is too challenging, I could use a library like D3.js.\label{item:deliverable:draw-line}
+    \item Report on offline HTML5 technologies. Used this to discover whether it is possible to download \& store a large amount of vector map data (>100 MB) for later rendering.\label{item:deliverable:offline-html}
+    \item Proof of concept basic offline HTML5 app. Used this to discover any limit of how files can be stored for offline use.\label{item:deliverable:basic-offline-app}
+    \item Report on the different ways  that the program could get OpenStreetMap data. One possibility is the Mapsforge format, or it could use the OSM editing API\@. This helped mitigate risk of using a technology that is not suitable for the project.\label{item:deliverable:osm-data}
+    \item Report about how map projection works. Specifically the mathematics behind projecting the data that is produced by OpenStreetMap. This ensured that I understood this key concept.\label{item:deliverable:map-projection}
+    \item Proof of concept that took some way made up of latitude longitude pairs and draws a line onto a canvas.\label{item:deliverable:draw-line}
     \item Make proof of concept~\ref{item:deliverable:draw-line} interactive; allow the user to pan and zoom the map. This should be done with the scroll wheel on desktop and pinch zooming on mobile.\label{item:deliverable:pan-zoom}
-    \item Proof of concept that loads some actual OSM data using the technology that I decided upon in deliverable~\ref{item:deliverable:osm-data}. If the implementation proves to be too difficult, I can pivot to another technology that I had explored in deliverable~\ref{item:deliverable:osm-data}.\label{item:deliverable:load-osm-data}
+    \item Proof of concept that loads some actual OSM data using the technology that I decided upon in deliverable~\ref{item:deliverable:osm-data}.\label{item:deliverable:load-osm-data}
     \item Thoroughly test the application on mobile, as this will likely be the main use case for an offline map.\label{item:deliverable:mobile-testing}
     \item Add online search functionality, using the Nominatim API.\label{item:deliverable:search}
     \item Add online routing functionality, using OSRM, GraphHopper or Valhalla.\label{item:deliverable:routing}
@@ -171,7 +171,7 @@ Following a timeline should help my project to proceed without any major unexpec
 
 \input{../research-reports/4-html5-canvas/content.tex}
 
-\section{OpenStreetMap data sources}
+\section{OpenStreetMap data sources}\label{sec:osm-data-sources}
 
 \input{../research-reports/2-osm-data-sources/content.tex}
 
@@ -295,7 +295,35 @@ public render() {
 
 \hfill \texttt{proof-of-concepts/4-rendering-osm-data}
 
-My final proof of concept revolved around reading tiled OSM data from a Mapforge formatted binary file~\cite{mapsforge-format}. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are current within the viewport.
+My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
+
+The bulk of the work for this proof of concept came in the form of writing a parser for the Mapsforge format~\cite{mapsforge-format}. I decided to use this format based on my report on OpenStreetMap data sources, in Section~\ref{sec:osm-data-sources}. This was because it seemed simpler to parse than the MBTiles, which is the other popular choice for tiled vector map files. It is a binary format, that is designed to space-efficiently encode geographical data, such that can be rendered on low-power mobile devices.
+
+\subsection{The Mapsforge format}
+
+Here I will explain the main concepts of the Mapsforge format, that I had to understand whilst writing the parser. This information is mostly as per the specification~\cite{mapsforge-format}, supplemented by what I learnt as I progressed. 
+
+\subsubsection{Points of Interest (PoI)}
+
+These represent tagged OpenStreetMap nodes, such as shops, bus stops, or any other objects that have been mapped as a node.
+
+\subsubsection{Ways}
+
+Ways are an abstraction over OpenStreetMap ways and relations. OSM represents complex structures such as buildings with internal courtyards as multiple ways, for the outer and inner parts. These are linked by a multipolygon relation that labels each part as inner or outer~\cite{osm-wiki-multipolygon}. These are non-trivial to parse, especially with large amounts of data, so it makes sense to push this complexity to the map-writer software.
+
+\subsubsection{Sub-files}
+
+%% \- to give latex line break hints
+
+Sub-files store map data for a range of zoom levels. For example, the file \texttt{proof\--of\--concepts/4\--rendering\--osm\--data\-/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
+    
+The over-zoom/under-zoom functionality is supported by each sub-file containing a ``zoom table'', which contains how many PoIs/Ways need to be read for the tile at the requested zoom level. For example, when under-zooming a z14 tile to z12, is very slow to render absolutely all the map features, as you will be showing around 112 z14 base tiles (on a 1080p screen). For the zoom-table to work, the Way and PoI data in each tile is sorted by ``feature importance'', meaning that data to be shown at low zoom levels, like place labels or important roads, comes first, and less important geometries like houses are placed last. Therefore, you can read that there should be \texttt{x} amount of PoIs/Ways for this tile, for the zoom level you are decoding, read the specified amount, then skip over the rest.
+
+\subsubsection{Variable length integers}
+
+\subsection{Writing a parser}
+
+In my first iteration of this proof of concept, I was decoding the file inline, using a \texttt{DataView}, manually keeping track of offsets within the blob. This worked, but led to a lot of duplicate code that was just handling offsets, and a number of error caused by me making some trivial mistake when incrementing the offset by the wrong amount. To remedy this smell, I refactored the code to use the abstraction of a \texttt{Reader}. You construct the \texttt{Reader} with a blob, then call methods like \texttt{.getVUint()}, or \texttt{.getBigUint64()}. These methods increment an offset internal to the \texttt{Reader} class.
 
 %% for final report:
 %\chapter{Final application development process}
@@ -307,6 +335,11 @@ My final proof of concept revolved around reading tiled OSM data from a Mapforge
 % look on the BCS website for ideas
 
 \section{Evaluation}
+
+\chapter{Annexe}
+
+%% include the full diary.md here.
+%% could convert to .tex with pandoc
 
 \addcontentsline{toc}{chapter}{Bibliography}
 
