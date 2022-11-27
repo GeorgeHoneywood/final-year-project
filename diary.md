@@ -46,6 +46,10 @@ Got a single tile of data to appear in the canvas map, but there is some issue w
 
 ### Week 10 (2022-11-21)
 
+Worked on the interim report in preparation for supervisor meeting, then for the interim submission. Fixed a tricky bug that was a result of an incorrect interpretation of the signed integer values. This was discovered and fixed by writing some tests that I should have written in the first place.
+
+Got multiple tiles to appear on the map, being loaded dynamically as you pan and zoom. Currently always loads the high resolution subfile, at z14, so zooming out quickly becomes slow. Fixing this is my next goal.
+
 ### Week 11 (2022-11-28)
 
 ### Week 12 (2022-12-05)
