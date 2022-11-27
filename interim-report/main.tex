@@ -232,7 +232,7 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 \hfill \texttt{proof-of-concepts/2-rendering-a-way}
 
-My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is \emph{currently} \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
+My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
 
 The main challenge I wanted to solve in this proof of concept was projecting the data. This stage is necessary, as OpenStreetMap data comes in the WGS84 CRS, and while this can be naively plotted on a graph as (x,y) coordinates, this would result in the ``plate carrée'' projection, as detailed in Section~\ref{sec:projecting-map-data}. The ``plate carrée'' projection is not particularly desirable, as it does not have any useful properties like conformality (preservation of angle) or preservation of area. Hence, for my application I chose to use Web Mercator, which preserves conformality, and is the de facto standard for web maps.
 
@@ -265,13 +265,25 @@ The third proof of concept heavily built upon this second --- with the goal of a
 
 The first part I tackled was the zooming. This turned out to be as simple as multiplying each projected coordinate by some scale factor, which I was already doing in the previous proof of concept. To modify this scale factor, the user can use the +/- buttons, the mouse scroll wheel, or a pinch gesture on a touch device. Pinch gestures were the most challenging to implement, as you have to handle and interpret \texttt{Touch} events for each separate finger on the screen.
 
-Panning also turned out to be relatively easy --- my implementation involved adding some offsets to the projected and scaled coordinates in the latitude and longitude axis. What was more complicated was having the map zoom about some arbitrary point. For example, on desktop, you expect a map to zoom into the position of your mouse cursor, on into the middle of your pinch gesture on mobile. To achieve this, I update the x and y offsets whenever you zoom, with a smaller offset change when zooming into the top left, and a larger one for the bottom right. Another issue I had to handle is that at a low zoom level, zooming was relatively quick, but once you reached higher zoom levels, it got slower and slower. To compensate for this I made the scale factor logarithmic.
+Panning also turned out to be relatively easy --- my implementation involved adding some offsets to the projected and scaled coordinates in the latitude and longitude axis. What was more complicated was having the map zoom about some arbitrary point. For example, on desktop, you expect a map to zoom into the position of your mouse cursor, on into the middle of your pinch gesture on mobile. To achieve this, I update the \texttt{x} and \texttt{y} offsets whenever you zoom, with a smaller offset change when zooming into the top left, and a larger one for the bottom right. Another issue I had to handle is that at a low zoom level, zooming was relatively quick, but once you reached higher zoom levels, it got slower and slower. To compensate for this I made the scale factor logarithmic.
 
-% TODO: talk about magic earth
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/3-panning-and-zooming/screenshots/the-world.png}
+    \caption{An interactive world map, using Natural Earth data~\cite{natural-earth}}
+\end{figure}\label{fig:panning-and-zooming}
+
+For testing the zooming between low and high zoom, I needed some ``large scale'' data to supplement the localized OSM data that I had downloaded for the previous proof of concept. Natural Earth Cultural Vector data seemed suitable, as it is readily available as GeoJSON, is released in the public domain, and is suitably low-detail for my purpose~\cite{natural-earth}. Once again I used \texttt{geojson.io}~\cite{geojson.io}, this time to merge these two sets of data.
+
+To begin with, I was simply redrawing the map every time a \texttt{Touch} or \texttt{Mouse} event fired. This worked, but these events would often fire very rapidly (>60 times/second), resulting in a slow panning experience, where rendering was occurring unnecessarily. My solution for this was \texttt{requestAnimationFrame()}, which allows you to have some function executed at a regular interval by the browser~\cite{mdn-request-animation-frame}. Therefore, I could to modify the state of the map, then have it smoothly rendered at regular intervals to reflect any changes to zoom or offsets. 
+
+Unfortunately this change meant the canvas re-rendered 60 times a second at all times, even when no state change had occurred, which is a waste of processing power and energy, especially on mobile devices. To remedy this I introduced a \texttt{dirty} flag, which I set whenever a state change had occurred, checking it at the beginning of the \texttt{render()} function. The end result was a map that updated smoothly 60 times a second when state changes were occurring, and not at all when the map was static.
 
 \section{Rendering tiled data from a Mapsforge file}
 
 \hfill \texttt{proof-of-concepts/4-rendering-osm-data}
+
+My final proof of concept revolved around reading tiled OSM data from a Mapforge formatted binary file~\cite{mapsforge-format}. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are current within the viewport.
 
 %% for final report:
 %\chapter{Final application development process}
@@ -285,6 +297,9 @@ Panning also turned out to be relatively easy --- my implementation involved add
 \section{Evaluation}
 
 \addcontentsline{toc}{chapter}{Bibliography}
+
+% smaller bibliography text
+\renewcommand*{\bibfont}{\normalfont\small}
 \printbibliography{}
 
 \end{document}
