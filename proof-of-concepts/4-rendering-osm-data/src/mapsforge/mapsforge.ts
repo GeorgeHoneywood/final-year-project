@@ -3,16 +3,15 @@ import {
     microDegreesToDegrees,
     unprojectMercator,
     zxyToMercatorCoord,
-}
-    from "../geom"
+} from "../geom"
 import { Coord } from "../types"
-import { PoI, Tile, Way } from "./objects"
 import {
-    Reader
-}
-    from "./reader"
-
-type ZoomTable = { poi_count: number, way_count: number }[]
+    PoI,
+    Tile,
+    Way,
+    ZoomTable
+} from "./objects"
+import { Reader } from "./reader"
 
 class BBox {
     max_lat = 0
@@ -239,8 +238,8 @@ class MapsforgeParser {
 
         const index_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
         const index_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
-        
-        // index is stored as a table, with x as rows, and y as
+
+        // index is stored as a table, with x as rows, and y as columns
         const block_offset = index_x + zoom_interval.tile_width * index_y
 
         const index_block_position = zoom_interval.sub_file_start_position
@@ -313,6 +312,7 @@ class MapsforgeParser {
         const ways: Way[] = this.readWays(zoom_table, tile_top_left_coord, tile_data)
 
         return new Tile(
+            zoom_table,
             pois,
             ways,
         )

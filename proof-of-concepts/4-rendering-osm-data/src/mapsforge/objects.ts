@@ -81,9 +81,13 @@ class PoI {
 }
 
 class Tile {
+    // the zoom table is relative to the zoom interval's min_zoom
+    zoom_table: ZoomTable
     pois: PoI[]
     ways: Way[]
-    constructor(pois: PoI[], ways: Way[]) {
+
+    constructor(zoom_table: ZoomTable, pois: PoI[], ways: Way[]) {
+        this.zoom_table = zoom_table
         this.pois = pois
         this.ways = ways
     }
@@ -95,5 +99,10 @@ type TilePosition = {
     x: number,
 }
 
+type ZoomTable = {
+    poi_count: number,
+    way_count: number
+}[]
+
 export { Way, PoI, Tile }
-export type { TilePosition }
+export type { TilePosition, ZoomTable }

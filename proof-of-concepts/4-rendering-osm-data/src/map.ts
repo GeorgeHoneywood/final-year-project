@@ -15,7 +15,12 @@ class CanvasMap {
     private tile_cache: { [id: string]: Tile | null } = {}
 
     // store the base tile zoom level for each possible zoom level
-    private base_zooms : {[original: number]: number } = {}
+    private base_zooms: {
+        [original: number]: {
+            base_zoom: number,
+            min_zoom: number
+        }
+    } = {}
 
     // zoom level, where 1 is the whole world this is scaled by calling
     // Math.pow(2, zoom_level) to get a non-logarithmic number
@@ -75,9 +80,14 @@ class CanvasMap {
         this.zoom_level = zoom_level;
 
         // calculate the base zoom levels for each zoom level
-            for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
-            // FIXME: this is pretty inefficient
-            this.base_zooms[i] = this.parser.getBaseZoom(i).base_zoom_level
+        for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
+            // FIXME: this is pretty inefficient, .getBaseZoom() does a linear
+            // search each call
+            const zoom_interval = this.parser.getBaseZoom(i)
+            this.base_zooms[i] = {
+                min_zoom: zoom_interval.min_zoom_level,
+                base_zoom: zoom_interval.base_zoom_level,
+            }
         }
 
         requestAnimationFrame(() => this.render()); // ensure that this==this
@@ -160,7 +170,7 @@ class CanvasMap {
             x: -(this.x_offset / scale),
         })
 
-        const base_tile_zoom = this.base_zooms[this.zoom_level|0]
+        const base_zoom_interval = this.base_zooms[this.zoom_level | 0]
 
         // FIXME: use the subfiles properly. at the moment, this always renders
         // the third subfile, with the tiles at base zoom 14
@@ -174,7 +184,7 @@ class CanvasMap {
         const top_left = coordZToXYZ(
             top_left_coord.y,
             top_left_coord.x,
-            base_tile_zoom,
+            base_zoom_interval.base_zoom,
         )
 
         const bottom_right_coord = unprojectMercator({
@@ -185,7 +195,7 @@ class CanvasMap {
         const bottom_right = coordZToXYZ(
             bottom_right_coord.y,
             bottom_right_coord.x,
-            base_tile_zoom,
+            base_zoom_interval.base_zoom,
         )
 
         // loop over the gap between the top left and bottom right of the screen
@@ -196,7 +206,7 @@ class CanvasMap {
                 required_tiles.push({
                     x,
                     y,
-                    z: base_tile_zoom | 0,
+                    z: base_zoom_interval.base_zoom | 0,
                 })
             }
         }
@@ -234,9 +244,13 @@ class CanvasMap {
                 continue
             }
 
+            // how many PoIs and ways we should show at our current zoom level
+            const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
+
             // render out points of interest
-            for (const poi of tile.pois) {
-                if (!poi.name || this.zoom_level < 16) continue;
+            for (let i = 0; i < zoom_row.poi_count; i++) {
+                const poi = tile.pois[i]
+                // if (!poi.name || this.zoom_level < 16) continue;
 
                 this.ctx.beginPath();
                 const { x, y } = poi.position;
@@ -258,7 +272,8 @@ class CanvasMap {
             }
 
             // render out the ways
-            for (const way of tile.ways) {
+            for (let i = 0; i < zoom_row.way_count; i++) {
+                const way = tile.ways[i]
                 if (way.double_delta) {
                     this.ctx.strokeStyle = "red";
                 } else {
