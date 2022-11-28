@@ -130,12 +130,20 @@ class CanvasMap {
             y: this.canvas.height / 2,
         },
     ) {
-        this.x_offset = x - (x - this.x_offset) * Math.pow(2, zoom_delta);
-        this.y_offset = y - (y - this.y_offset) * Math.pow(2, zoom_delta);
+        const new_zoom = this.zoom_level + zoom_delta;
 
-        this.zoom_level += zoom_delta;
+        // clamp zoom level to what our map file supports
+        if (
+            new_zoom >= this.parser.zoom_intervals[0].min_zoom_level
+            && new_zoom < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level
+        ) {
+            this.x_offset = x - (x - this.x_offset) * Math.pow(2, zoom_delta);
+            this.y_offset = y - (y - this.y_offset) * Math.pow(2, zoom_delta);
 
-        this.dirty = true;
+            this.zoom_level = new_zoom
+
+            this.dirty = true;
+        }
     }
 
     /**
@@ -172,15 +180,6 @@ class CanvasMap {
 
         const base_zoom_interval = this.base_zooms[this.zoom_level | 0]
 
-        // FIXME: use the subfiles properly. at the moment, this always renders
-        // the third subfile, with the tiles at base zoom 14
-        //
-        // to handle low zoom in a performant way, we need to switch to
-        // rendering from the lower detail subfiles when the user zooms out.
-        //
-        // the first part of this involves scaling the the zoom level x,y tile
-        // coord the map is at, into the zoom level that the subfile is stored
-        // in.
         const top_left = coordZToXYZ(
             top_left_coord.y,
             top_left_coord.x,
