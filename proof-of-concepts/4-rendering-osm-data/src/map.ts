@@ -273,11 +273,6 @@ class CanvasMap {
             // render out the ways
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
-                if (way.double_delta) {
-                    this.ctx.strokeStyle = "red";
-                } else {
-                    this.ctx.strokeStyle = "green";
-                }
 
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
