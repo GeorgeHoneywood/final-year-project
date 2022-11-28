@@ -14,6 +14,9 @@ class CanvasMap {
     // FIXME: should think about cache invalidation
     private tile_cache: { [id: string]: Tile | null } = {}
 
+    // store the base tile zoom level for each possible zoom level
+    private base_zooms : {[original: number]: number } = {}
+
     // zoom level, where 1 is the whole world this is scaled by calling
     // Math.pow(2, zoom_level) to get a non-logarithmic number
     private zoom_level = 0;
@@ -70,6 +73,12 @@ class CanvasMap {
         this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
         this.y_offset = -(mercator.y * scale) + this.canvas.height / 2;
         this.zoom_level = zoom_level;
+
+        // calculate the base zoom levels for each zoom level
+            for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
+            // FIXME: this is pretty inefficient
+            this.base_zooms[i] = this.parser.getBaseZoom(i).base_zoom_level
+        }
 
         requestAnimationFrame(() => this.render()); // ensure that this==this
     }
@@ -151,6 +160,8 @@ class CanvasMap {
             x: -(this.x_offset / scale),
         })
 
+        const base_tile_zoom = this.base_zooms[this.zoom_level|0]
+
         // FIXME: use the subfiles properly. at the moment, this always renders
         // the third subfile, with the tiles at base zoom 14
         //
@@ -163,7 +174,7 @@ class CanvasMap {
         const top_left = coordZToXYZ(
             top_left_coord.y,
             top_left_coord.x,
-            this.zoom_level,
+            base_tile_zoom,
         )
 
         const bottom_right_coord = unprojectMercator({
@@ -174,7 +185,7 @@ class CanvasMap {
         const bottom_right = coordZToXYZ(
             bottom_right_coord.y,
             bottom_right_coord.x,
-            this.zoom_level,
+            base_tile_zoom,
         )
 
         // loop over the gap between the top left and bottom right of the screen
@@ -185,10 +196,11 @@ class CanvasMap {
                 required_tiles.push({
                     x,
                     y,
-                    z: this.zoom_level | 0,
+                    z: base_tile_zoom | 0,
                 })
             }
         }
+        console.log(required_tiles)
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
@@ -202,7 +214,7 @@ class CanvasMap {
                 // for each of the overzoomed tiles in the viewport. not sure of
                 // the best way to handle this case. handling it here feels like
                 // the implementation leaking out...
-                this.parser.readTile(
+                this.parser.readBaseTile(
                     get_tile.z,
                     get_tile.x,
                     get_tile.y,

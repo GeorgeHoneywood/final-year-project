@@ -221,11 +221,12 @@ class MapsforgeParser {
         }
     }
 
-    public async readTile(zoom: number, x: number, y: number): Promise<Tile | null> {
+    public async readBaseTile(zoom: number, x: number, y: number, render_zoom: number): Promise<Tile | null> {
         const zoom_interval = this.getBaseZoom(zoom)
-        const base_tile = this.getBaseTilePosition({ z: zoom, x, y }, zoom_interval)
 
-        console.log(`loading tile z${zoom}/${x}/${y}, from base tile z${base_tile.z}/${base_tile.x}/${base_tile.y}`)
+        const base_tile = { z: zoom, x, y }
+
+        console.log(`loading tile z${zoom}/${x}/${y}`)
 
         if (base_tile.x < zoom_interval.left_tile_x || base_tile.x > zoom_interval.right_tile_x) {
             console.log("tile not found!")
@@ -236,14 +237,11 @@ class MapsforgeParser {
             return null
         }
 
-        const from_block_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
-        const from_block_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
-
-        // TODO: should support reading a range of multiple tiles in one go
-        // const to_block_x = Math.min(x - zoom_interval.left_tile_x, zoom_interval.tile_width - 1)
-        // const to_block_y = Math.min(y - zoom_interval.top_tile_y, zoom_interval.tile_height - 1)
-
-        const block_offset = from_block_x + zoom_interval.tile_width * from_block_y
+        const index_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
+        const index_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
+        
+        // index is stored as a table, with x as rows, and y as
+        const block_offset = index_x + zoom_interval.tile_width * index_y
 
         const index_block_position = zoom_interval.sub_file_start_position
             + (BigInt(block_offset) * 5n)
@@ -320,7 +318,7 @@ class MapsforgeParser {
         )
     }
 
-    private getBaseZoom(zoom: number) {
+    getBaseZoom(zoom: number) {
         let zoom_interval = this.zoom_intervals[0]
 
         for (const z of this.zoom_intervals) {
@@ -332,30 +330,6 @@ class MapsforgeParser {
         }
 
         return zoom_interval
-    }
-
-    private getBaseTilePosition(original: TilePosition, interval: ZoomLevel): TilePosition {
-        const scaled = { ...original } // deep copy
-        if (original.z === interval.base_zoom_level) {
-            // when the base zoom is the same as requested zoom, we do nothing
-            return original
-        } else if (original.z > interval.base_zoom_level) {
-            // zoom in (overzoom)
-            // doing some bitshifting would be more elegant here, as we are
-            // always dividing by two*n and not caring about remainder
-            for (let i = original.z; i > interval.base_zoom_level; i--) {
-                scaled.x = (scaled.x / 2) | 0
-                scaled.y = (scaled.y / 2) | 0
-            }
-        } else {
-            // zoom out (underzoom)
-            // FIXME: unsupported for now
-            return original
-
-        }
-
-        scaled.z = interval.base_zoom_level
-        return scaled
     }
 
     private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): PoI[] {
