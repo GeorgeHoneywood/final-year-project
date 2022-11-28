@@ -1,4 +1,3 @@
-
 import { Coord } from '../types'
 
 class Way {
@@ -16,7 +15,11 @@ class Way {
 
     tags: string[] | null
 
-    double_delta: boolean
+    is_closed: boolean
+    is_building: boolean
+    is_natural: boolean
+    is_water: boolean
+    is_grass: boolean
 
     constructor(
         osm_id: string | null,
@@ -27,7 +30,6 @@ class Way {
         house_number: string | null,
         ref: string | null,
         tags: string[] | null,
-        double_delta: boolean
     ) {
         this.osm_id = osm_id
 
@@ -41,7 +43,22 @@ class Way {
 
         this.tags = tags
 
-        this.double_delta = double_delta
+        // way is closed if start and end coords are close
+        this.is_closed = Math.hypot(
+            path[0].x - path[path.length - 1].x,
+            path[0].y - path[path.length - 1].y
+        ) < 0.000000001
+
+        this.is_building = !!tags?.find((e) => e.startsWith("building"))
+        this.is_water = !!tags?.find((e) => e === "natural=water")
+        // water is value of natural=, so we don't care about natural if it is already water
+        this.is_natural = !this.is_water ? !!tags?.find((e) => e.startsWith("natural")) : false
+        this.is_grass = !!tags?.find((e) =>
+            e === "landuse=grass"
+            || e === "landuse=meadow"
+            || e === "landuse=farmland"
+            || e === "leisure=golf_course"
+        )
     }
 }
 

@@ -211,7 +211,6 @@ class CanvasMap {
                 })
             }
         }
-        console.log(required_tiles)
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
@@ -252,28 +251,6 @@ class CanvasMap {
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
 
-                // draw way labels
-                if (this.zoom_level > 17 && way.label_position) {
-                    // draw the label centered on the geometry
-                    // FIXME: this only makes sense for closed geometries -- i.e.
-                    // not roads/paths
-                    const size = this.ctx.measureText(
-                        way.name ?? way.house_number ?? "",
-                    );
-                    const proj = projectMercator({ x: way.path[0].x, y: way.path[0].y });
-
-                    this.ctx.fillText(
-                        way.name ?? way.house_number ?? "",
-                        (proj.x + way.label_position.x) * scale +
-                        this.x_offset -
-                        size.width / 2,
-                        this.canvas.height -
-                        ((proj.y + way.label_position.y) * scale +
-                            this.y_offset) +
-                        15 / 2, // font height
-                    );
-                }
-
                 this.ctx.beginPath();
                 for (const { x, y } of way.path) {
                     const proj = projectMercator({ x, y });
@@ -282,7 +259,45 @@ class CanvasMap {
                         this.canvas.height - (proj.y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     );
                 }
-                this.ctx.stroke();
+
+                if (way.is_closed && way.is_building) {
+                    this.ctx.fillStyle = "#edc88e"
+                    this.ctx.fill()
+                } else if (way.is_closed && way.is_natural) {
+                    this.ctx.fillStyle = "#3f7a3f"
+                    this.ctx.fill()
+                } else if (way.is_closed && way.is_water) {
+                    this.ctx.fillStyle = "#53b9ef"
+                    this.ctx.fill()
+                } else if (way.is_closed && way.is_grass) {
+                    this.ctx.fillStyle = "#8dc98d"
+                    this.ctx.fill()
+                } else {
+                    this.ctx.strokeStyle = "black"
+                    this.ctx.stroke()
+                }
+
+                // draw way labels
+                if (this.zoom_level > 17 && way.label_position) {
+                    // draw the label centered on the geometry
+                    this.ctx.font = '13px Sans-serif';
+
+                    const size = this.ctx.measureText(
+                        way.name ?? way.house_number ?? "",
+                    );
+                    const proj = projectMercator({ x: way.path[0].x, y: way.path[0].y });
+
+                    this.ctx.fillStyle = "black"
+                    this.ctx.fillText(
+                        way.name ?? way.house_number ?? "",
+                        (proj.x + way.label_position.x) * scale
+                        + this.x_offset
+                        - size.width / 2,
+                        this.canvas.height
+                        - ((proj.y + way.label_position.y) * scale + this.y_offset)
+                        + 13 / 2, // font height
+                    );
+                }
             }
 
             // render out points of interest

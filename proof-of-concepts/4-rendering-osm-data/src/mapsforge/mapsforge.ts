@@ -549,8 +549,7 @@ class MapsforgeParser {
                     name,
                     house_number,
                     ref,
-                    tags,
-                    coordinate_block_encoding
+                    tags
                 )
             )
         }
