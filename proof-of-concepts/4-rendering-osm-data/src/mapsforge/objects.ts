@@ -16,10 +16,16 @@ class Way {
     tags: string[] | null
 
     is_closed: boolean
+
+    is_coastline: boolean
     is_building: boolean
-    is_natural: boolean
     is_water: boolean
+    is_beach: boolean
+    is_natural: boolean
     is_grass: boolean
+    is_residential: boolean
+    is_road: boolean
+    is_path: boolean
 
     constructor(
         osm_id: string | null,
@@ -50,14 +56,50 @@ class Way {
         ) < 0.000000001
 
         this.is_building = !!tags?.find((e) => e.startsWith("building"))
+
+        this.is_coastline = !!tags?.find((e) => e == "natural=coastline")
+
+        this.is_beach = !!tags?.find((e) => e === "natural=beach")
         this.is_water = !!tags?.find((e) => e === "natural=water")
+
         // water is value of natural=, so we don't care about natural if it is already water
-        this.is_natural = !this.is_water ? !!tags?.find((e) => e.startsWith("natural")) : false
+        this.is_natural = !this.is_water && !this.is_beach ? !!tags?.find((e) =>
+            e.startsWith("natural")
+            || e === "landuse=forest"
+        ) : false
+
         this.is_grass = !!tags?.find((e) =>
             e === "landuse=grass"
             || e === "landuse=meadow"
             || e === "landuse=farmland"
             || e === "leisure=golf_course"
+            || e === "leisure=park"
+            || e === "landuse=recreation_ground"
+        )
+
+        this.is_residential = !!tags?.find((e) => e === "landuse=residential")
+
+        // using startsWith catches the "highway=X_link" cases
+        this.is_road = !!tags?.find((e) =>
+            e.startsWith("highway=motorway")
+            || e.startsWith("highway=trunk")
+            || e.startsWith("highway=primary")
+            || e.startsWith("highway=secondary")
+            || e.startsWith("highway=tertiary")
+            || e === "highway=unclassified"
+            || e === "highway=residential"
+            || e === "highway=service"
+            || e === "highway=living_street"
+        )
+
+        this.is_path = !!tags?.find((e) =>
+            e === "highway=footway"
+            || e === "highway=cycleway"
+            || e === "highway=bridleway"
+            || e === "highway=steps"
+            || e === "highway=path"
+            || e === "highway=track"
+            || e === "highway=pedestrian"
         )
     }
 }

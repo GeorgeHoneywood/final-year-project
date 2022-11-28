@@ -167,7 +167,8 @@ class CanvasMap {
         this.setCanvasSize();
 
         // clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = "#f2efe9"
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw a crosshair
         this.drawCrosshair();
@@ -260,6 +261,9 @@ class CanvasMap {
                     );
                 }
 
+                // if (way.osm_id === "156644299") debugger
+
+                // feature styles
                 if (way.is_closed && way.is_building) {
                     this.ctx.fillStyle = "#edc88e"
                     this.ctx.fill()
@@ -269,12 +273,53 @@ class CanvasMap {
                 } else if (way.is_closed && way.is_water) {
                     this.ctx.fillStyle = "#53b9ef"
                     this.ctx.fill()
+                } else if (way.is_closed && way.is_beach) {
+                    this.ctx.fillStyle = "#f9e0bb"
+                    this.ctx.fill()
                 } else if (way.is_closed && way.is_grass) {
                     this.ctx.fillStyle = "#8dc98d"
                     this.ctx.fill()
-                } else {
-                    this.ctx.strokeStyle = "black"
+                } else if (way.is_closed && way.is_residential) {
+                    // FIXME: residential landuse rendering on top of roads
+                    // this.ctx.fillStyle = "#e0dfdf"
+                    // this.ctx.fill()
+                    continue
+                } else if (way.is_closed && way.is_path) {
+                    // pedestrian areas
+                    // FIXME: this isn't particularly correct
+                    // need to also check area=yes
+                    this.ctx.fillStyle = "#f9c1bb"
+                    this.ctx.fill()
+                } else if (way.is_road) {
+                    this.ctx.strokeStyle = "#7a7979"
+                    if (this.zoom_level < 15) {
+                        this.ctx.lineWidth = 2
+                    } else if (this.zoom_level < 17) {
+                        this.ctx.lineWidth = 4
+                    } else {
+                        this.ctx.lineWidth = 6
+                    }
                     this.ctx.stroke()
+                } else if (way.is_path) {
+                    this.ctx.strokeStyle = "#f9897c"
+                    if (this.zoom_level < 15) {
+                        this.ctx.lineWidth = 2
+                    } else if (this.zoom_level < 17) {
+                        this.ctx.lineWidth = 4
+                    } else {
+                        this.ctx.lineWidth = 6
+                    }
+                    this.ctx.stroke()
+                } else if (way.is_coastline) {
+                    this.ctx.strokeStyle = "black"
+                    this.ctx.lineWidth = 1
+                    this.ctx.stroke()
+                } else {
+                    // if we don't render it
+                    continue
+                    // this.ctx.strokeStyle = "black"
+                    // this.ctx.lineWidth = 1
+                    // this.ctx.stroke()
                 }
 
                 // draw way labels
@@ -391,6 +436,7 @@ class CanvasMap {
         };
         const wgs84Center = unprojectMercator(mercatorCenter);
 
+        this.ctx.font = "15px Arial";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
             `z${this.zoom_level.toFixed(1)},
