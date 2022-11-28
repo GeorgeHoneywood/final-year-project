@@ -142,8 +142,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         await p.readHeader()
 
         for (let z = 0; z < 21; z++) {
-            // @ts-expect-error private function
-            const zoom = p.getBaseZoom(z)
+              const zoom = p.getBaseZoom(z)
 
             if (z <= 7) {
                 expect(zoom.base_zoom_level).toBe(5)
@@ -153,15 +152,5 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
                 expect(zoom.base_zoom_level).toBe(14)
             }
         }
-    })
-
-    test("should scale tile positions to the base zooms of the subfiles", async () => {
-        const ferndown = new Blob([await fs.readFile("./data/ferndown.map")])
-        const p = new MapsforgeParser(ferndown)
-        await p.readHeader()
-
-        // @ts-expect-error private function
-        const position = p.getBaseTilePosition({ z: 1, x: 1, y: 1 }, p.zoom_intervals[0])
-        console.log(position)
     })
 })
