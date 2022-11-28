@@ -376,6 +376,7 @@ class CanvasMap {
         };
         const wgs84Center = unprojectMercator(mercatorCenter);
 
+        this.ctx.fillStyle = 'black';
         this.ctx.fillText(
             `z${this.zoom_level.toFixed(1)},
              x=${this.x_offset.toPrecision(8)},
