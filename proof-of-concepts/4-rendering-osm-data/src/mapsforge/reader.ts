@@ -4,7 +4,7 @@
  */
 class Reader {
     data: DataView
-    offset: number = 0
+    offset = 0
     decoder = new TextDecoder("utf-8")
 
     constructor(buffer: ArrayBuffer) {
@@ -133,7 +133,7 @@ class Reader {
     //
     // doesn't alter the offset
     printBytes(length = 20) {
-        let values: string[] = []
+        const values: string[] = []
         for (let i = this.offset; i < this.offset + length; i++) {
             const value = this.data.getUint8(i)
             values.push(

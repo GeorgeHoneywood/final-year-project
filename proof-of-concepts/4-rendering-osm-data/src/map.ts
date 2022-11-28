@@ -163,7 +163,7 @@ class CanvasMap {
         const top_left = coordZToXYZ(
             top_left_coord.y,
             top_left_coord.x,
-            14//this.zoom_level,
+            this.zoom_level,
         )
 
         const bottom_right_coord = unprojectMercator({
@@ -174,7 +174,7 @@ class CanvasMap {
         const bottom_right = coordZToXYZ(
             bottom_right_coord.y,
             bottom_right_coord.x,
-            14//this.zoom_level,
+            this.zoom_level,
         )
 
         // loop over the gap between the top left and bottom right of the screen
@@ -192,13 +192,18 @@ class CanvasMap {
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
-            const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
+            const tile_index = `${get_tile.z}/${get_tile.x}/${get_tile.y}`
             // only fetch if we haven't already -- must check undefined, as a
             // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
                 this.tile_cache[tile_index] = null
+                // FIXME: this isn't great -- when overzooming, we fetch the
+                // same base tile multiple times, and render it ontop of itself,
+                // for each of the overzoomed tiles in the viewport. not sure of
+                // the best way to handle this case. handling it here feels like
+                // the implementation leaking out...
                 this.parser.readTile(
-                    14,
+                    get_tile.z,
                     get_tile.x,
                     get_tile.y,
                 ).then((res) => {
@@ -210,7 +215,7 @@ class CanvasMap {
         }
 
         for (const get_tile of required_tiles) {
-            const tile_index = `${14}/${get_tile.x}/${get_tile.y}`
+            const tile_index = `${get_tile.z}/${get_tile.x}/${get_tile.y}`
             const tile = this.tile_cache[tile_index]
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now

@@ -222,21 +222,22 @@ class MapsforgeParser {
     }
 
     public async readTile(zoom: number, x: number, y: number): Promise<Tile | null> {
-        console.log(`loading tile z${zoom}/${x}/${y}`)
-
         const zoom_interval = this.getBaseZoom(zoom)
+        const base_tile = this.getBaseTilePosition({ z: zoom, x, y }, zoom_interval)
 
-        if (x < zoom_interval.left_tile_x || x > zoom_interval.right_tile_x) {
+        console.log(`loading tile z${zoom}/${x}/${y}, from base tile z${base_tile.z}/${base_tile.x}/${base_tile.y}`)
+
+        if (base_tile.x < zoom_interval.left_tile_x || base_tile.x > zoom_interval.right_tile_x) {
             console.log("tile not found!")
             return null
         }
-        if (y < zoom_interval.top_tile_y || y > zoom_interval.bottom_tile_y) {
+        if (base_tile.y < zoom_interval.top_tile_y || base_tile.y > zoom_interval.bottom_tile_y) {
             console.log("tile not found!")
             return null
         }
 
-        const from_block_x = Math.max(x - zoom_interval.left_tile_x, 0)
-        const from_block_y = Math.max(y - zoom_interval.top_tile_y, 0)
+        const from_block_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
+        const from_block_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
 
         // TODO: should support reading a range of multiple tiles in one go
         // const to_block_x = Math.min(x - zoom_interval.left_tile_x, zoom_interval.tile_width - 1)
@@ -279,7 +280,7 @@ class MapsforgeParser {
 
         // coordinates in the tile are all against this offset
         const tile_top_left_coord = unprojectMercator(
-            zxyToMercatorCoord(zoom, x, y)
+            zxyToMercatorCoord(base_tile.z, base_tile.x, base_tile.y)
         )
 
         if (this.flags.has_debug_info) {
@@ -334,22 +335,23 @@ class MapsforgeParser {
     }
 
     private getBaseTilePosition(original: TilePosition, interval: ZoomLevel): TilePosition {
-        const scaled = original
+        const scaled = { ...original } // deep copy
         if (original.z === interval.base_zoom_level) {
             // when the base zoom is the same as requested zoom, we do nothing
             return original
-        } else if (original.z < interval.base_zoom_level) {
-            // zoom in
-            for (let i = original.z; i < interval.base_zoom_level; i++) {
-                scaled.x *= 2
-                scaled.y *= 2
+        } else if (original.z > interval.base_zoom_level) {
+            // zoom in (overzoom)
+            // doing some bitshifting would be more elegant here, as we are
+            // always dividing by two*n and not caring about remainder
+            for (let i = original.z; i > interval.base_zoom_level; i--) {
+                scaled.x = (scaled.x / 2) | 0
+                scaled.y = (scaled.y / 2) | 0
             }
         } else {
-            // zoom out
-            for (let i = original.z; i > interval.base_zoom_level; i--) {
-                scaled.x /= 2
-                scaled.y /= 2
-            }
+            // zoom out (underzoom)
+            // FIXME: unsupported for now
+            return original
+
         }
 
         scaled.z = interval.base_zoom_level
