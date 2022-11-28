@@ -6,7 +6,7 @@ import {
 }
     from "../geom"
 import { Coord } from "../types"
-import { PoI, Tile, TilePosition, Way } from "./objects"
+import { PoI, Tile, Way } from "./objects"
 import {
     Reader
 }
@@ -221,7 +221,7 @@ class MapsforgeParser {
         }
     }
 
-    public async readBaseTile(zoom: number, x: number, y: number, render_zoom: number): Promise<Tile | null> {
+    public async readBaseTile(zoom: number, x: number, y: number): Promise<Tile | null> {
         const zoom_interval = this.getBaseZoom(zoom)
 
         const base_tile = { z: zoom, x, y }
