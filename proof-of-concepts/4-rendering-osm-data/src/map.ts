@@ -1,6 +1,6 @@
 import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
 import { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import { Tile, TilePosition } from "./mapsforge/objects.js";
+import { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
 import { Coord } from "./types.js";
 
 class CanvasMap {
@@ -45,6 +45,8 @@ class CanvasMap {
         this.ctx.font = "15px Arial";
 
         this.parser = parser;
+
+        this.ctx.miterLimit = 2;
 
         // must set canvas size, otherwise we cannot centre the map properly
         this.setCanvasSize();
@@ -246,30 +248,6 @@ class CanvasMap {
             // how many PoIs and ways we should show at our current zoom level
             const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
 
-            // render out points of interest
-            for (let i = 0; i < zoom_row.poi_count; i++) {
-                const poi = tile.pois[i]
-                // if (!poi.name || this.zoom_level < 16) continue;
-
-                this.ctx.beginPath();
-                const { x, y } = poi.position;
-                const proj = projectMercator({ x, y });
-
-                this.ctx.rect(
-                    proj.x * scale + this.x_offset - 5,
-                    this.canvas.height - (proj.y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
-                    10,
-                    10,
-                );
-                this.ctx.fillText(
-                    poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
-                    proj.x * scale + this.x_offset + 10,
-                    this.canvas.height - (proj.y * scale + this.y_offset) + 5,
-                );
-
-                this.ctx.stroke();
-            }
-
             // render out the ways
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
@@ -306,6 +284,26 @@ class CanvasMap {
                 }
                 this.ctx.stroke();
             }
+
+            // render out points of interest
+            for (let i = 0; i < zoom_row.poi_count; i++) {
+                const poi = tile.pois[i]
+                if (!poi.name) continue;
+
+                this.ctx.beginPath();
+                const { x, y } = poi.position;
+                const proj = projectMercator({ x, y });
+
+                this.ctx.rect(
+                    proj.x * scale + this.x_offset - 5,
+                    this.canvas.height - (proj.y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                    10,
+                    10,
+                );
+                this.drawStokedText(poi, proj, scale);
+
+                this.ctx.stroke();
+            }
         }
 
         this.drawDebugInfo(begin, scale, top_left);
@@ -313,6 +311,24 @@ class CanvasMap {
         this.updateUrlHash();
 
         requestAnimationFrame(() => this.render());
+    }
+
+    private drawStokedText(poi: PoI, proj: { x: number; y: number; }, scale: number) {
+        this.ctx.strokeStyle = 'black';
+        this.ctx.font = '15px Sans-serif';
+        this.ctx.lineWidth = 4;
+        this.ctx.strokeText(
+            poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
+            proj.x * scale + this.x_offset + 10,
+            this.canvas.height - (proj.y * scale + this.y_offset) + 5
+        );
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillText(
+            poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
+            proj.x * scale + this.x_offset + 10,
+            this.canvas.height - (proj.y * scale + this.y_offset) + 5
+        );
+        this.ctx.lineWidth = 1
     }
 
     private drawCrosshair() {
