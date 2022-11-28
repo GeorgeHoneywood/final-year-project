@@ -237,6 +237,8 @@ class CanvasMap {
             }
         }
 
+        const types :any = {}
+
         // draw ways first
         for (const get_tile of required_tiles) {
             const tile = this.tile_cache[getIndexString(get_tile)]
@@ -253,10 +255,9 @@ class CanvasMap {
 
                 this.ctx.beginPath();
                 for (const { x, y } of way.path) {
-                    const proj = projectMercator({ x, y });
                     this.ctx.lineTo(
-                        proj.x * scale + this.x_offset,
-                        this.canvas.height - (proj.y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                        x * scale + this.x_offset,
+                        this.canvas.height - (y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     );
                 }
 
@@ -318,8 +319,6 @@ class CanvasMap {
                     // this.ctx.lineWidth = 1
                     // this.ctx.stroke()
                 }
-
-
             }
         }
 
@@ -345,16 +344,15 @@ class CanvasMap {
                     const size = this.ctx.measureText(
                         way.name ?? way.house_number ?? "",
                     );
-                    const proj = projectMercator({ x: way.path[0].x, y: way.path[0].y });
-
+   
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
                         way.name ?? way.house_number ?? "",
-                        (proj.x + way.label_position.x) * scale
+                        (way.path[0].x + way.label_position.x) * scale
                         + this.x_offset
                         - size.width / 2,
                         this.canvas.height
-                        - ((proj.y + way.label_position.y) * scale + this.y_offset)
+                        - ((way.path[0].y + way.label_position.y) * scale + this.y_offset)
                         + 13 / 2, // font height
                     );
                 }
@@ -365,24 +363,20 @@ class CanvasMap {
                 const poi = tile.pois[i]
                 if (!poi.name) continue;
 
-                this.ctx.beginPath();
                 const { x, y } = poi.position;
-                const proj = projectMercator({ x, y });
-
                 this.ctx.rect(
-                    proj.x * scale + this.x_offset - 5,
-                    this.canvas.height - (proj.y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                    x * scale + this.x_offset - 5,
+                    this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     10,
                     10,
                 );
-                this.drawStokedText(poi, proj, scale);
+                this.drawStokedText(poi, {x, y}, scale);
 
                 this.ctx.stroke();
             }
         }
 
-
-        this.drawDebugInfo(begin, scale, top_left);
+        this.drawDebugInfo(begin, scale, top_left, required_tiles.length);
 
         this.updateUrlHash();
 
@@ -449,14 +443,14 @@ class CanvasMap {
      * @param scale the current zoom scale
      * @param top_left the top left tile x,y coordinate
      */
-    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }) {
+    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }, tile_count: number) {
         const mercatorCenter: Coord = {
             x: ((this.canvas.width / 2) - this.x_offset) / scale,
             y: ((this.canvas.height / 2) - this.y_offset) / scale,
         };
         const wgs84Center = unprojectMercator(mercatorCenter);
 
-        this.ctx.font = "15px";
+        this.ctx.font = "15px sans-serif";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
             `z${this.zoom_level.toFixed(1)},
@@ -465,7 +459,8 @@ class CanvasMap {
              frame_time=${(performance.now() - begin).toFixed(0)}ms,
              mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
              wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)}
-             tile_x,y=${top_left.x},${top_left.y}`
+             tile_x,y=${top_left.x},${top_left.y},
+             tile_count=${tile_count}`
                 .split("\n").map(e => e.trim()).join(" "),
             5,
             15,

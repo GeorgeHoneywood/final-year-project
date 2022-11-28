@@ -1,6 +1,7 @@
 import {
     coordZToXYZ,
     microDegreesToDegrees,
+    projectMercator,
     unprojectMercator,
     zxyToMercatorCoord,
 } from "../geom"
@@ -389,7 +390,7 @@ class MapsforgeParser {
 
             pois.push(new PoI(
                 osm_id,
-                { y: lat, x: lon },
+                projectMercator({ y: lat, x: lon }),
                 layer,
                 name,
                 house_number,
@@ -463,10 +464,10 @@ class MapsforgeParser {
 
             let label_position: Coord | null = null
             if (has_label_position) {
-                label_position = {
+                label_position = projectMercator({
                     y: microDegreesToDegrees(tile_data.getVSint()),
                     x: microDegreesToDegrees(tile_data.getVSint()),
-                }
+                })
             }
 
             // TODO: I don't understand when number_of_way_data_blocks will be > 1
@@ -494,10 +495,10 @@ class MapsforgeParser {
                             const lon = microDegreesToDegrees(tile_data.getVSint())
                                 + previous_lon
 
-                            path.push({
+                            path.push(projectMercator({
                                 y: lat,
                                 x: lon,
-                            })
+                            }))
 
                             previous_lat = lat
                             previous_lon = lon
@@ -528,10 +529,10 @@ class MapsforgeParser {
                                 previous_lon_offset = lon - previous_lon
                             }
 
-                            path.push({
+                            path.push(projectMercator({
                                 y: lat,
                                 x: lon,
-                            })
+                            }))
 
                             previous_lat = lat
                             previous_lon = lon
