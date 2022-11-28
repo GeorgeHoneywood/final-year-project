@@ -215,7 +215,7 @@ class CanvasMap {
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
-            const tile_index = `${get_tile.z}/${get_tile.x}/${get_tile.y}`
+            const tile_index = getIndexString(get_tile)
             // only fetch if we haven't already -- must check undefined, as a
             // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
@@ -237,9 +237,9 @@ class CanvasMap {
             }
         }
 
+        // draw ways first
         for (const get_tile of required_tiles) {
-            const tile_index = `${get_tile.z}/${get_tile.x}/${get_tile.y}`
-            const tile = this.tile_cache[tile_index]
+            const tile = this.tile_cache[getIndexString(get_tile)]
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now
                 continue
@@ -248,7 +248,6 @@ class CanvasMap {
             // how many PoIs and ways we should show at our current zoom level
             const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
 
-            // render out the ways
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
 
@@ -260,8 +259,6 @@ class CanvasMap {
                         this.canvas.height - (proj.y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     );
                 }
-
-                // if (way.osm_id === "156644299") debugger
 
                 // feature styles
                 if (way.is_closed && way.is_building) {
@@ -322,10 +319,28 @@ class CanvasMap {
                     // this.ctx.stroke()
                 }
 
+
+            }
+        }
+
+        // draw labels on top
+        for (const get_tile of required_tiles) {
+            const tile = this.tile_cache[getIndexString(get_tile)]
+            if (!tile) {
+                // tile is either empty, or not loaded yet. skip for now
+                continue
+            }
+
+            // how many PoIs and ways we should show at our current zoom level
+            const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
+
+            // render way labels
+            for (let i = 0; i < zoom_row.way_count; i++) {
+                const way = tile.ways[i]
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
                     // draw the label centered on the geometry
-                    this.ctx.font = '13px Sans-serif';
+                    this.ctx.font = '15px sans-serif';
 
                     const size = this.ctx.measureText(
                         way.name ?? way.house_number ?? "",
@@ -366,16 +381,21 @@ class CanvasMap {
             }
         }
 
+
         this.drawDebugInfo(begin, scale, top_left);
 
         this.updateUrlHash();
 
         requestAnimationFrame(() => this.render());
+
+        function getIndexString(get_tile: TilePosition) {
+            return `${get_tile.z}/${get_tile.x}/${get_tile.y}`;
+        }
     }
 
     private drawStokedText(poi: PoI, proj: { x: number; y: number; }, scale: number) {
         this.ctx.strokeStyle = 'black';
-        this.ctx.font = '15px Sans-serif';
+        this.ctx.font = '20px sans-serif';
         this.ctx.lineWidth = 4;
         this.ctx.strokeText(
             poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
@@ -436,7 +456,7 @@ class CanvasMap {
         };
         const wgs84Center = unprojectMercator(mercatorCenter);
 
-        this.ctx.font = "15px Arial";
+        this.ctx.font = "15px";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
             `z${this.zoom_level.toFixed(1)},
