@@ -324,7 +324,7 @@ The over-zoom/under-zoom functionality is supported by each sub-file containing 
 
 \subsubsection{Variable length integers}
 
-To save file space, coordinates and other numbers are encoded in a custom format. This means that both large and small numbers can be represented in the same format, whilst only requiring a minimal amount of bytes to represent them. The format is based around the idea that the first bit of a byte is used as a continuation bit --- i.e., the \texttt{1000 0000} it is set in this byte. If the continuation bit is set, you continue to read the next byte as part of the same number.
+To save file space, coordinates and other numbers are encoded in a custom format. This means that both large and small numbers can use the same representation, whilst requiring a minimal amount of bytes to store them. The format is based around the idea that the first bit of a byte is used as a continuation bit --- i.e., the \texttt{1000 0000} it is set in this byte. If the continuation bit is set, you continue to read the next byte as part of the same number.
 
 The format is little-endian, meaning that the first byte of the number is the least significant\footnote{Note that the bytes themselves are still stored in big-endian format}. Hence, you can read whole number by shifting each of the subsequent numbers by \(7n\), then applying a bitwise \texttt{OR / |} against the current total.
 
@@ -351,7 +351,7 @@ getVUint() {
 }
 \end{lstlisting}
 
-Signed integers follow a similar scheme with the continuation bit, but also sacrifice the second bit of the last byte to indicate the sign of the number, i.e. \texttt{0100 0000}. There is no concept of a floating point number in the format. Instead numbers are divided when it is required, for example for coordinates, which are stored in the file in micro degree units.
+Signed integers follow a similar scheme with the continuation bit, but also sacrifice the second bit of the last byte to indicate the sign of the number, i.e., \texttt{0100 0000}. There is no concept of a floating point number in the format. Instead, you divide numbers when it is required, for example for coordinates, which are stored in the file in microdegree units.
 
 \subsection{Writing a parser}
 
