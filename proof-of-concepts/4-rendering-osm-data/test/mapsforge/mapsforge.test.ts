@@ -121,7 +121,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(poi.name).toBe("Old Forge Road")
         expect(poi.tags).toStrictEqual(["highway=bus_stop"])
         expect(poi.position.x).toBeCloseTo(-1.91829175)
-        expect(poi.position.y).toBeCloseTo(50.80641726)
+        expect(poi.position.y).toBeCloseTo(59.17312685)
 
         const way = tile.ways[40]
         expect(way.name).toBe("Haviland Road")
@@ -130,10 +130,10 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         const first = way.path[0];
         expect(first.x).toBeCloseTo(-1.91370475)
-        expect(first.y).toBeCloseTo(50.80959926)
+        expect(first.y).toBeCloseTo(59.17816229)
         const last = way.path[11];
         expect(last.x).toBeCloseTo(-1.91624574, 7)
-        expect(last.y).toBeCloseTo(50.81180926, 7)
+        expect(last.y).toBeCloseTo(59.18165976, 7)
     })
 
     test("should return the base zoom level for some zoom", async () => {
