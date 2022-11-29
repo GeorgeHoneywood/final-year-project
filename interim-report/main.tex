@@ -9,6 +9,7 @@
 \usepackage[shortlabels]{enumitem} %change list formatting
 \usepackage[pdftex,
             colorlinks,
+            breaklinks=true,
             linkcolor={black},
             citecolor={black},
             urlcolor={blue!60!black},
@@ -73,7 +74,7 @@
 
 \begin{abstract}
     Although web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad.
-    
+
     In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how map data is projected into a rendered map. It will also teach me how to successfully develop a medium-sized application.
 \end{abstract}
 \newpage
@@ -198,7 +199,7 @@ As part of the development process, I have created a number of proof-of-concepts
 
 \section{Simple offline HTML5 app}
 
-\hfill \texttt{proof-of-concepts/1-offline-html5}
+{ \hfill \footnotesize Source in \texttt{proof-of-concepts/1-offline-html5}}
 
 My first proof of concept was a basic offline HTML5 application, employing the techniques that I researched in Section~\ref{sec:offline-html-applications}. Since the \texttt{Application Cache} has been deprecated, the accepted way to create an offline HTML5 app is to use Service Workers~\cite{w3c-service-workers-caches}. The concept behind this is that the Service Worker intercepts all HTTP requests that are made on the website, and can then respond to this request with a result from a prepopulated cache.
 
@@ -232,7 +233,7 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 \section{Rendering geometry to a canvas}
 
-\hfill \texttt{proof-of-concepts/2-rendering-a-way}
+{ \footnotesize Source in \texttt{proof-of-concepts/2-rendering-a-way}, or online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}.}
 
 My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
 
@@ -261,7 +262,7 @@ This proof of concept was entirely static, with the viewport and zoom level hard
 
 \section{Adding interactivity --- panning and zooming}
 
-\hfill \texttt{proof-of-concepts/3-panning-and-zooming}
+{ \footnotesize Source in \texttt{proof-of-concepts/3-panning-and-zooming}, or online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}.}
 
 The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
 
@@ -295,7 +296,7 @@ public render() {
 
 \section{Rendering tiled data from a Mapsforge file}
 
-\hfill \texttt{proof-of-concepts/4-rendering-osm-data}
+{ \footnotesize Source in \texttt{proof-of-concepts/4-rendering-osm-data}, or online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}.}
 
 My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
 
@@ -303,7 +304,7 @@ The bulk of the work for this proof of concept came in the form of writing a par
 
 \subsection{The Mapsforge format}
 
-Here I will explain the main concepts of the Mapsforge format, that I had to understand whilst writing the parser. This information is mostly as per the specification~\cite{mapsforge-format}, supplemented by what I learnt as I progressed. 
+Here I will explain the main concepts of the Mapsforge format, that I had to understand whilst writing the parser. This information is mostly as per the specification~\cite{mapsforge-format}, supplemented by what I learnt as I progressed.
 
 \subsubsection{Points of Interest (PoI)}
 
@@ -318,7 +319,7 @@ Ways are an abstraction over OpenStreetMap ways and relations. OSM represents co
 %% \- to give latex line break hints
 
 Sub-files store map data for a range of zoom levels. For example, the file \texttt{proof\--of\--concepts/4\--rendering\--osm\--data\-/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
-    
+
 The over-zoom/under-zoom functionality is supported by each sub-file containing a ``zoom table'', which contains how many PoIs/Ways need to be read for the tile at the requested zoom level. For example, when under-zooming a z14 tile to z12, is very slow to render absolutely all the map features, as you will be showing around 112 z14 base tiles (on a 1080p screen). For the zoom-table to work, the Way and PoI data in each tile is sorted by ``feature importance'', meaning that data to be shown at low zoom levels, like place labels or important roads, comes first, and less important geometries like houses are placed last. Therefore, you can read that there should be \texttt{x} amount of PoIs/Ways for this tile, for the zoom level you are decoding, read the specified amount, then skip over the rest.
 
 \subsubsection{Variable length integers}
