@@ -28,3 +28,7 @@ main.pdf
 proof-of-concepts/1-offline-html5/albania.map
 dist
 node_modules
+wales.map
+dorset-with-debug.map
+proof-of-concepts/4-rendering-osm-data/data/england.map
+proof-of-concepts/4-rendering-osm-data/data/london.map
