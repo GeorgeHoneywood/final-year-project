@@ -478,7 +478,11 @@ class MapsforgeParser {
 
             const path: Coord[] = []
             for (let j = 0; j < number_of_way_data_blocks; j++) {
-                // if number_of_coordinate_blocks is > 1, then the way is a multipolygon 
+                // if number_of_coordinate_blocks is > 1, then the way is a
+                // multipolygon 
+                
+                // FIXME: handle multipolygons correctly. need to store an array
+                // of paths for each way.
                 const number_of_coordinate_blocks = tile_data.getVUint()
 
                 for (let k = 0; k < number_of_coordinate_blocks; k++) {
