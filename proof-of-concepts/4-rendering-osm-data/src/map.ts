@@ -170,9 +170,6 @@ class CanvasMap {
         this.ctx.fillStyle = "#f2efe9"
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // draw a crosshair
-        this.drawCrosshair();
-
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
 
@@ -220,11 +217,6 @@ class CanvasMap {
             // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
                 this.tile_cache[tile_index] = null
-                // FIXME: this isn't great -- when overzooming, we fetch the
-                // same base tile multiple times, and render it ontop of itself,
-                // for each of the overzoomed tiles in the viewport. not sure of
-                // the best way to handle this case. handling it here feels like
-                // the implementation leaking out...
                 this.parser.readBaseTile(
                     get_tile.z,
                     get_tile.x,
@@ -236,8 +228,6 @@ class CanvasMap {
                 })
             }
         }
-
-        const types :any = {}
 
         // draw ways first
         for (const get_tile of required_tiles) {
@@ -341,19 +331,18 @@ class CanvasMap {
                     // draw the label centered on the geometry
                     this.ctx.font = '15px sans-serif';
 
-                    const size = this.ctx.measureText(
-                        way.name ?? way.house_number ?? "",
-                    );
-   
+                    const label = way.name ?? way.house_number ?? ""
+                    const size = this.ctx.measureText(label)
+
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
-                        way.name ?? way.house_number ?? "",
+                        label,
                         (way.path[0].x + way.label_position.x) * scale
                         + this.x_offset
                         - size.width / 2,
                         this.canvas.height
                         - ((way.path[0].y + way.label_position.y) * scale + this.y_offset)
-                        + 13 / 2, // font height
+                        + 15 / 2, // font height
                     );
                 }
             }
@@ -364,16 +353,20 @@ class CanvasMap {
                 if (!poi.name) continue;
 
                 const { x, y } = poi.position;
-                this.ctx.rect(
+
+                this.ctx.lineWidth = 2
+                this.ctx.strokeStyle = 'black';
+                // little box over the PoI, then label next to
+                this.ctx.strokeRect(
                     x * scale + this.x_offset - 5,
                     this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
                     10,
                     10,
                 );
-                this.drawStokedText(poi, {x, y}, scale);
-
-                this.ctx.stroke();
+                this.drawStokedText(poi, { x, y }, scale);
             }
+            
+            this.ctx.stroke();
         }
 
         this.drawDebugInfo(begin, scale, top_left, required_tiles.length);
@@ -391,26 +384,22 @@ class CanvasMap {
         this.ctx.strokeStyle = 'black';
         this.ctx.font = '20px sans-serif';
         this.ctx.lineWidth = 4;
+
+        const label = poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? ""
         this.ctx.strokeText(
-            poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
+            label,
             proj.x * scale + this.x_offset + 10,
             this.canvas.height - (proj.y * scale + this.y_offset) + 5
         );
+
         this.ctx.fillStyle = 'white';
         this.ctx.fillText(
-            poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? "",
+            label,
             proj.x * scale + this.x_offset + 10,
             this.canvas.height - (proj.y * scale + this.y_offset) + 5
         );
-        this.ctx.lineWidth = 1
-    }
 
-    private drawCrosshair() {
-        this.ctx.moveTo(this.canvas.width / 2, 0);
-        this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
-        this.ctx.moveTo(0, this.canvas.height / 2);
-        this.ctx.lineTo(this.canvas.width, this.canvas.height / 2);
-        this.ctx.stroke();
+
     }
 
     i = 0;
