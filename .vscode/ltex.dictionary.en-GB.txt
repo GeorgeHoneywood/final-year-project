@@ -13,3 +13,4 @@ slippy
 conformality
 carrée
 multipolygon
+PoIs

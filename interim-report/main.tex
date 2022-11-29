@@ -316,6 +316,12 @@ Ways are an abstraction over OpenStreetMap ways and relations. OSM represents co
 
 \subsubsection{Sub-files}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/high-detail-at-low-zoom.png}
+    \caption{Raw tiled data from zoom 14 base tiles}
+\end{figure}\label{fig:rendering-tiles}
+
 %% \- to give latex line break hints
 
 Sub-files store map data for a range of zoom levels. For example, the file \texttt{proof\--of\--concepts/4\--rendering\--osm\--data\-/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
@@ -356,6 +362,20 @@ Signed integers follow a similar scheme with the continuation bit, but also sacr
 \subsection{Writing a parser}
 
 In my first iteration of this proof of concept, I was decoding the file inline, using a \texttt{DataView}, manually keeping track of offsets within the blob. This worked, but led to a lot of duplicate code that was just handling offsets, and a number of error caused by me making some trivial mistake when incrementing the offset by the wrong amount. To remedy this smell, I refactored the code to use the abstraction of a \texttt{Reader}. You construct the \texttt{Reader} with a blob, then call methods like \texttt{.getVUint()}, or \texttt{.getBigUint64()}. These methods increment an offset internal to the \texttt{Reader} class.
+
+\subsection{Rendering the tiles}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/styled.png}
+    \caption{Styling of data from Mapsforge file}
+\end{figure}\label{fig:rendering-osm-data}
+
+When rendering the map, I first convert the current zoom level to the corresponding base zoom level of one of the sub-files. Once I have this I then calculate the coordinates at the top-left and bottom right of the screen, then convert these into Z/X/Y tile numbers, which I can then fetch from the file. To improve rendering performance, only the PoIs and Ways specified in the zoom table for that zoom level are shown.
+
+I handled styling fairly simplisticly, setting a number of booleans based on way tags as the tiles are loaded. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be.
+
+In order to make sure that labels are drawn on top, I make two passes through the data. First I render out all the areas and lines, then the way labels and PoIs. Before I implemented this, labels were being overlapped by areas from other tiles.
 
 %% for final report:
 %\chapter{Final application development process}
