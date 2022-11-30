@@ -1,4 +1,4 @@
-\documentclass[]{final_report}
+\documentclass{final_report}
 \usepackage[backend=biber,
             sorting=none,
             language=british]{biblatex} %create bibliography
@@ -73,9 +73,9 @@
 %%% Your Abstract here
 
 \begin{abstract}
-    Although web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad.
+    Although online web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad. There are limited options in this space that are cross-platform, which I hope my project can resolve through the nature of it being provided as a progressive web app (PWA).
 
-    In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how map data is projected into a rendered map. It will also teach me how to successfully develop a medium-sized application.
+    In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how you project map data into a rendered map. It will also teach me how to successfully develop a medium-sized application.
 \end{abstract}
 \newpage
 
@@ -98,7 +98,13 @@
 % \section{Issues}
 % \section{Motivation}
 
-\section{Related literature}
+\section{Literature review}
+
+Whilst researching my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge  that supplemented information that I have picked up over the years due to being involved with the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
+
+For more up to date or specific information I often relied on the OpenStreetMap Wiki~\cite{osm-wiki}, which provides a helpful reference for both OSM specific information and other GIS adjacent topics. These include general information about map projections~\cite{osm-wiki-mercator}, and details about the Z/X/Y tiling scheme that is common for web maps~\cite{osm-wiki-tile-names}.
+
+When it came to implementing the project, MDN Web Developer documentation proved invaluable~\cite{mdn}. They provide an excellent reference on how to use many web APIs, with detailed usage guides included. In particular, the information about the Canvas API~\cite{mdn-canvas-api}, and Service Workers~\cite{mdn-service-workers} was very useful, as these were technologies that I was not familiar with.
 
 \section{Aims and objectives}
 
@@ -118,7 +124,7 @@ Here I will list some specific features that I would like to implement in the pr
 
 % FIXME: presumably this should be in past tense
 
-Following a timeline should help my project to proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
+Following a timeline will help my project proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
 
 \begin{enumerate}
     \item Report on offline HTML5 technologies. Used this to discover whether it is possible to download \& store a large amount of vector map data (>100 MB) for later rendering.\label{item:deliverable:offline-html}
@@ -179,16 +185,6 @@ Following a timeline should help my project to proceed without any major unexpec
 \section{Projecting map data}\label{sec:projecting-map-data}
 
 \input{../research-reports/3-map-projections/content.tex}
-
-\chapter{Software engineering}
-
-% convential commit messages
-
-\section{Testing}
-
-\section{Version control}
-
-\section{Documentation}
 
 \chapter{Proof-of-concept development process}
 
@@ -306,13 +302,13 @@ The bulk of the work for this proof of concept came in the form of writing a par
 
 Here I will explain the main concepts of the Mapsforge format, that I had to understand whilst writing the parser. This information is mostly as per the specification~\cite{mapsforge-format}, supplemented by what I learnt as I progressed.
 
-\subsubsection{Points of Interest (PoI)}
+\subsubsection{Points of Interest (PoIs)}
 
-These represent tagged OpenStreetMap nodes, such as shops, bus stops, or any other objects that have been mapped as a node.
+These represent tagged OpenStreetMap nodes, such as shops, bus stops, or any other objects that have been mapped as a node. They are also used for city/town/place labels at low zoom levels.
 
 \subsubsection{Ways}
 
-Ways are an abstraction over OpenStreetMap ways and relations. OSM represents complex structures such as buildings with internal courtyards as multiple ways, for the outer and inner parts. These are linked by a multipolygon relation that labels each part as inner or outer~\cite{osm-wiki-multipolygon}. These are non-trivial to parse, especially with large amounts of data, so it makes sense to push this complexity to the map-writer software.
+Ways are an abstraction over OpenStreetMap ways and relations, presenting both as a single type. OSM represents complex structures such as buildings with internal courtyards as multiple ways, for the outer and inner parts. These are then linked by a multipolygon relation that labels each part as inner or outer~\cite{osm-wiki-multipolygon}. These are non-trivial to efficiently interpret, especially with large amounts of data, so it makes sense to push this complexity to the map-writer software.
 
 \subsubsection{Sub-files}
 
@@ -334,7 +330,7 @@ To save file space, coordinates and other numbers are encoded in a custom format
 
 The format is little-endian, meaning that the first byte of the number is the least significant\footnote{Note that the bytes themselves are still stored in big-endian format}. Hence, you can read whole number by shifting each of the subsequent numbers by \(7n\), then applying a bitwise \texttt{OR / |} against the current total.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=Parsing variable length integers]
 // decode a variable length unsigned integer as a number
 getVUint() {
     // if the first bit is 1, need to read the next byte rest of the 7 bits
@@ -376,6 +372,52 @@ When rendering the map, I first convert the current zoom level to the correspond
 I handled styling fairly simplisticly, setting a number of booleans based on way tags as the tiles are loaded. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be.
 
 In order to make sure that labels are drawn on top, I make two passes through the data. First I render out all the areas and lines, then the way labels and PoIs. Before I implemented this, labels were being overlapped by areas from other tiles.
+
+\chapter{Software engineering}
+
+% convential commit messages
+% talk about typescript
+
+In order to successfully deliver a project, it is important to follow good software engineering practices. These should help you create something that has minimal technical debt, is correct, is maintainable, and can be easily understood by other members of a team.
+
+I decided to write my project in TypeScript over plain JavaScript, as it provides an extremely helpful layer to help solve runtime type issues. It also allows my IDE, Visual Studio Code, to provide far more useful suggestions, compared to writing JS\@. This is because it is aware what types variables are at all times, instead of using a fallible heuristic approach.
+
+Conveniently, the JavaScript bundler I chose, \texttt{esbuild}, has built in support for stripping TypeScript annotations, meaning I only have a single build step. It doesn't have the ability to check types itself, but this was not an issue for me, as VS Code performs this function natively in the editor. \texttt{esbuild} also has a convenient ``dev-server'' mode, where it bundles up the latest code as the requests come in, removing the need for a file-watcher.
+
+\section{Testing}
+
+Testing is critical to producing a piece of software that works as expected. It helps you to define what your function should return before you write it, and ensures that the function returns exactly what you expect.
+
+In my project a significant amount of the work is rendering data to the HTML5 canvas. This portion of the project is very difficult to test --- at least while development is still occurring. Therefore, I directed my testing efforts towards the non-visual portions of the application, such as parsing the Mapsforge file, geometry operations, and projecting data.
+
+I implemented testing using the Jest framework. Initially I had some issues setting it up to be able to understand tests and code written in TypeScript. Once it was set up, it was irritatingly slow, taking 5+ seconds to run with only a single test. The cause of this was two-fold; I was using the \texttt{ts-jest} package, which uses Babel to transpile TypeScript to JS (which is slow), and I had written my \texttt{jest.config.ts} in TypeScript. This meant that when I ran \texttt{jest test}, it had to spin up \texttt{ts-node} to interpret the file, which is also relatively slow. To fix this I rewrote the config file in plain JavaScript, and switched Jest to use \texttt{@swc-node/jest} instead of \texttt{ts-jest} to transpile the JavaScript, which reduced the time taken to under 2 seconds for the whole suite.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/artifacts.png}
+    \caption{Rendering incorrectly parsed geometries}
+\end{figure}\label{fig:artifacts}
+
+In particular the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as in~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function, and I realized that I was incrementing my offset through the file on the wrong line.
+
+\begin{lstlisting}[caption=Output from the \texttt{.getVSint()} test suite, numbers=none]
+should be able to decode signed variable ints
+    pass: 1 byte max negative: [01111111].getVSint() == -63
+    pass: 1 byte max positve: [00111111].getVSint() == 63
+    pass: 2 byte min: [10000000,00000001].getVSint() == 128 (1 ms)
+    pass: 2 byte max: [11111111,01111111].getVSint() == -8191
+    pass: 3 byte min: [10000000,10000000,01000001].getVSint() == -16384
+    pass: 3 byte max: [11111111,11111111,01111111].getVSint() == -1048575
+    pass: 4 byte min: [10000000,10000000,10000000,00000001].getVSint() == 2097152
+\end{lstlisting}
+
+\section{Version control}
+
+Another important software engineering practice is making good use of version control.
+
+\section{Documentation}
+
+\section{Profiling}
 
 %% for final report:
 %\chapter{Final application development process}
