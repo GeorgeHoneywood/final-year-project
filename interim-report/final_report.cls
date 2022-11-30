@@ -70,7 +70,7 @@
 %}
 
 \renewcommand\chapter{
-\if@openright\cleardoublepage\else\clearpage\fi
+%\if@openright\cleardoublepage\else\clearpage\fi
                     \thispagestyle{plain}%
                     \global\@topnum\z@
                     \@afterindentfalse
