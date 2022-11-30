@@ -77,7 +77,6 @@
 
     In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how you project map data into a rendered map. It will also teach me how to successfully develop a medium-sized application.
 \end{abstract}
-\newpage
 
 % for final report:
 %%%%%%%%%%%%%%%%%%%%%%
@@ -89,6 +88,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Introduction
+
 \chapter{Introduction}
 
 \input{../plan/introduction.tex}
@@ -164,7 +164,10 @@ Following a timeline will help my project proceed without any major unexpected d
     \item \textbf{Week 9--11 (2023/03/27)}: Prepare for the final report.
 \end{itemize}
 
+\clearpage
 \chapter{Research}
+
+Here I present the research reports I conducted throughout the development process. These helped me to discover which technologies would be most appropriate for my project, and how I could implement them in my proof of concepts.
 
 \section{Basic HTML5 technologies}
 
@@ -186,6 +189,7 @@ Following a timeline will help my project proceed without any major unexpected d
 
 \input{../research-reports/3-map-projections/content.tex}
 
+\clearpage
 \chapter{Proof-of-concept development process}
 
 % talk about proof of concepts here!
@@ -251,8 +255,8 @@ const y = Math.log(Math.tan(
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.7\textwidth]{../proof-of-concepts/2-rendering-a-way/screenshots/ferndown-buildings.png}
-    \caption{Rendering some GeoJSON data to the canvas}
-\end{figure}\label{fig:rendering-geometry}
+    \caption{Rendering some GeoJSON data to the canvas}\label{fig:rendering-geometry}
+\end{figure}
 
 This proof of concept was entirely static, with the viewport and zoom level hardcoded into the program. To make the implementation simpler I wrote a function that scaled all the coordinates to be around (0,0), so that I didn't have to handle offsetting the viewport.
 
@@ -269,8 +273,8 @@ Panning also turned out to be relatively easy --- my implementation involved add
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{../proof-of-concepts/3-panning-and-zooming/screenshots/the-world.png}
-    \caption{An interactive world map, using Natural Earth data~\cite{natural-earth}}
-\end{figure}\label{fig:panning-and-zooming}
+    \caption{An interactive world map, using Natural Earth data~\cite{natural-earth}}\label{fig:panning-and-zooming}
+\end{figure}
 
 For testing the zooming between low and high zoom, I needed some ``large scale'' data to supplement the localized OSM data that I had downloaded for the previous proof of concept. Natural Earth Cultural Vector data seemed suitable, as it is readily available as GeoJSON, is released in the public domain, and is suitably low-detail for my purpose~\cite{natural-earth}. Once again I used \texttt{geojson.io}~\cite{geojson.io}, this time to merge these two sets of data.
 
@@ -315,8 +319,8 @@ Ways are an abstraction over OpenStreetMap ways and relations, presenting both a
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/high-detail-at-low-zoom.png}
-    \caption{Raw tiled data from zoom 14 base tiles}
-\end{figure}\label{fig:rendering-tiles}
+    \caption{Raw tiled data from zoom 14 base tiles}\label{fig:rendering-tiles}
+\end{figure}
 
 %% \- to give latex line break hints
 
@@ -364,19 +368,17 @@ In my first iteration of this proof of concept, I was decoding the file inline, 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/styled.png}
-    \caption{Styling of data from Mapsforge file}
-\end{figure}\label{fig:rendering-osm-data}
+    \caption{Styling of data from Mapsforge file}\label{fig:rendering-osm-data}
+\end{figure}
 
 When rendering the map, I first convert the current zoom level to the corresponding base zoom level of one of the sub-files. Once I have this I then calculate the coordinates at the top-left and bottom right of the screen, then convert these into Z/X/Y tile numbers, which I can then fetch from the file. To improve rendering performance, only the PoIs and Ways specified in the zoom table for that zoom level are shown.
 
-I handled styling fairly simplisticly, setting a number of booleans based on way tags as the tiles are loaded. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be.
+I handled styling fairly simplistically, setting a number of booleans based on way tags, as the tiles load in. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be. This is shown in Figure~\ref{fig:rendering-osm-data}.
 
-In order to make sure that labels are drawn on top, I make two passes through the data. First I render out all the areas and lines, then the way labels and PoIs. Before I implemented this, labels were being overlapped by areas from other tiles.
+To make sure that the map always draw labels on top, I make two passes through the data. In the first, I render out all the areas and lines, then in the second, the way labels and PoIs. Before I implemented this, areas from other tiles would often overlap labels.
 
+\clearpage
 \chapter{Software engineering}
-
-% convential commit messages
-% talk about typescript
 
 In order to successfully deliver a project, it is important to follow good software engineering practices. These should help you create something that has minimal technical debt, is correct, is maintainable, and can be easily understood by other members of a team.
 
@@ -395,10 +397,10 @@ I implemented testing using the Jest framework. Initially I had some issues sett
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/artifacts.png}
-    \caption{Rendering incorrectly parsed geometries}
-\end{figure}\label{fig:artifacts}
+    \caption{Rendering incorrectly parsed geometries}\label{fig:artifacts}
+\end{figure}
 
-In particular the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as in~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function, and I realized that I was incrementing my offset through the file on the wrong line.
+In particular the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as is shown in Figure~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function, and I realized that I was incrementing my offset through the file on the wrong line.
 
 \begin{lstlisting}[caption=Output from the \texttt{.getVSint()} test suite, numbers=none]
 should be able to decode signed variable ints
@@ -413,15 +415,37 @@ should be able to decode signed variable ints
 
 \section{Version control}
 
-Another important software engineering practice is making good use of version control.
+Another important software engineering practice is making good use of version control. Throughout this project I have made extensive use of Git branches, primarily to develop each of my proof of concepts. This has made sure that the code in the \texttt{main} branch is always in a working state.
+
+I have rigorously followed the \emph{Conventional Commits} specification, prefixing all commits with a type, such as \texttt{feat:}, \texttt{fix:}, \texttt{test:} or \texttt{report:}~\cite{conventional-commits}. This indicates the basic purpose of a commit at a glance, and encourages me to split up large changes into smaller atomic units of a single type. When changes are complicated or have subtle side effects, I have written a longer commit body, to supplement the information in the commit name.
 
 \section{Documentation}
 
-\section{Profiling}
+Regarding user documentation, so far my proof of concepts have been simple enough that detailed documentation is not yet necessary. For each proof of concept I have written a \texttt{README.md} that details how it can be run (or a link to it hosted online), and any dependencies or extra files required.
+
+In terms of developer documentation, where appropriate I have written JSDoc comments, particularly for functions that provide a \emph{public} API\@. These explicitly detail the purpose of the function, how it should be used, and what the arguments should be set to. In addition to these JSDoc comments, where the code itself is not completely clear or intentions aren't obvious, I have written comments inline.
+
+\section{Profiling and optimizations}
+
+The \texttt{render()} function is critically important to the responsiveness of the application. As the \texttt{requestAnimationFrame()} callback fires 60 times a second, we should aim to have the \texttt{render()} function run in under \(1000/60=16.666\) ms, so that we have a new frame to show with each refresh of the screen. 
+
+The first tool I implemented to work towards achieving this was adding a frame time metric to the debug information at the top of the canvas. This allowed me to test various different configurations and code changes to see which resulted in the best performance. Measuring the frame time is helpful for gauging performance overall, but it is not very precise --- you cannot see exactly what is consuming the CPU time within the \texttt{render()} call.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/profiling.png}
+    \caption{Using the profiler}\label{fig:profiling}
+\end{figure}
+
+This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important thing to optimize here is to simply cut down on the amount of geometries being rendered.
+
+%This is a pretty difficult target to achieve when you have lots of geometries on scree
 
 %% for final report:
+%\clearpage
 %\chapter{Final application development process}
 
+\clearpage
 \chapter{Conclusion}
 
 %% for final report:
@@ -430,6 +454,7 @@ Another important software engineering practice is making good use of version co
 
 \section{Evaluation}
 
+\clearpage
 \chapter{Annexe}
 
 %% include the full diary.md here.

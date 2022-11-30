@@ -14,3 +14,4 @@ conformality
 carrée
 multipolygon
 PoIs
+JSDoc
