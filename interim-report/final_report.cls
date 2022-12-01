@@ -159,8 +159,8 @@ Royal Holloway, University of London\\\vfill
 \renewcommand{\cfttoctitlefont}{\huge}
 \setlength\cftparskip{0pt} %a load of guff to make toc more compact
 \setlength{\cftbeforetoctitleskip}{0pt}
-\setlength\cftbeforechapskip{6pt}
-\setlength\cftbeforesecskip{4pt}
+\setlength\cftbeforechapskip{5pt}
+\setlength\cftbeforesecskip{3pt}
 \setlength\cftaftertoctitleskip{15pt}
 \setlength{\cftsubsubsecindent}{3.3cm} % {2.7cm}
 

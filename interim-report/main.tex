@@ -71,7 +71,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Your Abstract here
-
+\clearpage
 \begin{abstract}
     Although online web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad. There are limited options in this space that are cross-platform, which I hope my project can resolve through the nature of it being provided as a progressive web app (PWA).
 
@@ -120,9 +120,7 @@ Here I will list some specific features that I would like to implement in the pr
     \item When online, the application should allow the user to browse a map without having to first download any data. This could be done using raster tiles.
 \end{itemize}
 
-\section{Milestones}
-
-% FIXME: presumably this should be in past tense
+\section{Deliverables \& timeline}
 
 Following a timeline will help my project proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
 
@@ -142,7 +140,7 @@ Following a timeline will help my project proceed without any major unexpected d
     \item Allow the user to browse the map without first downloading data when online. This could be done using raster tiles.\label{item:deliverable:online}
 \end{enumerate}
 
-\subsection{Term 1}
+\subsection{Term one}\label{sec:term-1-plan}
 
 \begin{itemize}
     \item \textbf{Week 3 (2022/10/03)}: Report~\ref{item:deliverable:offline-html}.
@@ -153,7 +151,7 @@ Following a timeline will help my project proceed without any major unexpected d
     \item \textbf{Week 10--11 (2022/11/21)}: Prepare for the interim report, and presentation.
 \end{itemize}
 
-\subsection{Term 2}
+\subsection{Term two}
 
 \begin{itemize}
     \item \textbf{Week 1--2 (2023/01/10)}: Integration of the above proof of concepts into the final program.
@@ -217,9 +215,6 @@ Bundling in its simplest form involves concatenating all the source files togeth
 
 \clearpage
 \chapter{Proof-of-concept development process}
-
-% talk about proof of concepts here!
-% little write up of how each works, and what it achieves
 
 As part of the development process, I have created a number of proof-of-concepts, that each build on each other. These have helped me to understand, test and evaluate various technologies that I could use to build the final application.
 
@@ -451,7 +446,7 @@ Regarding user documentation, so far my proof of concepts have been simple enoug
 
 In terms of developer documentation, where appropriate I have written JSDoc comments, particularly for functions that provide a \emph{public} API\@. These explicitly detail the purpose of the function, how it should be used, and what the arguments should be set to. In addition to these JSDoc comments, where the code itself is not completely clear or intentions aren't obvious, I have written comments inline.
 
-\section{Profiling and optimizations}
+\section{Profiling and optimizations}\label{sec:profiling}
 
 The \texttt{render()} function is critically important to the responsiveness of the application. As the \texttt{requestAnimationFrame()} callback fires 60 times a second, we should aim to have the \texttt{render()} function run in under \(1000/60=16.666\) ms, so that we have a new frame to show with each refresh of the screen. 
 
@@ -465,23 +460,27 @@ The first tool I implemented to work towards achieving this was adding a frame t
 
 This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important thing to optimize here is to simply cut down on the amount of geometries being rendered.
 
-%This is a pretty difficult target to achieve when you have lots of geometries on scree
-
 %% for final report:
 %\clearpage
 %\chapter{Final application development process}
 
 \clearpage
-\chapter{Conclusion}
+\chapter{Conclusion \& evaluation}
 
 %% for final report:
 % \section{Professional issues}
 % look on the BCS website for ideas
 
-\section{Evaluation}
+In term one I have successfully followed the timeline I set out in Section~\ref{sec:term-1-plan}. During the beginning of the term I fell slightly behind, as I was busy with other modules, but I managed to catch up on lost time. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, which provides a basis of understanding for the rest of my report, as I had written my other reseasrch assuming quite a high level of base knowledge. My proof of concepts have been useful, helping me to understand key technologies and discover how is best to build the final deliverable.
+
+In term two I hope to continue keeping up with my plan. I may also write another report, on the subject of WebGL\@. It will be useful to do some research into this technology, as I fear that I have reached the limits of performance of the CPU rendered \texttt{CanvasRenderingContext2D} (see Section~\ref{sec:profiling}). WebGL, which is GPU accelerated, may allow me to go further, without compromising on the level of detail on the map.
+
+One thing that I have allowed for in the plan for term two is deliverable~\ref{item:deliverable:mobile-testing} (testing on mobile). This may not require as much time as I initially thought, given I have made mobile support a priority throughout the development of the proof of concepts. I also allocated a generous amount of time to integrating my proof of concepts together, which will not be necessary as they have each built on each other.
+
+The rest of the deliverables planned for term two are all fairly independent (i.e., they do not ``block'' progress). This means that if one is too difficult to implement, I can skip over it and move on to other tasks, providing some flexibility in my schedule. This may be useful for deliverable~\ref{item:deliverable:wikipedia}, where I would provide Wikipedia integration --- as I am unsure whether the Mapsforge files preserve Wikipedia tags.
 
 \clearpage
-\chapter{Annexe}
+\chapter*{Annexe}
 
 %% include the full diary.md here.
 %% could convert to .tex with pandoc
