@@ -57,5 +57,3 @@ Got multiple tiles to appear on the map, being loaded dynamically as you pan and
 Worked on getting the correct base tiles to render as you zoom in/out, significantly improving performance, and letting you get a high level overview of the map.
 
 Added styling for Ways and PoIs, with some zoom-conditional rendering logic. Continuing with the interim report.
-
-### Week 12 (2022-12-05)
