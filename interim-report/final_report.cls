@@ -166,7 +166,9 @@ Royal Holloway, University of London\\\vfill
 
 \usepackage{listings} %syntax highlighting
 \lstdefinelanguage{JavaScript}{
-  keywords={break, case, catch, continue, debugger, default, delete, do, else, false, finally, for, function, if, in, instanceof, new, null, return, switch, this, throw, true, try, typeof, var, void, while, with},
+  keywords={break, case, catch, continue, debugger, default, delete, do, else,
+  false, finally, for, function, if, in, instanceof, new, null, return, switch,
+  this, throw, true, try, typeof, var, void, while, with, let, const},
   morecomment=[l]{//},
   morecomment=[s]{/*}{*/},
   morestring=[b]',
