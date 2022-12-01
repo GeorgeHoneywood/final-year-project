@@ -2,11 +2,14 @@ import { MapsforgeParser } from "./mapsforge/mapsforge.js"
 import { loadMapBlob } from "./load.js";
 import { CanvasMap } from "./map.js";
 import { Coord } from "./types.js";
+import { registerServiceWorker } from "./register-sw.js";
 
 const canvas = document.getElementById("map") as HTMLCanvasElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
+    await registerServiceWorker()
+
     const parser = new MapsforgeParser(await loadMapBlob("data/dorset.map"))
 
     await parser.readHeader()
