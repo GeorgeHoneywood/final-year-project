@@ -254,7 +254,7 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 \section{Rendering geometry to a canvas}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/2-rendering-a-way}, or online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}.}
+{ \footnotesize Source in \texttt{proof-of-concepts/2-rendering-a-way}, online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}, or \href{https://youtu.be/2F_vpCrQsO4}{demo video}.}
 
 My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
 
@@ -283,7 +283,7 @@ This proof of concept was entirely static, with the viewport and zoom level hard
 
 \section{Adding interactivity --- panning and zooming}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/3-panning-and-zooming}, or online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}.}
+{ \footnotesize Source in \texttt{proof-of-concepts/3-panning-and-zooming}, online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}, or \href{https://youtu.be/_JvGwLra_Q4}{demo video}.}
 
 The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
 
@@ -317,7 +317,7 @@ public render() {
 
 \section{Rendering tiled data from a Mapsforge file}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/4-rendering-osm-data}, or online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}.}
+{ \footnotesize Source in \texttt{proof-of-concepts/4-rendering-osm-data}, online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}, \href{https://youtu.be/2cvZ-veBUto}{mobile demo video}, or \href{https://youtu.be/0evN3RT42QQ}{desktop demo video}.}
 
 My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
 
