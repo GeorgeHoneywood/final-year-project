@@ -1,6 +1,5 @@
-import { GeometryArray } from "./types.js";
 
-// load an array of coordinates from a geojson file
+// load an some map blob
 async function loadMapBlob(path: string): Promise<Blob> {
     const resp = await fetch(path);
     if (!resp.ok) {
