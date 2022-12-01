@@ -159,7 +159,7 @@ Following a timeline will help my project proceed without any major unexpected d
     \item \textbf{Week 1--2 (2023/01/10)}: Integration of the above proof of concepts into the final program.
     \item \textbf{Week 3--4 (2023/01/24)}: Deliverable~\ref{item:deliverable:mobile-testing}.
     \item \textbf{Week 5 (2023/02/07)}: Prepare an initial draft for the final report.
-    \item \textbf{Week 6--7 (2023/02/14)}: Add support for further features, such as deliverables \ref{item:deliverable:search}, \ref{item:deliverable:routing}, \ref{item:deliverable:wikipedia}, \ref{item:deliverable:markers} and \ref{item:deliverable:online}.
+    \item \textbf{Week 6--7 (2023/02/14)}: Add support for further features, such as deliverables~\ref{item:deliverable:search},~\ref{item:deliverable:routing},~\ref{item:deliverable:wikipedia},~\ref{item:deliverable:markers} and~\ref{item:deliverable:online}.
     \item \textbf{Week 8 (2023/02/28)}: Evaluate the solution so far, and decide whether to extend the project further, if time permits.
     \item \textbf{Week 9--11 (2023/03/27)}: Prepare for the final report.
 \end{itemize}
@@ -169,9 +169,35 @@ Following a timeline will help my project proceed without any major unexpected d
 
 Here I present the research reports I conducted throughout the development process. These helped me to discover which technologies would be most appropriate for my project, and how I could implement them in my proof of concepts.
 
-\section{Basic HTML5 technologies}
+\section{Basic web technologies}
 
-% write another report here, only on basic stuff.
+Websites are commonly made up of 3 main components: HTML, CSS and JavaScript~\cite{mdn-html}. HTML is used to create text, images, videos, and other non-interactive content. CSS is responsible for styling, colours, sizing, and other visual effects. JavaScript is used to add interactivity.
+
+While I will need some HTML and CSS, my project is focused on creating an interactive map. Therefore, much of my work will be done in JavaScript, specifically heavily utilising the Canvas API~\cite{mdn-canvas-api}. Instead of using vanilla JavaScript, I have chosen to use TypeScript, which is a superset of JavaScript that adds a compilation/stripping step, where types are statically checked to prevent runtime type issues (this is discussed more in Section~\ref{sec:software-engineering}).
+
+\begin{lstlisting}[caption=Basic HTML to run an external script with some basic styling, language=html]
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proof of concept: 1</title>
+    <style>
+      body {
+        font-family: sans;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Proof of concept: 1</h1>
+    <canvas id="map"></canvas>
+    <script src="dist/bundle.js"></script>
+  </body>
+</html>
+\end{lstlisting}
+
+To run your multiple JavaScript files in the browser, you can either use plain ES Modules~\cite{mdn-es-modules}, or add a bundling step, where all the code is combined into a single file. Using ES Modules in the browser allows you to avoid a build step, but has the negative that it is it requires \(n\) round-trips to the server. For example if say \texttt{main.js} imports \texttt{map.js} and \texttt{map.js} imports \texttt{util.js}, your browser will need to make 3 separate requests to the server, and script execution will be blocked until the last dependency has been fetched and evaluated~\cite{sitepoint-using-es-modules}. 
+
+Bundling in its simplest form involves concatenating all the source files together into a single file, which neatly avoids the round trip problem, whilst still allowing you to store your source code in separate files. Advanced bundlers also support features like minification, where variables are renamed to be shorter, whitespace is removed, and unused functions are purged. \texttt{esbuild} is a popular modern JavaScript/TypeScript bundler, written in Go, for high performance~\cite{esbuild}.
 
 \section{Offline HTML5 applications}\label{sec:offline-html-applications}
 
@@ -378,7 +404,7 @@ I handled styling fairly simplistically, setting a number of booleans based on w
 To make sure that the map always draw labels on top, I make two passes through the data. In the first, I render out all the areas and lines, then in the second, the way labels and PoIs. Before I implemented this, areas from other tiles would often overlap labels.
 
 \clearpage
-\chapter{Software engineering}
+\chapter{Software engineering}\label{sec:software-engineering}
 
 In order to successfully deliver a project, it is important to follow good software engineering practices. These should help you create something that has minimal technical debt, is correct, is maintainable, and can be easily understood by other members of a team.
 

@@ -17,3 +17,4 @@
 {"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\Qtabsize=4,fontsize=.\\E$"}
 {"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QFor example if you have a file, fetch.go., you put your tests in fetchtest.go., and they will be evaluated when you execute go test ./... — this made it easier to follow TDD.\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\QFor example if you have a file, fetch.go., you put your tests in fetchtest.go., and they will be evaluated when you execute go test ./... — this made it easier to follow TDD.\\E$"}
+{"rule":"PASSIVE_VOICE","sentence":"^\\QWebsites are commonly made up of 3 main components: HTML, CSS and JavaScript.\\E$"}
