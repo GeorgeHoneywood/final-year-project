@@ -20,12 +20,12 @@ Another useful method for drawing a map will be the \texttt{ctx.measureText(`str
 
 Finally, the \texttt{Path2D} interface may be useful for my application~\cite{mdn-canvas-path-2d}. It allows you to save a path, meaning you can stroke and fill some geometry, without having to draw the path twice. Hence, it should give an efficiency boost. You use it like so:
 
-\begin{Verbatim}
-const ctx = canvas.getContext(`2d');
+\begin{lstlisting}
+const ctx = canvas.getContext('2d');
 
 let path = new Path2D();
 path.rect(5, 5, 20, 20);
 
 ctx.stroke(path);
 ctx.fill(path);
-\end{Verbatim}
+\end{lstlisting}
