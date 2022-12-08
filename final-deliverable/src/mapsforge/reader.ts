@@ -135,10 +135,20 @@ class Reader {
     printBytes(length = 20) {
         const values: string[] = []
         for (let i = this.offset; i < this.offset + length; i++) {
-            const value = this.data.getUint8(i)
-            values.push(
-                `${value.toString(2).padStart(8, "0")}:${value.toString(16).padStart(2, "0")}:${String.fromCharCode(value)}`
-            )
+            try {
+                const value = this.data.getUint8(i)
+                values.push(
+                    `${value.toString(2).padStart(8, "0")}:${value.toString(16).padStart(2, "0")}:${value.toString(10).padStart(3, "0")}:${String.fromCharCode(value)}`
+                )
+            } catch (e) {
+                // we expect a range error if we print near EOF
+                if (e instanceof RangeError) {
+                    console.log("reached EOF")
+                    break
+                } else {
+                    throw e
+                }
+            }
 
         }
         console.log(values)
