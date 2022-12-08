@@ -56,7 +56,7 @@ class ZoomLevel {
     bottom_tile_y = 0
 }
 
-const tag_wildcard = /^.*%([bifhs])$/;
+const tag_wildcard = /^.*=%([bifhs])$/;
 
 /**
  * Reads some file encoded in the Mapsforge binary map file specification
@@ -344,7 +344,7 @@ class MapsforgeParser {
                 const str = tile_data.getFixedString(32)
                 // console.log(`reading poi: ${str}`)
                 if (!str.startsWith("***POIStart")) {
-                    throw new Error("***POIStart debug marker not found!")
+                    throw new Error(`***POIStart debug marker not found! got ${str}`)
                 }
                 osm_id = str.trim().replaceAll("***", "").replace("POIStart", "")
             }
@@ -360,14 +360,7 @@ class MapsforgeParser {
             const layer = (special >> 4) - 5
             const tag_count = (special & 0b00001111)
 
-            const tags = []
-            for (let j = 0; j < tag_count; j++) {
-                // decode each tag
-                const tag = this.poi_tags[tile_data.getVUint()]
-
-                // FIXME: handle wildcard tags?
-                tags.push(tag)
-            }
+            const tags = this.readTags(tag_count, this.poi_tags, tile_data)
 
             const flags = tile_data.getUint8()
 
@@ -410,7 +403,7 @@ class MapsforgeParser {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
-                console.log(`reading way: ${str}`)
+                // console.log(`reading way: ${str}`)
                 if (!str.startsWith("---WayStart")) {
                     throw new Error("---WayStart debug marker not found!")
                 }
@@ -426,51 +419,9 @@ class MapsforgeParser {
             const special = tile_data.getUint8()
 
             const layer = (special >> 4) - 5
-            const tag_count = (special & 0b00001111)
+            const tag_count = (special & 0b0000_1111)
 
-            const tags = []
-            for (let j = 0; j < tag_count; j++) {
-                tile_data.printBytes()
-                const tag_no = tile_data.getVUint()
-                // decode each tag
-                const tag = this.way_tags[tag_no]
-
-                if (!tag){debugger}
-                console.log(tag)
-                const is_wildcard = tag.match(tag_wildcard)
-                if (is_wildcard) {
-                    console.log("lol", osm_id)
-                    const wildcard_type = is_wildcard[1]
-
-                    console.log({is_wildcard})
-                    
-                    console.log(tile_data.offset)
-
-                    // FIXME: currently discarding wildcard tag values...
-                    switch (wildcard_type) {
-                        case "b": // byte
-                            tile_data.getUint8()
-                            break;
-                        case "i": // int
-                            console.log("read", tile_data.getInt32())
-                            break;
-                        case "f": // float (same length as int)
-                            tile_data.getInt32()
-                            break;
-                        case "h": // short
-                            tile_data.getUint16()
-                            break;
-                        case "s": // string
-                            tile_data.getVString()
-                            break;
-                        default:
-                            throw new Error(`unknown wildcard type: ${wildcard_type}`)
-                    }
-                    console.log(tile_data.offset)
-                }
-
-                tags.push(tag)
-            }
+            const tags = this.readTags(tag_count, this.way_tags, tile_data)
 
             const flags = tile_data.getUint8()
 
@@ -595,6 +546,59 @@ class MapsforgeParser {
             )
         }
         return ways
+    }
+
+    private readTags(tag_count: number, tag_list: string[], tile_data: Reader) {
+        const tags = []
+        for (let j = 0; j < tag_count; j++) {
+            // decode each tag
+            const tag_id = tile_data.getVUint()
+            const tag = tag_list[tag_id]
+
+            if (!tag) {
+                throw new Error(`could not read tag with id: ${tag_id}`)
+            }
+
+            tags.push(tag)
+        }
+
+        // wildcard tags are stored after tag ids
+        // TODO: looping the wrong way
+        for (let j = 0; j < tag_count; j++) {
+            const tag = tags[j]
+            const is_wildcard = tag.match(tag_wildcard)
+            if (is_wildcard) {
+                // gets the value from the regex capture group
+                const wildcard_type = is_wildcard[1]
+
+                // FIXME: currently discarding wildcard tag values...
+                // was forced to reference mapsforge library code, as the
+                // specification does not show possible wildcard values and
+                // their meanings:
+                // https://github.com/mapsforge/mapsforge/blob/master/mapsforge-map-reader/src/main/java/org/mapsforge/map/reader/ReadBuffer.java#L221
+                switch (wildcard_type) {
+                    case "b": // byte
+                        tile_data.getUint8()
+                        break
+                    case "i": // int
+                        tile_data.getInt32()
+                        break
+                    case "f": // float (same length as int)
+                        tile_data.getInt32()
+                        break
+                    case "h": // short
+                        tile_data.getUint16()
+                        break
+                    case "s": // string
+                        tile_data.getVString()
+                        break
+                    default:
+                        throw new Error(`unknown wildcard type: ${wildcard_type}`)
+                }
+            }
+        }
+
+        return tags
     }
 }
 
