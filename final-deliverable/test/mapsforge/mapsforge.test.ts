@@ -128,10 +128,10 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         expect(way.tags).toStrictEqual(["highway=unclassified"])
         expect(way.is_closed).toBe(false)
 
-        const first = way.path[0];
+        const first = way.paths[0][0];
         expect(first.x).toBeCloseTo(-1.91370475)
         expect(first.y).toBeCloseTo(59.17816229)
-        const last = way.path[11];
+        const last = way.paths[0][11];
         expect(last.x).toBeCloseTo(-1.91624574, 7)
         expect(last.y).toBeCloseTo(59.18165976, 7)
     })

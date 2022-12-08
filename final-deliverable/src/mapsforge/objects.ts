@@ -4,8 +4,8 @@ class Way {
     // the id of the Way in OpenStreetMap. only available if debug info is present
     osm_id: string | null
 
-    path: Coord[]
-    // label_position is relative to path[0]
+    paths: Coord[][]
+    // label_position is relative to paths[0][0]
     label_position: Coord | null
     layer: number
 
@@ -29,7 +29,7 @@ class Way {
 
     constructor(
         osm_id: string | null,
-        path: Coord[],
+        paths: Coord[][],
         label_position: Coord | null,
         layer: number,
         name: string | null,
@@ -39,7 +39,7 @@ class Way {
     ) {
         this.osm_id = osm_id
 
-        this.path = path
+        this.paths = paths
         this.label_position = label_position
         this.layer = layer
 
@@ -50,9 +50,10 @@ class Way {
         this.tags = tags
 
         // way is closed if start and end coords are close
+        // FIXME: this should be per path
         this.is_closed = Math.hypot(
-            path[0].x - path[path.length - 1].x,
-            path[0].y - path[path.length - 1].y
+            paths[0][0].x - paths[0][paths[0].length - 1].x,
+            paths[0][0].y - paths[0][paths[0].length - 1].y
         ) < 0.000000001
 
         this.is_building = !!tags?.find((e) => e.startsWith("building"))

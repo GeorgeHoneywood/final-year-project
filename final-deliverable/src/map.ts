@@ -243,71 +243,86 @@ class CanvasMap {
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
 
-                this.ctx.beginPath();
-                for (const { x, y } of way.path) {
-                    this.ctx.lineTo(
-                        x * scale + this.x_offset,
-                        this.canvas.height - (y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
-                    );
-                }
+                // handle multipolygons
+                for (const path of way.paths) {
+                    this.ctx.beginPath();
+                    for (const { x, y } of path) {
+                        this.ctx.lineTo(
+                            x * scale + this.x_offset,
+                            this.canvas.height - (y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                        );
+                    }
+                    // feature styles
+                    if (way.is_closed && way.is_building) {
+                        this.ctx.fillStyle = "#edc88e"
+                        this.ctx.fill()
+                    } else if (way.is_closed && way.is_natural) {
+                        this.ctx.fillStyle = "#3f7a3f"
+                        this.ctx.fill()
+                    } else if (way.is_closed && way.is_water) {
+                        this.ctx.fillStyle = "#53b9ef"
+                        this.ctx.fill()
+                    } else if (way.is_closed && way.is_beach) {
+                        this.ctx.fillStyle = "#f9e0bb"
+                        this.ctx.fill()
+                    } else if (way.is_closed && way.is_grass) {
+                        this.ctx.fillStyle = "#8dc98d"
+                        this.ctx.fill()
+                    } else if (way.is_closed && way.is_residential) {
+                        // FIXME: residential landuse rendering on top of roads
+                        // this.ctx.fillStyle = "#e0dfdf"
+                        // this.ctx.fill()
+                        continue
+                    } else if (way.is_closed && way.is_path) {
+                        // pedestrian areas
+                        // FIXME: this isn't particularly correct
+                        // need to also check area=yes
+                        this.ctx.fillStyle = "#f9c1bb"
+                        this.ctx.fill()
+                    } else if (way.is_road) {
+                        this.ctx.strokeStyle = "#7a7979"
+                        let scale = 1
 
-                // feature styles
-                if (way.is_closed && way.is_building) {
-                    this.ctx.fillStyle = "#edc88e"
-                    this.ctx.fill()
-                } else if (way.is_closed && way.is_natural) {
-                    this.ctx.fillStyle = "#3f7a3f"
-                    this.ctx.fill()
-                } else if (way.is_closed && way.is_water) {
-                    this.ctx.fillStyle = "#53b9ef"
-                    this.ctx.fill()
-                } else if (way.is_closed && way.is_beach) {
-                    this.ctx.fillStyle = "#f9e0bb"
-                    this.ctx.fill()
-                } else if (way.is_closed && way.is_grass) {
-                    this.ctx.fillStyle = "#8dc98d"
-                    this.ctx.fill()
-                } else if (way.is_closed && way.is_residential) {
-                    // FIXME: residential landuse rendering on top of roads
-                    // this.ctx.fillStyle = "#e0dfdf"
-                    // this.ctx.fill()
-                    continue
-                } else if (way.is_closed && way.is_path) {
-                    // pedestrian areas
-                    // FIXME: this isn't particularly correct
-                    // need to also check area=yes
-                    this.ctx.fillStyle = "#f9c1bb"
-                    this.ctx.fill()
-                } else if (way.is_road) {
-                    this.ctx.strokeStyle = "#7a7979"
-                    if (this.zoom_level < 15) {
-                        this.ctx.lineWidth = 2
-                    } else if (this.zoom_level < 17) {
-                        this.ctx.lineWidth = 4
+                        if (way.tags?.find((e) =>
+                            e === "highway=motorway"
+                            || e === "highway=trunk"
+                        )) {
+                            // major roads in orange
+                            this.ctx.strokeStyle = "#fcba64"
+
+                            // major roads should be twice as thick as normal roads
+                            scale = 2
+                        }
+
+                        if (this.zoom_level < 15) {
+                            this.ctx.lineWidth = 2 * scale
+                        } else if (this.zoom_level < 17) {
+                            this.ctx.lineWidth = 4 * scale
+                        } else {
+                            this.ctx.lineWidth = 6 * scale
+                        }
+                        this.ctx.stroke()
+                    } else if (way.is_path) {
+                        this.ctx.strokeStyle = "#f9897c"
+                        if (this.zoom_level < 15) {
+                            this.ctx.lineWidth = 2
+                        } else if (this.zoom_level < 17) {
+                            this.ctx.lineWidth = 4
+                        } else {
+                            this.ctx.lineWidth = 6
+                        }
+                        this.ctx.stroke()
+                    } else if (way.is_coastline) {
+                        this.ctx.strokeStyle = "black"
+                        this.ctx.lineWidth = 1
+                        this.ctx.stroke()
                     } else {
-                        this.ctx.lineWidth = 6
+                        // if we don't render it
+                        continue
+                        // this.ctx.strokeStyle = "black"
+                        // this.ctx.lineWidth = 1
+                        // this.ctx.stroke()
                     }
-                    this.ctx.stroke()
-                } else if (way.is_path) {
-                    this.ctx.strokeStyle = "#f9897c"
-                    if (this.zoom_level < 15) {
-                        this.ctx.lineWidth = 2
-                    } else if (this.zoom_level < 17) {
-                        this.ctx.lineWidth = 4
-                    } else {
-                        this.ctx.lineWidth = 6
-                    }
-                    this.ctx.stroke()
-                } else if (way.is_coastline) {
-                    this.ctx.strokeStyle = "black"
-                    this.ctx.lineWidth = 1
-                    this.ctx.stroke()
-                } else {
-                    // if we don't render it
-                    continue
-                    // this.ctx.strokeStyle = "black"
-                    // this.ctx.lineWidth = 1
-                    // this.ctx.stroke()
                 }
             }
         }
@@ -337,11 +352,11 @@ class CanvasMap {
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
                         label,
-                        (way.path[0].x + way.label_position.x) * scale
+                        (way.paths[0][0].x + way.label_position.x) * scale
                         + this.x_offset
                         - size.width / 2,
                         this.canvas.height
-                        - ((way.path[0].y + way.label_position.y) * scale + this.y_offset)
+                        - ((way.paths[0][0].y + way.label_position.y) * scale + this.y_offset)
                         + 15 / 2, // font height
                     );
                 }
@@ -365,7 +380,7 @@ class CanvasMap {
                 );
                 this.drawStokedText(poi, { x, y }, scale);
             }
-            
+
             this.ctx.stroke();
         }
 
