@@ -10,7 +10,7 @@ const canvas = document.getElementById("map") as HTMLCanvasElement;
 async function main() {
     await registerServiceWorker()
 
-    const parser = new MapsforgeParser(await loadMapBlob("data/dorset.map"))
+    const parser = new MapsforgeParser(await loadMapBlob("data/dorset-tag-values.map"))
 
     await parser.readHeader()
 

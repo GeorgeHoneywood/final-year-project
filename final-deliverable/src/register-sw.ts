@@ -10,6 +10,6 @@ async function registerServiceWorker() {
             console.error(`registration failed: ${err}`);
         }
     }
-};
+}
 
 export { registerServiceWorker }

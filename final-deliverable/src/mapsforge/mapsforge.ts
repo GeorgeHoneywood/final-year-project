@@ -56,6 +56,8 @@ class ZoomLevel {
     bottom_tile_y = 0
 }
 
+const tag_wildcard = /^.*%([bifhs])$/;
+
 /**
  * Reads some file encoded in the Mapsforge binary map file specification
  * 
@@ -408,7 +410,7 @@ class MapsforgeParser {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
                 const str = tile_data.getFixedString(32)
-                // console.log(`reading way: ${str}`)
+                console.log(`reading way: ${str}`)
                 if (!str.startsWith("---WayStart")) {
                     throw new Error("---WayStart debug marker not found!")
                 }
@@ -428,10 +430,45 @@ class MapsforgeParser {
 
             const tags = []
             for (let j = 0; j < tag_count; j++) {
+                tile_data.printBytes()
+                const tag_no = tile_data.getVUint()
                 // decode each tag
-                const tag = this.way_tags[tile_data.getVUint()]
+                const tag = this.way_tags[tag_no]
 
-                // FIXME: handle wildcard tags?
+                if (!tag){debugger}
+                console.log(tag)
+                const is_wildcard = tag.match(tag_wildcard)
+                if (is_wildcard) {
+                    console.log("lol", osm_id)
+                    const wildcard_type = is_wildcard[1]
+
+                    console.log({is_wildcard})
+                    
+                    console.log(tile_data.offset)
+
+                    // FIXME: currently discarding wildcard tag values...
+                    switch (wildcard_type) {
+                        case "b": // byte
+                            tile_data.getUint8()
+                            break;
+                        case "i": // int
+                            console.log("read", tile_data.getInt32())
+                            break;
+                        case "f": // float (same length as int)
+                            tile_data.getInt32()
+                            break;
+                        case "h": // short
+                            tile_data.getUint16()
+                            break;
+                        case "s": // string
+                            tile_data.getVString()
+                            break;
+                        default:
+                            throw new Error(`unknown wildcard type: ${wildcard_type}`)
+                    }
+                    console.log(tile_data.offset)
+                }
+
                 tags.push(tag)
             }
 
@@ -445,7 +482,6 @@ class MapsforgeParser {
             const has_number_of_way_data_blocks = (flags & 0b0000_1000) !== 0
             // === true means double-delta encoding, false means single-delta
             const coordinate_block_encoding = (flags & 0b0000_0100) !== 0
-
 
             let name: string | null = null
             if (has_name) {
