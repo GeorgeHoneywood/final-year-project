@@ -275,17 +275,25 @@ class CanvasMap {
                         continue
                     } else if (way.is_closed && way.is_path) {
                         // pedestrian areas
-                        // FIXME: this isn't particularly correct
-                        // need to also check area=yes
-                        this.ctx.fillStyle = "#f9c1bb"
-                        this.ctx.fill()
+                        // FIXME: need to stroke the path if not an area
+                        if (way.tags?.find((e) => e === "area=yes")) {
+                            this.ctx.fillStyle = "#f9c1bb"
+                            this.ctx.fill()
+                        }
+                    } else if (way.is_closed && way.is_road) {
+                        // road areas
+                        // FIXME: need to stroke the road if not an area
+                        if (way.tags?.find((e) => e === "area=yes")) {
+                            this.ctx.fillStyle = "#7a7979"
+                            this.ctx.fill()
+                        }
                     } else if (way.is_road) {
                         this.ctx.strokeStyle = "#7a7979"
                         let scale = 1
 
                         if (way.tags?.find((e) =>
-                            e === "highway=motorway"
-                            || e === "highway=trunk"
+                            e.startsWith("highway=motorway")
+                            || e.startsWith("highway=trunk")
                         )) {
                             // major roads in orange
                             this.ctx.strokeStyle = "#fcba64"
@@ -311,6 +319,10 @@ class CanvasMap {
                         } else {
                             this.ctx.lineWidth = 6
                         }
+                        this.ctx.stroke()
+                    } else if (way.is_railway) {
+                        this.ctx.lineWidth = 6
+                        this.ctx.strokeStyle = "#ed5c4b"
                         this.ctx.stroke()
                     } else if (way.is_coastline) {
                         this.ctx.strokeStyle = "black"

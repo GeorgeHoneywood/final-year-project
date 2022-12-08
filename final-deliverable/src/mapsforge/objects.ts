@@ -26,6 +26,7 @@ class Way {
     is_residential: boolean
     is_road: boolean
     is_path: boolean
+    is_railway: boolean
 
     constructor(
         osm_id: string | null,
@@ -103,6 +104,8 @@ class Way {
             || e === "highway=track"
             || e === "highway=pedestrian"
         )
+
+        this.is_railway = !!tags?.find((e) => e === "railway=rail")
     }
 }
 
