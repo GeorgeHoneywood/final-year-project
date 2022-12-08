@@ -63,14 +63,12 @@ class Way {
         this.is_beach = !!tags?.find((e) => e === "natural=beach")
         this.is_water = !!tags?.find((e) => e === "natural=water")
 
-        // water is value of natural=, so we don't care about natural if it is
-        // already water
-        // FIXME: using all natural values like this isn't a good idea, too wide
-        // of a net
-        this.is_natural = !this.is_water && !this.is_beach ? !!tags?.find((e) =>
-            e.startsWith("natural")
+        this.is_natural = !!tags?.find((e) =>
+            e === "natural=scrub"
+            || e === "natural=wood"
             || e === "landuse=forest"
-        ) : false
+            || e === "natural=heath"
+        )
 
         this.is_grass = !!tags?.find((e) =>
             e === "landuse=grass"
