@@ -64,7 +64,8 @@ const tag_wildcard = /^.*=%([bifhs])$/;
  * See here: https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md
  */
 class MapsforgeParser {
-    blob: Blob
+    blob: Blob | null
+    url: URL | null
 
     version = 0
     file_size = 0n
@@ -89,8 +90,50 @@ class MapsforgeParser {
     zoom_interval_count = 0
     zoom_intervals: ZoomLevel[] = []
 
-    public constructor(blob: Blob) {
+    /**
+     * Create a mapsforge file parser. Pass in either a Blob or a URL
+     * @param blob a whole, predownloaded blob
+     * @param url to fetch data from dynamically
+     */
+    public constructor(blob: Blob | null = null, url: URL | null = null) {
+        if (!blob && !url) {
+            throw new Error("either supply a blob or a url to read data from!")
+        }
+
         this.blob = blob
+        this.url = url
+    }
+
+    /**
+     * Helper function to get some bytes, either from the remote URL using range
+     * requests, or from the downloaded blob using `.slice()`
+     * 
+     * @param begin offset to begin read at in bytes
+     * @param end offset to end read at in bytes
+     * @returns ArrayBuffer containing the requested bytes
+     */
+    private async fetchBytes(begin: number, end: number): Promise<ArrayBuffer> {
+        if (this.blob) {
+            return this.blob.slice(begin, end).arrayBuffer()
+        } else if (this.url) {
+            const resp = await fetch(this.url,
+                {
+                    headers: {
+                        'Range': `bytes=${begin}-${end}`
+                    }
+                });
+
+            if (!resp.ok) {
+                throw new Error(
+                    `request failed; error code: ${resp.statusText || resp.status}`
+                );
+            }
+
+            const blob = await resp.blob()
+            return blob.arrayBuffer()
+        } else {
+            throw new Error("no data source!")
+        }
     }
 
     /**
@@ -98,18 +141,19 @@ class MapsforgeParser {
      * any tile data.
      */
     public async readHeader() {
-        if (await this.blob.slice(0, 20).text() !== "mapsforge binary OSM") {
-            throw new Error("file not mapforge binary format")
+        const magic_bytes = await this.fetchBytes(0, 24)
+        if (new TextDecoder().decode(magic_bytes.slice(0, 20)) !== "mapsforge binary OSM") {
+            throw new Error("file not in mapforge binary format!")
         }
 
         const header_length = new DataView(
-            await this.blob.slice(20, 24).arrayBuffer()
+            await magic_bytes.slice(20, 24)
         ).getInt32(0)
 
         const header = new Reader(
-            await this.blob.slice(
+            await this.fetchBytes(
                 24, header_length + 24,
-            ).arrayBuffer()
+            )
         )
 
         this.version = header.getInt32()
@@ -223,6 +267,14 @@ class MapsforgeParser {
         }
     }
 
+    /**
+     * Read a Tile of data from the mapsforge file
+     * 
+     * @param zoom level to read at. usually 0-21, but depends on the file
+     * @param x tile coord
+     * @param y tile coord
+     * @returns a Tile containing map data
+     */
     public async readBaseTile(zoom: number, x: number, y: number): Promise<Tile | null> {
         const zoom_interval = this.getBaseZoom(zoom)
 
@@ -251,10 +303,10 @@ class MapsforgeParser {
 
         // load two index blocks
         const index = new Reader(
-            await this.blob.slice(
+            await this.fetchBytes(
                 Number(index_block_position),
                 Number(index_block_position + 10n),
-            ).arrayBuffer()
+            )
         )
 
         // FIXME: handle the end of file case, where there aren't any more index blocks
@@ -264,7 +316,6 @@ class MapsforgeParser {
 
         if (next_block_pointer === block_pointer) {
             // if the tile is empty, the index points to the next tile with data
-            // throw new Error("empty tiles are not supported!")
             console.log("tile not found!")
             return null
         }
@@ -272,10 +323,10 @@ class MapsforgeParser {
         const block_length = next_block_pointer - block_pointer;
 
         const tile_data = new Reader(
-            await this.blob.slice(
+            await this.fetchBytes(
                 Number(zoom_interval.sub_file_start_position + block_pointer),
                 Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
-            ).arrayBuffer()
+            )
         )
 
         // coordinates in the tile are all against this offset
@@ -563,7 +614,6 @@ class MapsforgeParser {
         }
 
         // wildcard tags are stored after tag ids
-        // TODO: looping the wrong way
         for (let j = 0; j < tag_count; j++) {
             const tag = tags[j]
             const is_wildcard = tag.match(tag_wildcard)
