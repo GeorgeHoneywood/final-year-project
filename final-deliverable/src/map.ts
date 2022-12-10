@@ -229,6 +229,20 @@ class CanvasMap {
             }
         }
 
+        let total_ways = 0
+        const totals: { [type: string]: number } = {
+            building: 0,
+            natural: 0,
+            road: 0,
+            railway: 0,
+            country: 0,
+            water: 0,
+            beach: 0,
+            path: 0,
+            grass: 0,
+            coastline: 0,
+        }
+
         // draw ways first
         for (const get_tile of required_tiles) {
             const tile = this.tile_cache[getIndexString(get_tile)]
@@ -245,6 +259,7 @@ class CanvasMap {
 
                 // handle multipolygons
                 for (const path of way.paths) {
+                    total_ways++
                     this.ctx.beginPath();
                     for (const { x, y } of path) {
                         this.ctx.lineTo(
@@ -256,18 +271,23 @@ class CanvasMap {
                     if (way.is_closed && way.is_building) {
                         this.ctx.fillStyle = "#edc88e"
                         this.ctx.fill()
+                        totals['building']++
                     } else if (way.is_closed && way.is_natural) {
                         this.ctx.fillStyle = "#3f7a3f"
                         this.ctx.fill()
+                        totals['natural']++
                     } else if (way.is_closed && way.is_water) {
                         this.ctx.fillStyle = "#53b9ef"
                         this.ctx.fill()
+                        totals['water']++
                     } else if (way.is_closed && way.is_beach) {
                         this.ctx.fillStyle = "#f9e0bb"
                         this.ctx.fill()
+                        totals['beach']++
                     } else if (way.is_closed && way.is_grass) {
                         this.ctx.fillStyle = "#8dc98d"
                         this.ctx.fill()
+                        totals['grass']++
                     } else if (way.is_closed && way.is_residential) {
                         // FIXME: residential landuse rendering on top of roads
                         // this.ctx.fillStyle = "#e0dfdf"
@@ -279,6 +299,7 @@ class CanvasMap {
                         if (way.tags?.find((e) => e === "area=yes")) {
                             this.ctx.fillStyle = "#f9c1bb"
                             this.ctx.fill()
+                            totals['path']++
                         }
                     } else if (way.is_closed && way.is_road) {
                         // road areas
@@ -286,6 +307,7 @@ class CanvasMap {
                         if (way.tags?.find((e) => e === "area=yes")) {
                             this.ctx.fillStyle = "#7a7979"
                             this.ctx.fill()
+                            totals['road']++
                         }
                     } else if (way.is_road) {
                         this.ctx.strokeStyle = "#7a7979"
@@ -309,6 +331,7 @@ class CanvasMap {
                         } else {
                             this.ctx.lineWidth = 6 * scale
                         }
+                        totals['road']++
                         this.ctx.stroke()
                     } else if (way.is_path) {
                         this.ctx.strokeStyle = "#f9897c"
@@ -319,14 +342,17 @@ class CanvasMap {
                         } else {
                             this.ctx.lineWidth = 6
                         }
+                        totals['path']++
                         this.ctx.stroke()
                     } else if (way.is_railway) {
                         this.ctx.lineWidth = 6
                         this.ctx.strokeStyle = "#ed5c4b"
                         this.ctx.stroke()
+                        totals['railway']++
                     } else if (way.is_coastline) {
                         this.ctx.strokeStyle = "black"
                         this.ctx.lineWidth = 1
+                        totals['coastline']++
                         this.ctx.stroke()
                     } else {
                         // if we don't render it
@@ -396,7 +422,7 @@ class CanvasMap {
             this.ctx.stroke();
         }
 
-        this.drawDebugInfo(begin, scale, top_left, required_tiles.length);
+        this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
 
         this.updateUrlHash();
 
@@ -459,24 +485,27 @@ class CanvasMap {
      * @param scale the current zoom scale
      * @param top_left the top left tile x,y coordinate
      */
-    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }, tile_count: number) {
-        const mercatorCenter: Coord = {
-            x: ((this.canvas.width / 2) - this.x_offset) / scale,
-            y: ((this.canvas.height / 2) - this.y_offset) / scale,
-        };
-        const wgs84Center = unprojectMercator(mercatorCenter);
+    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, totals: Record<string, number>) {
+        // const mercatorCenter: Coord = {
+        //     x: ((this.canvas.width / 2) - this.x_offset) / scale,
+        //     y: ((this.canvas.height / 2) - this.y_offset) / scale,
+        // };
+        // const wgs84Center = unprojectMercator(mercatorCenter);
+        
+        // x=${this.x_offset.toPrecision(8)},
+        // y=${this.y_offset.toPrecision(8)},
+        // mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
+        // wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)},
 
         this.ctx.font = "15px sans-serif";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
             `z${this.zoom_level.toFixed(1)},
-             x=${this.x_offset.toPrecision(8)},
-             y=${this.y_offset.toPrecision(8)},
              frame_time=${(performance.now() - begin).toFixed(0)}ms,
-             mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
-             wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)}
              tile_x,y=${top_left.x},${top_left.y},
-             tile_count=${tile_count}`
+             tile_count=${tile_count},
+             total_ways=${total_ways},
+             totals=${JSON.stringify(totals)}`
                 .split("\n").map(e => e.trim()).join(" "),
             5,
             15,
