@@ -613,37 +613,40 @@ class MapsforgeParser {
             tags.push(tag)
         }
 
-        // wildcard tags are stored after tag ids
-        for (let j = 0; j < tag_count; j++) {
-            const tag = tags[j]
-            const is_wildcard = tag.match(tag_wildcard)
-            if (is_wildcard) {
-                // gets the value from the regex capture group
-                const wildcard_type = is_wildcard[1]
+        // only >v5 files have wildcard tags
+        if (this.version >= 5) {
+            // wildcard tags are stored after tag ids
+            for (let j = 0; j < tag_count; j++) {
+                const tag = tags[j]
+                const is_wildcard = tag.match(tag_wildcard)
+                if (is_wildcard) {
+                    // gets the value from the regex capture group
+                    const wildcard_type = is_wildcard[1]
 
-                // FIXME: currently discarding wildcard tag values...
-                // was forced to reference mapsforge library code, as the
-                // specification does not show possible wildcard values and
-                // their meanings:
-                // https://github.com/mapsforge/mapsforge/blob/master/mapsforge-map-reader/src/main/java/org/mapsforge/map/reader/ReadBuffer.java#L221
-                switch (wildcard_type) {
-                    case "b": // byte
-                        tile_data.getUint8()
-                        break
-                    case "i": // int
-                        tile_data.getInt32()
-                        break
-                    case "f": // float (same length as int)
-                        tile_data.getInt32()
-                        break
-                    case "h": // short
-                        tile_data.getUint16()
-                        break
-                    case "s": // string
-                        tile_data.getVString()
-                        break
-                    default:
-                        throw new Error(`unknown wildcard type: ${wildcard_type}`)
+                    // FIXME: currently discarding wildcard tag values...
+                    // was forced to reference mapsforge library code, as the
+                    // specification does not show possible wildcard values and
+                    // their meanings:
+                    // https://github.com/mapsforge/mapsforge/blob/master/mapsforge-map-reader/src/main/java/org/mapsforge/map/reader/ReadBuffer.java#L221
+                    switch (wildcard_type) {
+                        case "b": // byte
+                            tile_data.getUint8()
+                            break
+                        case "i": // int
+                            tile_data.getInt32()
+                            break
+                        case "f": // float (same length as int)
+                            tile_data.getInt32()
+                            break
+                        case "h": // short
+                            tile_data.getUint16()
+                            break
+                        case "s": // string
+                            tile_data.getVString()
+                            break
+                        default:
+                            throw new Error(`unknown wildcard type: ${wildcard_type}`)
+                    }
                 }
             }
         }
