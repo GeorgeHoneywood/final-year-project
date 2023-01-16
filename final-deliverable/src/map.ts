@@ -429,6 +429,9 @@ class CanvasMap {
             this.ctx.stroke();
         }
 
+        // draw the user's position
+        this.drawUserPosition(scale);
+
         this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
 
         this.updateUrlHash();
@@ -437,6 +440,26 @@ class CanvasMap {
 
         function getIndexString(get_tile: TilePosition) {
             return `${get_tile.z}/${get_tile.x}/${get_tile.y}`;
+        }
+    }
+
+    // draw the user's current GPS position to the canvas,
+    // if we have it
+    private drawUserPosition(scale: number) {
+        if (this.user_position) {
+            const { x, y } = projectMercator({
+                x: this.user_position.longitude,
+                y: this.user_position.latitude
+            });
+
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = "red";
+            this.ctx.strokeRect(
+                x * scale + this.x_offset - 10,
+                this.canvas.height - (y * scale + this.y_offset) - 10,
+                20,
+                20
+            );
         }
     }
 
@@ -498,7 +521,7 @@ class CanvasMap {
         //     y: ((this.canvas.height / 2) - this.y_offset) / scale,
         // };
         // const wgs84Center = unprojectMercator(mercatorCenter);
-        
+
         // x=${this.x_offset.toPrecision(8)},
         // y=${this.y_offset.toPrecision(8)},
         // mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
