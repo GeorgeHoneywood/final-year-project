@@ -12,13 +12,27 @@
       body {
         font-family: sans;
       }
+
+      #map-container {
+        position: relative;
+      }
+
+      #geolocate {
+        position: absolute;
+        z-index: 10;
+        top: 10px;
+        right: 10px;
+      }
     </style>
   </head>
 
   <body>
     <h1>Proof of concept: rendering tiled OSM data</h1>
-
-    <canvas id="map"></canvas>
+    
+    <div id="map-container">
+      <canvas id="map"></canvas>
+      <button id="geolocate">Geolocate!</button>
+    </div>
 
     <script src="dist/bundle.js"></script>
   </body>
