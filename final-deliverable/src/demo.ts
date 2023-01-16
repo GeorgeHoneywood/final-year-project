@@ -5,13 +5,16 @@ import { Coord } from "./types.js";
 import { registerServiceWorker } from "./register-sw.js";
 
 const canvas = document.getElementById("map") as HTMLCanvasElement;
+const geolocate_button = document.getElementById("geolocate") as HTMLButtonElement;
 // const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
     await registerServiceWorker()
 
-    // const parser = new MapsforgeParser(await loadMapBlob("data/england.map"))
-    const parser = new MapsforgeParser(null, new URL("data/england.map", location.href))
+    // load entire map blob
+    const parser = new MapsforgeParser(await loadMapBlob("data/egham.map"))
+    // load dynamically using HTTP range requests
+    // const parser = new MapsforgeParser(null, new URL("data/egham.map", location.href))
 
     await parser.readHeader()
 
@@ -19,9 +22,19 @@ async function main() {
 
     const map = new CanvasMap(canvas, parser);
 
-    // layerPicker.addEventListener("change", async (e) => {
-    //     // map.setGeometries(await getGeometries());
-    // });
+    // gps handling
+    geolocate_button.addEventListener("click", () => {
+        console.log("geolocating!")
+        if (navigator.geolocation) {
+            // TODO: handle GeolocationPositionError 
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
+            navigator.geolocation.watchPosition((pos: GeolocationPosition) => {
+                map.setUserPosition(pos.coords)
+            });
+        } else {
+            console.log("geolocation is unsupported!")
+        }
+    })
 
     let mousePosition: Coord | null = null;
 

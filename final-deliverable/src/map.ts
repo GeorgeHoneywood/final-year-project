@@ -33,6 +33,8 @@ class CanvasMap {
     // rerendering otherwise is a waste of CPU time
     private dirty = true;
 
+    private user_position: GeolocationCoordinates | null = null
+
     /**
      * Create a map, linked to a canvas, to show tiles from the parser.
      *
@@ -146,6 +148,11 @@ class CanvasMap {
 
             this.dirty = true;
         }
+    }
+
+    public setUserPosition(coord: GeolocationCoordinates) {
+        this.user_position = coord
+        this.dirty = true;
     }
 
     /**
