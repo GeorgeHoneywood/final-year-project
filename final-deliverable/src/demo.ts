@@ -4,9 +4,10 @@ import { CanvasMap } from "./map.js";
 import { Coord } from "./types.js";
 import { registerServiceWorker } from "./register-sw.js";
 
+const DOUBLE_TAP_TIMEOUT = 300;
+
 const canvas = document.getElementById("map") as HTMLCanvasElement;
 const geolocate_button = document.getElementById("geolocate") as HTMLButtonElement;
-// const layerPicker = document.getElementById("layerPicker") as HTMLSelectElement;
 
 async function main() {
     await registerServiceWorker()
@@ -78,11 +79,14 @@ async function main() {
     // touch handling code: https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
     // TODO:
     // * Double tap zoom
-    // * Double & hold zoom in and out
 
     const currentTouches: any[] = [];
     let previousPinchDistance: number | null = null;
     let pinchCenter: Coord | null = null;
+    let firstTap = false;
+    let wasDoubleTapped = false;
+    let doubleTapPosition: Coord | null = null;
+    let previousDoubleTapDistance: number | null = null;
 
     function copyTouch({ identifier, pageX, pageY }: any) {
         return { identifier, pageX, pageY };
@@ -107,6 +111,17 @@ async function main() {
         for (let i = 0; i < touches.length; i++) {
             currentTouches.push(copyTouch(touches[i]));
         }
+
+        // figure out if a double tap has occurred
+        if (!firstTap) {
+            firstTap = true;
+            setTimeout(() => { firstTap = false; }, DOUBLE_TAP_TIMEOUT);
+            return
+        }
+
+        if (firstTap) {
+            wasDoubleTapped = true
+        }
     });
 
     canvas.addEventListener("touchmove", (e) => {
@@ -114,7 +129,25 @@ async function main() {
 
         const touches = e.changedTouches;
 
-        if (touches.length == 1) {
+        if (wasDoubleTapped && e.touches.length === 1) {
+            // handle double tap zoom first
+
+            const rect = canvas.getBoundingClientRect();
+            doubleTapPosition ??= {
+                x: touches[0].pageX - rect.left,
+                y: rect.bottom - touches[0].pageY,
+            }
+
+            // we only care about the distance in the y-axis for double taps
+            const doubleTapDistance = doubleTapPosition.y - rect.bottom - touches[0].pageY;
+            previousDoubleTapDistance ??= doubleTapDistance;
+
+            // zoom about the position of the double tap
+            map.zoom((previousDoubleTapDistance - doubleTapDistance) / 100, doubleTapPosition);
+            previousDoubleTapDistance = doubleTapDistance;
+        } else if (touches.length === 1) {
+            // handle single-finger scrolling
+
             // this handles the random single touches that occur during a pinch zoom
             if (previousPinchDistance !== null) return;
 
@@ -128,7 +161,10 @@ async function main() {
                 currentTouches.splice(idx, 1, copyTouch(touches[0]));
             }
 
+
         } else if (touches.length === 2) {
+            // handle pinch zoom
+
             const pinchDistance = Math.hypot(
                 (touches[0].pageX - touches[1].pageX),
                 (touches[0].pageY - touches[1].pageY),
@@ -144,6 +180,7 @@ async function main() {
                     + (rect.bottom - touches[1].pageY)) / 2,
             };
 
+            // zoom about the pinch center
             map.zoom(-(previousPinchDistance - pinchDistance) / 100, pinchCenter);
 
             previousPinchDistance = pinchDistance;
@@ -169,6 +206,11 @@ async function main() {
             previousPinchDistance = null;
             pinchCenter = null;
         }
+
+        // clear out double tap stuff
+        wasDoubleTapped = false
+        previousDoubleTapDistance = null
+        doubleTapPosition = null
     });
 
     canvas.addEventListener("touchcancel", (e) => {
@@ -176,7 +218,7 @@ async function main() {
     });
 
 
-    // FIXME: this should adjust offsets so that the centre of the map
+    // TODO: this should adjust offsets so that the centre of the map
     // stays in the centre when the window resizes
     window.addEventListener("resize", (e) => {
         e.preventDefault();
