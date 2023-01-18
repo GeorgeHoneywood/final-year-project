@@ -1,0 +1,495 @@
+\documentclass{final_report}
+\usepackage[backend=biber,
+            sorting=none,
+            language=british]{biblatex} %create bibliography
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage[shortlabels]{enumitem} %change list formatting
+\usepackage[pdftex,
+            colorlinks,
+            breaklinks=true,
+            linkcolor={black},
+            citecolor={black},
+            urlcolor={blue!60!black},
+            pdfauthor={George Honeywood},
+            pdftitle={Final Year Project --- Interim Report}]{hyperref} 
+
+% prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+
+\setlist[itemize]{noitemsep, nolistsep} %make lists take up less room
+\setlist[enumerate]{noitemsep}
+
+\addbibresource{../sources.bib}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Input project details
+\def\studentname{George Honeywood}
+\def\reportyear{2022}
+\def\projecttitle{Offline HTML5 Maps Application}
+\def\supervisorname{Reuben Rowe}
+\def\degree{BSc (Hons) in Computer Science}
+\def\fullOrHalfUnit{Full Unit} % indicate if you are doing the project as a Full Unit or Half Unit
+\def\finalOrInterim{Interim Report} % indicate if this document is your Final Report or Interim Report
+
+\begin{document}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Declaration
+
+% \chapter*{Declaration}
+
+% This report has been prepared on the basis of my own work. Where other published and unpublished source materials have been used, these have been acknowledged.
+
+% \vskip3em
+
+% Word Count: 
+
+% \vskip3em
+
+% Student Name: \studentname
+
+% \vskip3em
+
+% Date of Submission: 
+
+% \vskip3em
+
+% Signature: GH
+
+% \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Table of Contents
+\tableofcontents\pdfbookmark[0]{Table of Contents}{toc}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Your Abstract here
+\clearpage
+\begin{abstract}
+    Although online web maps are commonplace, offline maps are a valuable niche that are useful in certain situations, such as on mobile devices with limited data, or when roaming abroad. There are limited options in this space that are cross-platform, which I hope my project can resolve through the nature of it being provided as a progressive web app (PWA).
+
+    In this project I aim to build an offline maps application based on OpenStreetMap data. The user should be able to download map data for their area of interest, then view it by panning and zooming, like a traditional online slippy map. Time permitting, I may also add additional features that require an internet connection, like routing and Wikipedia integration. Through this project I hope to learn about how you project map data into a rendered map. It will also teach me how to successfully develop a medium-sized application.
+\end{abstract}
+
+% for final report:
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Project Spec
+
+% \chapter*{Project specification}
+% \addcontentsline{toc}{chapter}{Project specification}
+% Your project specification goes here.
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Introduction
+
+\chapter{Introduction}
+
+\input{../plan/introduction.tex}
+
+%% these sections have basically been covered in the introduction.
+%% maybe it would be good to split the introduction out.
+% \section{Issues}
+% \section{Motivation}
+
+\section{Literature review}
+
+Whilst researching my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge  that supplemented information that I have picked up over the years due to being involved with the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
+
+For more up to date or specific information I often relied on the OpenStreetMap Wiki~\cite{osm-wiki}, which provides a helpful reference for both OSM specific information and other GIS adjacent topics. These include general information about map projections~\cite{osm-wiki-mercator}, and details about the Z/X/Y tiling scheme that is common for web maps~\cite{osm-wiki-tile-names}.
+
+When it came to implementing the project, MDN Web Developer documentation proved invaluable~\cite{mdn}. They provide an excellent reference on how to use many web APIs, with detailed usage guides included. In particular, the information about the Canvas API~\cite{mdn-canvas-api}, and Service Workers~\cite{mdn-service-workers} was very useful, as these were technologies that I was not familiar with.
+
+\section{Aims and objectives}
+
+Here I will list some specific features that I would like to implement in the project. These are not fixed, and some may not be implemented, or others added in their place.
+
+\begin{itemize}
+    \item Download vector map data for a user-provided region (preferably at least as large as a UK county), allowing the user to browse the map offline
+    \item Allow the user to pan and zoom the map. They should be able to zoom out to the view the full extent of the downloaded data.
+    \item Provide a search functionality, using the Nominatim API
+    \item Allow the user to route between two points, which could be implemented using OSRM, GraphHopper or Valhalla
+    \item When an OSM element has been tagged with a reference to a Wikipedia article, it should show a description from Wikipedia
+    \item Allow the user to save and name markers for later use
+    \item When online, the application should allow the user to browse a map without having to first download any data. This could be done using raster tiles.
+\end{itemize}
+
+\section{Deliverables \& timeline}
+
+Following a timeline will help my project proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
+
+\begin{enumerate}
+    \item Report on offline HTML5 technologies. Used this to discover whether it is possible to download \& store a large amount of vector map data (>100 MB) for later rendering.\label{item:deliverable:offline-html}
+    \item Proof of concept basic offline HTML5 app. Used this to discover any limit of how files can be stored for offline use.\label{item:deliverable:basic-offline-app}
+    \item Report on the different ways  that the program could get OpenStreetMap data. One possibility is the Mapsforge format, or it could use the OSM editing API\@. This helped mitigate risk of using a technology that is not suitable for the project.\label{item:deliverable:osm-data}
+    \item Report about how map projection works. Specifically the mathematics behind projecting the data that is produced by OpenStreetMap. This ensured that I understood this key concept.\label{item:deliverable:map-projection}
+    \item Proof of concept that took some way made up of latitude longitude pairs and draws a line onto a canvas.\label{item:deliverable:draw-line}
+    \item Make proof of concept~\ref{item:deliverable:draw-line} interactive; allow the user to pan and zoom the map. This should be done with the scroll wheel on desktop and pinch zooming on mobile.\label{item:deliverable:pan-zoom}
+    \item Proof of concept that loads some actual OSM data using the technology that I decided upon in deliverable~\ref{item:deliverable:osm-data}.\label{item:deliverable:load-osm-data}
+    \item Thoroughly test the application on mobile, as this will likely be the main use case for an offline map.\label{item:deliverable:mobile-testing}
+    \item Add online search functionality, using the Nominatim API.\label{item:deliverable:search}
+    \item Add online routing functionality, using OSRM, GraphHopper or Valhalla.\label{item:deliverable:routing}
+    \item Show point of interest information from Wikipedia, when an OSM element has been tagged to allow this.\label{item:deliverable:wikipedia}
+    \item Add the ability to save and name markers for later use.\label{item:deliverable:markers}
+    \item Allow the user to browse the map without first downloading data when online. This could be done using raster tiles.\label{item:deliverable:online}
+\end{enumerate}
+
+\subsection{Term one}\label{sec:term-1-plan}
+
+\begin{itemize}
+    \item \textbf{Week 3 (2022/10/03)}: Report~\ref{item:deliverable:offline-html}.
+    \item \textbf{Week 4 (2022/10/10)}: Proof of concept~\ref{item:deliverable:basic-offline-app} \& report~\ref{item:deliverable:osm-data}.
+    \item \textbf{Week 5 (2022/10/17)}: Report~\ref{item:deliverable:map-projection} \& proof of concept~\ref{item:deliverable:draw-line}.
+    \item \textbf{Week 6--7 (2022/10/24)}: Proof of concept~\ref{item:deliverable:pan-zoom}.
+    \item \textbf{Week 8--9 (2022/11/07)}: Proof of concept~\ref{item:deliverable:load-osm-data}.
+    \item \textbf{Week 10--11 (2022/11/21)}: Prepare for the interim report, and presentation.
+\end{itemize}
+
+\subsection{Term two}
+
+\begin{itemize}
+    \item \textbf{Week 1--2 (2023/01/09)}: Integration of the above proof of concepts into the final program.
+    \item \textbf{Week 3--4 (2023/01/23)}: Deliverable~\ref{item:deliverable:mobile-testing}.
+    \item \textbf{Week 5 (2023/02/06)}: Prepare an initial draft for the final report.
+    \item \textbf{Week 6--7 (2023/02/13)}: Add support for further features, such as deliverables~\ref{item:deliverable:search},~\ref{item:deliverable:routing},~\ref{item:deliverable:wikipedia},~\ref{item:deliverable:markers} and~\ref{item:deliverable:online}.
+    \item \textbf{Week 8 (2023/02/27)}: Evaluate the solution so far, and decide whether to extend the project further, if time permits.
+    \item \textbf{Week 9--11 (2023/03/06)}: Prepare for the final report.
+\end{itemize}
+
+\clearpage
+\chapter{Research}
+
+Here I present the research reports I conducted throughout the development process. These helped me to discover which technologies would be most appropriate for my project, and how I could implement them in my proof of concepts.
+
+\section{Basic web technologies}
+
+Websites are commonly made up of 3 main components: HTML, CSS and JavaScript~\cite{mdn-html}. HTML is used to create text, images, videos, and other non-interactive content. CSS is responsible for styling, colours, sizing, and other visual effects. JavaScript is used to add interactivity.
+
+While I will need some HTML and CSS, my project is focused on creating an interactive map. Therefore, much of my work will be done in JavaScript, specifically heavily utilising the Canvas API~\cite{mdn-canvas-api}. Instead of using vanilla JavaScript, I have chosen to use TypeScript, which is a superset of JavaScript that adds a compilation/stripping step, where types are statically checked to prevent runtime type issues (this is discussed more in Section~\ref{sec:software-engineering}).
+
+\begin{lstlisting}[caption=Basic HTML to run an external script with some basic styling, language=html]
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proof of concept: 1</title>
+    <style>
+      body {
+        font-family: sans;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Proof of concept: 1</h1>
+    <canvas id="map"></canvas>
+    <script src="dist/bundle.js"></script>
+  </body>
+</html>
+\end{lstlisting}
+
+To run your multiple JavaScript files in the browser, you can either use plain ES Modules~\cite{mdn-es-modules}, or add a bundling step, where all the code is combined into a single file. Using ES Modules in the browser allows you to avoid a build step, but has the negative that it is it requires \(n\) round-trips to the server. For example if say \texttt{main.js} imports \texttt{map.js} and \texttt{map.js} imports \texttt{util.js}, your browser will need to make 3 separate requests to the server, and script execution will be blocked until the last dependency has been fetched and evaluated~\cite{sitepoint-using-es-modules}. 
+
+Bundling in its simplest form involves concatenating all the source files together into a single file, which neatly avoids the round trip problem, whilst still allowing you to store your source code in separate files. Advanced bundlers also support features like minification, where variables are renamed to be shorter, whitespace is removed, and unused functions are purged. \texttt{esbuild} is a popular modern JavaScript/TypeScript bundler, written in Go, for high performance~\cite{esbuild}.
+
+\section{Offline HTML5 applications}\label{sec:offline-html-applications}
+
+\input{../research-reports/1-offline-html5/content.tex}
+
+\section{Using the HTML5 canvas}
+
+\input{../research-reports/4-html5-canvas/content.tex}
+
+\section{OpenStreetMap data sources}\label{sec:osm-data-sources}
+
+\input{../research-reports/2-osm-data-sources/content.tex}
+
+\section{Projecting map data}\label{sec:projecting-map-data}
+
+\input{../research-reports/3-map-projections/content.tex}
+
+\clearpage
+\chapter{Proof-of-concept development process}
+
+As part of the development process, I have created a number of proof-of-concepts, that each build on each other. These have helped me to understand, test and evaluate various technologies that I could use to build the final application.
+
+\section{Simple offline HTML5 app}
+
+{ \hfill \footnotesize Source in \texttt{proof-of-concepts/1-offline-html5}}
+
+My first proof of concept was a basic offline HTML5 application, employing the techniques that I researched in Section~\ref{sec:offline-html-applications}. Since the \texttt{Application Cache} has been deprecated, the accepted way to create an offline HTML5 app is to use Service Workers~\cite{w3c-service-workers-caches}. The concept behind this is that the Service Worker intercepts all HTTP requests that are made on the website, and can then respond to this request with a result from a prepopulated cache.
+
+In addition to creating an offline HTML5 app, I also learned how to store a large binary blob. This will be necessary for my project, as this is how the map data will be stored. To this end I looked at using both the Service Worker cache, and the File API\@.
+
+The File API works like a traditional file picker --- allowing the user to choose some file from their local filesystem~\cite{w3c-file-api}. This is useful, but does not provide an excellent user experience. For example the user would have to download a map file to some location on their computer, then select it in the file picker every time they want to view a map. This violates Nielsen's ``Recognition, not recall'' heuristic~\cite{nielsen-heuristics}, as the application should work without the user having to remember where they saved the map file.
+
+Therefore, it is preferred to use the Service Worker cache method, where you store the file inside the web browser's cache. Storing binary blobs works like using the Service Worker cache for normal website resources:
+
+\begin{lstlisting}[caption=Using the Service Worker cache]
+self.addEventListener('install', (event) =>  event.waitUntil(
+        addResourcesToCache(['/index.html', '/blob.map']) // prepopulate cache
+));
+
+const cacheFirst = async ({ request }) => {
+    const responseFromCache = await caches.match(request);
+    if (responseFromCache) { // try to get the resource from the cache
+        return responseFromCache;
+    }
+
+    return new Response('could not retrieve from cache', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' },
+        });
+};
+
+self.addEventListener('fetch', (event) => event.respondWith(
+        cacheFirst({request: event.request})
+));
+\end{lstlisting}
+
+\section{Rendering geometry to a canvas}
+
+{ \footnotesize Source in \texttt{proof-of-concepts/2-rendering-a-way}, online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}, or \href{https://youtu.be/2F_vpCrQsO4}{demo video}.}
+
+My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
+
+The main challenge I wanted to solve in this proof of concept was projecting the data. This stage is necessary, as OpenStreetMap data comes in the WGS84 CRS, and while this can be naively plotted on a graph as (x,y) coordinates, this would result in the ``plate carrée'' projection, as detailed in Section~\ref{sec:projecting-map-data}. The ``plate carrée'' projection is not particularly desirable, as it does not have any useful properties like conformality (preservation of angle) or preservation of area. Hence, for my application I chose to use Web Mercator, which preserves conformality, and is the de facto standard for web maps.
+
+Initially, I attempted to use the algorithm from \textcite[41]{snyder1987map}, as shown in Section~\ref{sec:projecting-map-data}. Unfortunately I had some issues with getting these equations to produce reasonable results. Therefore, I turned to the OpenStreetMap Wiki, which helpfully provides a reference for transforming WGS84 data into the Web Mercator projection~\cite{osm-wiki-mercator}. I translated the C example into TypeScript, and it correctly projected the data.
+
+\begin{lstlisting}[caption=Projecting to Web Mercator]
+const RADIANS_TO_DEGREES = 180 / Math.PI;
+
+// calculate x/long
+const x = long;
+// calculate y/lat
+const y = Math.log(Math.tan(
+    (lat / RADIANS_TO_DEGREES) / 2 + Math.PI / 4
+)) * RADIANS_TO_DEGREES;
+\end{lstlisting}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../proof-of-concepts/2-rendering-a-way/screenshots/ferndown-buildings.png}
+    \caption{Rendering some GeoJSON data to the canvas}\label{fig:rendering-geometry}
+\end{figure}
+
+This proof of concept was entirely static, with the viewport and zoom level hardcoded into the program. To make the implementation simpler I wrote a function that scaled all the coordinates to be around (0,0), so that I didn't have to handle offsetting the viewport.
+
+\section{Adding interactivity --- panning and zooming}
+
+{ \footnotesize Source in \texttt{proof-of-concepts/3-panning-and-zooming}, online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}, or \href{https://youtu.be/_JvGwLra_Q4}{demo video}.}
+
+The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
+
+The first part I tackled was the zooming. This turned out to be as simple as multiplying each projected coordinate by some scale factor, which I was already doing in the previous proof of concept. To modify this scale factor, the user can use the +/- buttons, the mouse scroll wheel, or a pinch gesture on a touch device. Pinch gestures were the most challenging to implement, as you have to handle and interpret \texttt{Touch} events for each separate finger on the screen.
+
+Panning also turned out to be relatively easy --- my implementation involved adding some offsets to the projected and scaled coordinates in the latitude and longitude axis. What was more complicated was having the map zoom about some arbitrary point. For example, on desktop, you expect a map to zoom into the position of your mouse cursor, on into the middle of your pinch gesture on mobile. To achieve this, I update the \texttt{x} and \texttt{y} offsets whenever you zoom, with a smaller offset change when zooming into the top left, and a larger one for the bottom right. Another issue I had to handle is that at a low zoom level, zooming was relatively quick, but once you reached higher zoom levels, it got slower and slower. To compensate for this I made the scale factor logarithmic.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/3-panning-and-zooming/screenshots/the-world.png}
+    \caption{An interactive world map, using Natural Earth data~\cite{natural-earth}}\label{fig:panning-and-zooming}
+\end{figure}
+
+For testing the zooming between low and high zoom, I needed some ``large scale'' data to supplement the localized OSM data that I had downloaded for the previous proof of concept. Natural Earth Cultural Vector data seemed suitable, as it is readily available as GeoJSON, is released in the public domain, and is suitably low-detail for my purpose~\cite{natural-earth}. Once again I used \texttt{geojson.io}~\cite{geojson.io}, this time to merge these two sets of data.
+
+To begin with, I was simply redrawing the map every time a \texttt{Touch} or \texttt{Mouse} event fired. This worked, but these events would often fire very rapidly (>60 times/second), resulting in a slow panning experience, where rendering was occurring unnecessarily. My solution for this was \texttt{requestAnimationFrame()}, which allows you to have some function executed at a regular interval by the browser~\cite{mdn-request-animation-frame}. Therefore, I could to modify the state of the map, then have it smoothly rendered at regular intervals to reflect any changes to zoom or offsets.
+
+Unfortunately this change meant the canvas re-rendered 60 times a second at all times, even when no state change had occurred, which is a waste of processing power and energy, especially on mobile devices. To remedy this I introduced a \texttt{dirty} flag, which I set whenever a state change had occurred, checking it at the beginning of the \texttt{render()} function. The end result was a map that updated smoothly 60 times a second when state changes were occurring, and not at all when the map was static.
+
+\begin{lstlisting}[caption=Only rendering when the map state is \texttt{dirty}]
+public render() {
+    // if nothing has changed, don't bother re-rendering
+    if (!this.dirty) {
+        requestAnimationFrame(() => this.render());
+        return;
+    }
+    this.dirty = false;
+    [...]
+}
+\end{lstlisting}
+
+\section{Rendering tiled data from a Mapsforge file}
+
+{ \footnotesize Source in \texttt{proof-of-concepts/4-rendering-osm-data}, online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}, \href{https://youtu.be/2cvZ-veBUto}{mobile demo video}, or \href{https://youtu.be/0evN3RT42QQ}{desktop demo video}.}
+
+My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
+
+The bulk of the work for this proof of concept came in the form of writing a parser for the Mapsforge format~\cite{mapsforge-format}. I decided to use this format based on my report on OpenStreetMap data sources, in Section~\ref{sec:osm-data-sources}. This was because it seemed simpler to parse than the MBTiles, which is the other popular choice for tiled vector map files. It is a binary format, that is designed to space-efficiently encode geographical data, such that can be rendered on low-power mobile devices.
+
+\subsection{The Mapsforge format}
+
+Here I will explain the main concepts of the Mapsforge format, that I had to understand whilst writing the parser. This information is mostly as per the specification~\cite{mapsforge-format}, supplemented by what I learnt as I progressed.
+
+\subsubsection{Points of Interest (PoIs)}
+
+These represent tagged OpenStreetMap nodes, such as shops, bus stops, or any other objects that have been mapped as a node. They are also used for city/town/place labels at low zoom levels.
+
+\subsubsection{Ways}
+
+Ways are an abstraction over OpenStreetMap ways and relations, presenting both as a single type. OSM represents complex structures such as buildings with internal courtyards as multiple ways, for the outer and inner parts. These are then linked by a multipolygon relation that labels each part as inner or outer~\cite{osm-wiki-multipolygon}. These are non-trivial to efficiently interpret, especially with large amounts of data, so it makes sense to push this complexity to the map-writer software.
+
+\subsubsection{Sub-files}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/high-detail-at-low-zoom.png}
+    \caption{Raw tiled data from zoom 14 base tiles}\label{fig:rendering-tiles}
+\end{figure}
+
+%% \- to give latex line break hints
+
+Sub-files store map data for a range of zoom levels. For example, the file \texttt{proof\--of\--concepts/4\--rendering\--osm\--data\-/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
+
+The over-zoom/under-zoom functionality is supported by each sub-file containing a ``zoom table'', which contains how many PoIs/Ways need to be read for the tile at the requested zoom level. For example, when under-zooming a z14 tile to z12, is very slow to render absolutely all the map features, as you will be showing around 112 z14 base tiles (on a 1080p screen). For the zoom-table to work, the Way and PoI data in each tile is sorted by ``feature importance'', meaning that data to be shown at low zoom levels, like place labels or important roads, comes first, and less important geometries like houses are placed last. Therefore, you can read that there should be \texttt{x} amount of PoIs/Ways for this tile, for the zoom level you are decoding, read the specified amount, then skip over the rest.
+
+\subsubsection{Variable length integers}
+
+To save file space, coordinates and other numbers are encoded in a custom format. This means that both large and small numbers can use the same representation, whilst requiring a minimal amount of bytes to store them. The format is based around the idea that the first bit of a byte is used as a continuation bit --- i.e., the \texttt{1000 0000} it is set in this byte. If the continuation bit is set, you continue to read the next byte as part of the same number.
+
+The format is little-endian, meaning that the first byte of the number is the least significant\footnote{Note that the bytes themselves are still stored in big-endian format}. Hence, you can read whole number by shifting each of the subsequent numbers by \(7n\), then applying a bitwise \texttt{OR / |} against the current total.
+
+\begin{lstlisting}[caption=Parsing variable length integers]
+// decode a variable length unsigned integer as a number
+getVUint() {
+    // if the first bit is 1, need to read the next byte rest of the 7 bits
+    // are the numeric value, starting with the least significant
+    let value = 0;
+    let shift = 0;
+
+    // check if we need to continue
+    while ((this.data.getUint8(this.offset) & 0b1000_0000) != 0) {
+        // if this not the first byte we've read, each bit is worth more
+        value |= (this.data.getUint8(this.offset) & 0b0111_1111) << shift
+        this.offset++
+        shift += 7
+    }
+
+    // read the seven bits from the last byte
+    value |= (this.data.getUint8(this.offset) << shift)
+    this.offset++
+    return value
+}
+\end{lstlisting}
+
+Signed integers follow a similar scheme with the continuation bit, but also sacrifice the second bit of the last byte to indicate the sign of the number, i.e., \texttt{0100 0000}. There is no concept of a floating point number in the format. Instead, you divide numbers when it is required, for example for coordinates, which are stored in the file in microdegree units.
+
+\subsection{Writing a parser}
+
+In my first iteration of this proof of concept, I was decoding the file inline, using a \texttt{DataView}, manually keeping track of offsets within the blob. This worked, but led to a lot of duplicate code that was just handling offsets, and a number of error caused by me making some trivial mistake when incrementing the offset by the wrong amount. To remedy this smell, I refactored the code to use the abstraction of a \texttt{Reader}. You construct the \texttt{Reader} with a blob, then call methods like \texttt{.getVUint()}, or \texttt{.getBigUint64()}. These methods increment an offset internal to the \texttt{Reader} class.
+
+\subsection{Rendering the tiles}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/styled.png}
+    \caption{Styling of data from Mapsforge file}\label{fig:rendering-osm-data}
+\end{figure}
+
+When rendering the map, I first convert the current zoom level to the corresponding base zoom level of one of the sub-files. Once I have this I then calculate the coordinates at the top-left and bottom right of the screen, then convert these into Z/X/Y tile numbers, which I can then fetch from the file. To improve rendering performance, only the PoIs and Ways specified in the zoom table for that zoom level are shown.
+
+I handled styling fairly simplistically, setting a number of booleans based on way tags, as the tiles load in. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be. This is shown in Figure~\ref{fig:rendering-osm-data}.
+
+To make sure that the map always draw labels on top, I make two passes through the data. In the first, I render out all the areas and lines, then in the second, the way labels and PoIs. Before I implemented this, areas from other tiles would often overlap labels.
+
+\clearpage
+\chapter{Software engineering}\label{sec:software-engineering}
+
+In order to successfully deliver a project, it is important to follow good software engineering practices. These should help you create something that has minimal technical debt, is correct, is maintainable, and can be easily understood by other members of a team.
+
+I decided to write my project in TypeScript over plain JavaScript, as it provides an extremely helpful layer to help solve runtime type issues. It also allows my IDE, Visual Studio Code, to provide far more useful suggestions, compared to writing JS\@. This is because it is aware what types variables are at all times, instead of using a fallible heuristic approach.
+
+Conveniently, the JavaScript bundler I chose, \texttt{esbuild}, has built in support for stripping TypeScript annotations, meaning I only have a single build step. It doesn't have the ability to check types itself, but this was not an issue for me, as VS Code performs this function natively in the editor. \texttt{esbuild} also has a convenient ``dev-server'' mode, where it bundles up the latest code as the requests come in, removing the need for a file-watcher.
+
+\section{Testing}
+
+Testing is critical to producing a piece of software that works as expected. It helps you to define what your function should return before you write it, and ensures that the function returns exactly what you expect.
+
+In my project a significant amount of the work is rendering data to the HTML5 canvas. This portion of the project is very difficult to test --- at least while development is still occurring. Therefore, I directed my testing efforts towards the non-visual portions of the application, such as parsing the Mapsforge file, geometry operations, and projecting data.
+
+I implemented testing using the Jest framework. Initially I had some issues setting it up to be able to understand tests and code written in TypeScript. Once it was set up, it was irritatingly slow, taking 5+ seconds to run with only a single test. The cause of this was two-fold; I was using the \texttt{ts-jest} package, which uses Babel to transpile TypeScript to JS (which is slow), and I had written my \texttt{jest.config.ts} in TypeScript. This meant that when I ran \texttt{jest test}, it had to spin up \texttt{ts-node} to interpret the file, which is also relatively slow. To fix this I rewrote the config file in plain JavaScript, and switched Jest to use \texttt{@swc-node/jest} instead of \texttt{ts-jest} to transpile the JavaScript, which reduced the time taken to under 2 seconds for the whole suite.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/artifacts.png}
+    \caption{Rendering incorrectly parsed geometries}\label{fig:artifacts}
+\end{figure}
+
+In particular the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as is shown in Figure~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function, and I realized that I was incrementing my offset through the file on the wrong line.
+
+\begin{lstlisting}[caption=Output from the \texttt{.getVSint()} test suite, numbers=none]
+should be able to decode signed variable ints
+    pass: 1 byte max negative: [01111111].getVSint() == -63
+    pass: 1 byte max positve: [00111111].getVSint() == 63
+    pass: 2 byte min: [10000000,00000001].getVSint() == 128 (1 ms)
+    pass: 2 byte max: [11111111,01111111].getVSint() == -8191
+    pass: 3 byte min: [10000000,10000000,01000001].getVSint() == -16384
+    pass: 3 byte max: [11111111,11111111,01111111].getVSint() == -1048575
+    pass: 4 byte min: [10000000,10000000,10000000,00000001].getVSint() == 2097152
+\end{lstlisting}
+
+\section{Version control}
+
+Another important software engineering practice is making good use of version control. Throughout this project I have made extensive use of Git branches, primarily to develop each of my proof of concepts. This has made sure that the code in the \texttt{main} branch is always in a working state.
+
+I have rigorously followed the \emph{Conventional Commits} specification, prefixing all commits with a type, such as \texttt{feat:}, \texttt{fix:}, \texttt{test:} or \texttt{report:}~\cite{conventional-commits}. This indicates the basic purpose of a commit at a glance, and encourages me to split up large changes into smaller atomic units of a single type. When changes are complicated or have subtle side effects, I have written a longer commit body, to supplement the information in the commit name.
+
+\section{Documentation}
+
+Regarding user documentation, so far my proof of concepts have been simple enough that detailed documentation is not yet necessary. For each proof of concept I have written a \texttt{README.md} that details how it can be run (or a link to it hosted online), and any dependencies or extra files required.
+
+In terms of developer documentation, where appropriate I have written JSDoc comments, particularly for functions that provide a \emph{public} API\@. These explicitly detail the purpose of the function, how it should be used, and what the arguments should be set to. In addition to these JSDoc comments, where the code itself is not completely clear or intentions aren't obvious, I have written comments inline.
+
+\section{Profiling and optimizations}\label{sec:profiling}
+
+The \texttt{render()} function is critically important to the responsiveness of the application. As the \texttt{requestAnimationFrame()} callback fires 60 times a second, we should aim to have the \texttt{render()} function run in under \(1000/60=16.666\) ms, so that we have a new frame to show with each refresh of the screen. 
+
+The first tool I implemented to work towards achieving this was adding a frame time metric to the debug information at the top of the canvas. This allowed me to test various different configurations and code changes to see which resulted in the best performance. Measuring the frame time is helpful for gauging performance overall, but it is not very precise --- you cannot see exactly what is consuming the CPU time within the \texttt{render()} call.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../proof-of-concepts/4-rendering-osm-data/screenshots/profiling.png}
+    \caption{Using the profiler}\label{fig:profiling}
+\end{figure}
+
+This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important thing to optimize here is to simply cut down on the amount of geometries being rendered.
+
+%% for final report:
+%\clearpage
+%\chapter{Final application development process}
+
+\clearpage
+\chapter{Conclusion \& evaluation}
+
+%% for final report:
+% \section{Professional issues}
+% look on the BCS website for ideas
+
+In term one I have successfully followed the timeline I set out in Section~\ref{sec:term-1-plan}. During the beginning of the term I fell slightly behind, as I was busy with other modules, but I managed to catch up on lost time. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, which provides a basis of understanding for the rest of my report, as I had written my other reseasrch assuming quite a high level of base knowledge. My proof of concepts have been useful, helping me to understand key technologies and discover how is best to build the final deliverable.
+
+In term two I hope to continue keeping up with my plan. I may also write another report, on the subject of WebGL\@. It will be useful to do some research into this technology, as I fear that I have reached the limits of performance of the CPU rendered \texttt{CanvasRenderingContext2D} (see Section~\ref{sec:profiling}). WebGL, which is GPU accelerated, may allow me to go further, without compromising on the level of detail on the map.
+
+One thing that I have allowed for in the plan for term two is deliverable~\ref{item:deliverable:mobile-testing} (testing on mobile). This may not require as much time as I initially thought, given I have made mobile support a priority throughout the development of the proof of concepts. I also allocated a generous amount of time to integrating my proof of concepts together, which will not be necessary as they have each built on each other.
+
+The rest of the deliverables planned for term two are all fairly independent (i.e., they do not ``block'' progress). This means that if one is too difficult to implement, I can skip over it and move on to other tasks, providing some flexibility in my schedule. This may be useful for deliverable~\ref{item:deliverable:wikipedia}, where I would provide Wikipedia integration --- as I am unsure whether the Mapsforge files preserve Wikipedia tags.
+
+\clearpage
+\chapter{Appendix}
+
+\section{\texttt{diary.md}}
+
+\lstinputlisting[breakindent=0pt, numbers=none, language={}]{../diary.md}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+% smaller bibliography text
+\renewcommand*{\bibfont}{\normalfont\small}
+\printbibliography{}
+
+\end{document}
