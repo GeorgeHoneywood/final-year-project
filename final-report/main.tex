@@ -351,7 +351,7 @@ The over-zoom/under-zoom functionality is supported by each sub-file containing 
 
 \subsubsection{Variable length integers}
 
-To save file space, coordinates and other numbers are encoded in a custom format. This means that both large and small numbers can use the same representation, whilst requiring a minimal amount of bytes to store them. The format is based around the idea that the first bit of a byte is used as a continuation bit --- i.e., the \texttt{1000 0000} it is set in this byte. If the continuation bit is set, you continue to read the next byte as part of the same number.
+To save file space, coordinates and other numbers are encoded in a custom format. This means that both large and small numbers can use the same representation, whilst requiring a minimal amount of bytes to store them. The format is based around the idea that the first bit of a byte is used as a continuation bit --- i.e., in \texttt{1000 0000} the continuation bit is set. If the continuation bit is set, you continue to read the next byte as part of the same number, until you reach an unset continuation bit.
 
 The format is little-endian, meaning that the first byte of the number is the least significant\footnote{Note that the bytes themselves are still stored in big-endian format}. Hence, you can read whole number by shifting each of the subsequent numbers by \(7n\), then applying a bitwise \texttt{OR / |} against the current total.
 
@@ -468,16 +468,23 @@ This is where the profiler comes in. It is a tool that lets you visualize how lo
 \chapter{Conclusion \& evaluation}
 
 %% for final report:
-% \section{Professional issues}
+\section{Professional issues}
 % look on the BCS website for ideas
 
-In term one I have successfully followed the timeline I set out in Section~\ref{sec:term-1-plan}. During the beginning of the term I fell slightly behind, as I was busy with other modules, but I managed to catch up on lost time. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, which provides a basis of understanding for the rest of my report, as I had written my other reseasrch assuming quite a high level of base knowledge. My proof of concepts have been useful, helping me to understand key technologies and discover how is best to build the final deliverable.
+Accessibility is particularly relevant my project. It is an issue for all web content, but especially for maps, and other non-text based media. Many blind or visually impaired people use screen readers to allow them to interact with websites, but this is simply not possible for web maps. MDN advises that in general, web developers should use semantic HTML over the \texttt{<canvas>} element, as the canvas is opaque bitmapped data that cannot be interpreted by a screen reader~\cite{mdn-element-reference-canvas}. In contrast, semantic HTML is well-supported by screen readers and other assistive technologies.
 
-In term two I hope to continue keeping up with my plan. I may also write another report, on the subject of WebGL\@. It will be useful to do some research into this technology, as I fear that I have reached the limits of performance of the CPU rendered \texttt{CanvasRenderingContext2D} (see Section~\ref{sec:profiling}). WebGL, which is GPU accelerated, may allow me to go further, without compromising on the level of detail on the map.
+Unfortunately, maps are very difficult to provide accessibly. Notwithstanding this, blind or visually impaired people still need to navigate the world. \textcite{accessible-wayfinding-belt} found that a ``Tactile Way-finding Belt'', could help facilitate navigation for those with ``visual impairment or Alzheimer’s disease''. They based their study on a system of four vibrating motors, with one for each cardinal direction, which provide signals directing the wearer to their destination. By design this format is more limited than a map, but it does work towards making one of their main uses, navigation, more accessible.
 
-One thing that I have allowed for in the plan for term two is deliverable~\ref{item:deliverable:mobile-testing} (testing on mobile). This may not require as much time as I initially thought, given I have made mobile support a priority throughout the development of the proof of concepts. I also allocated a generous amount of time to integrating my proof of concepts together, which will not be necessary as they have each built on each other.
 
-The rest of the deliverables planned for term two are all fairly independent (i.e., they do not ``block'' progress). This means that if one is too difficult to implement, I can skip over it and move on to other tasks, providing some flexibility in my schedule. This may be useful for deliverable~\ref{item:deliverable:wikipedia}, where I would provide Wikipedia integration --- as I am unsure whether the Mapsforge files preserve Wikipedia tags.
+% FIXME: this is all out of date
+
+% In term one I have successfully followed the timeline I set out in Section~\ref{sec:term-1-plan}. During the beginning of the term I fell slightly behind, as I was busy with other modules, but I managed to catch up on lost time. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, which provides a basis of understanding for the rest of my report, as I had written my other reseasrch assuming quite a high level of base knowledge. My proof of concepts have been useful, helping me to understand key technologies and discover how is best to build the final deliverable.
+
+% In term two I hope to continue keeping up with my plan. I may also write another report, on the subject of WebGL\@. It will be useful to do some research into this technology, as I fear that I have reached the limits of performance of the CPU rendered \texttt{CanvasRenderingContext2D} (see Section~\ref{sec:profiling}). WebGL, which is GPU accelerated, may allow me to go further, without compromising on the level of detail on the map.
+
+% One thing that I have allowed for in the plan for term two is deliverable~\ref{item:deliverable:mobile-testing} (testing on mobile). This may not require as much time as I initially thought, given I have made mobile support a priority throughout the development of the proof of concepts. I also allocated a generous amount of time to integrating my proof of concepts together, which will not be necessary as they have each built on each other.
+
+% The rest of the deliverables planned for term two are all fairly independent (i.e., they do not ``block'' progress). This means that if one is too difficult to implement, I can skip over it and move on to other tasks, providing some flexibility in my schedule. This may be useful for deliverable~\ref{item:deliverable:wikipedia}, where I would provide Wikipedia integration --- as I am unsure whether the Mapsforge files preserve Wikipedia tags.
 
 \clearpage
 \chapter{Appendix}
