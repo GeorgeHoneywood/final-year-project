@@ -57,3 +57,20 @@ Got multiple tiles to appear on the map, being loaded dynamically as you pan and
 Worked on getting the correct base tiles to render as you zoom in/out, significantly improving performance, and letting you get a high level overview of the map.
 
 Added styling for Ways and PoIs, with some zoom-conditional rendering logic. Continuing with the interim report.
+
+### Week 12 (2022-12-05)
+
+Improved multipolygon handling, rendering each ring separately. Still not perfect, as it currently in-fills everything inside the outer way, when it should only fill up to the inner ways.
+
+Worked on handling v5 files. These have variable tag values, so data other than the hardcoded tags supported by the format can be stored.
+
+Added an online mode, where instead of fetching the whole map blob in one go, we fetch only the chunks we need, using HTTP range requests. This allows you to interactively use huge map files, like the whole of England (~800 MB), as it only fetches the necessary bits of the file for your current viewport.
+
+## Term 2
+
+### Week 18 (2023-01-16)
+
+Added geolocation support, using `geolocation.watchPosition()`, which updates with your position. Also added double tap + hold gesture for zooming with a single finger on mobile.
+
+Worked on the professional issues' section of the report, talking about accessibility.
+
