@@ -459,11 +459,12 @@ The first tool I implemented to work towards achieving this was adding a frame t
     \caption{Using the profiler}\label{fig:profiling}
 \end{figure}
 
-This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important thing to optimize here is to simply cut down on the amount of geometries being rendered.
+This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important factor to optimize in this scenario is to reduce the amount of geometries that need to be rendered.
 
-%% for final report:
-%\clearpage
-%\chapter{Final application development process}
+\clearpage
+\chapter{Final application development process}
+
+% TODO
 
 \clearpage
 \chapter{Conclusion \& evaluation}
