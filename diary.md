@@ -74,3 +74,20 @@ Added geolocation support, using `geolocation.watchPosition()`, which updates wi
 
 Worked on the professional issues' section of the report, talking about accessibility.
 
+### Week 19 (2023-01-23)
+
+### Week 20 (2023-01-30)
+
+### Week 21 (2023-02-06)
+
+### Week 22 (2023-02-13)
+
+### Week 23 (2023-02-20)
+
+### Week 24 (2023-02-27)
+
+### Week 25 (2023-03-06)
+
+### Week 26 (2023-03-13)
+
+### Week 27 (2023-03-20)
