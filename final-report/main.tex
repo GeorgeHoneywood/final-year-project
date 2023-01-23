@@ -478,10 +478,15 @@ Talkback works for not only native apps, but also web based content. This is ena
 
 Even most non-text based media can be made accessible to blind people, through \texttt{alt} tags on images and subtitling on videos. Unfortunately this is simply not possible for web maps, as they convey meaning in a visual form that cannot be textually described trivially. MDN advises that in general, web developers should use semantic HTML over the \texttt{<canvas>} element, as the canvas is opaque bitmapped data that cannot be interpreted by a screen reader~\cite{mdn-element-reference-canvas}. Notwithstanding this, blind and visually impaired people still need to navigate the world. \textcite{accessible-wayfinding-belt} found that a ``Tactile Way-finding Belt'', could help facilitate navigation for those with ``visual impairment or Alzheimer’s disease''. They based their study on a system of four vibrating motors, with one for each cardinal direction, which provide signals directing the wearer to their destination. By design this format is more limited than a map, but it does work towards making one of their main uses, navigation, more accessible.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../final-deliverable/screenshots/simulated-deuteranopia.png}
+    \caption{Simulating deuteranopia, in Firefox Dev Tools}\label{fig:deuteranopia}
+\end{figure}
 
-% TODO: talk about bias in OSM data
-\textcite{osm-self-focus-bias}
+A common form of visual impairment is colour vision deficiency (colour blindness). According to the \textcite{nhs-colour-vision-deficiency}, the red-green form affects around 1 in 12 men and 1 in 200 women. This can be more easily accommodated than other forms of visual impairment, by ensuring that text and backgrounds have a suitable contrast ratio, described in the Web Content Accessibility Guidelines~\cite{w3c-wcag}. It is also important to visually check colour contrast through simulators. The Developer tools in Firefox provide one such simulator, which can visualize various forms of colour vision deficiency --- see \autoref{fig:deuteranopia}.
 
+% TODO: talk about wheelchair access tags in OSM
 
 % FIXME: this is all out of date
 
