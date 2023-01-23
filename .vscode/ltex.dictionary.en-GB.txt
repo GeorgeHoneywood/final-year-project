@@ -15,3 +15,5 @@ carrée
 multipolygon
 PoIs
 JSDoc
+TalkBack
+VoiceOver
