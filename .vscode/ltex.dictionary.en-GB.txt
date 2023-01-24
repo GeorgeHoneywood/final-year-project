@@ -17,3 +17,4 @@ PoIs
 JSDoc
 TalkBack
 VoiceOver
+StreetComplete

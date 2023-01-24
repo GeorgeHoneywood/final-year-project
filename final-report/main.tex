@@ -471,7 +471,8 @@ This is where the profiler comes in. It is a tool that lets you visualize how lo
 
 \section{Professional issues}
 
-Accessibility is a particularly relevant concern for my project. % TODO: expand on why!
+Accessibility is a particularly relevant concern for my project. People with disabilities still need to be able to be able to interpret geographic data, and may have different priorities to able-bodied users. Those with visual impairments need larger map label sizes, and wheelchair users may need extra context about sloped kerbs. My application should accommodate as many of these needs as possible.
+
 Through assistive technologies like screen readers or magnification, most text-based web content is accessible to partially sighted or blind users. Android and iOS both have built-in screen-readers --- TalkBack and VoiceOver respectively. These tools assist users by providing a full alternate means of interaction, that is more complete and usable than simply reading out the text on screen. TalkBack disables the usual touch/swipe gestures on the phone, instead allowing the user to swipe left or right to navigate through tab stops in the interface. At each tab stop TalkBack announces the type and content of the selected screen element, and the user can double-tap to interact with it if necessary. The system navigation gestures can be accessed through two-finger swipes, instead of the usual single finger ones.
 
 Talkback works for not only native apps, but also web based content. This is enabled through use of semantic HTML elements, supplemented by ARIA tagging where this is not possible~\cite{w3c-aria}. The idea behind semantic HTML is that the HTML markup should convey meaning, instead of providing information purely visually through CSS\@. For example, UI buttons should be tagged as \texttt{<button>} elements, over plain \texttt{<div>}s, so that a screen reader can relay this context to the user. There are numerous HTML elements that have semantics, such as basics like \texttt{<ul>} and \texttt{<h1>}, and others that convey more complex concepts, like \texttt{<nav>} for navigation menus~\cite{mdn-accessibility-basis}.
@@ -487,6 +488,12 @@ Even most non-text based media can be made accessible to blind people, through \
 A common form of visual impairment is colour vision deficiency (colour blindness). According to the \textcite{nhs-colour-vision-deficiency}, the red-green form affects around 1 in 12 men and 1 in 200 women. This can be more easily accommodated than other forms of visual impairment, by ensuring that text and backgrounds have a suitable contrast ratio, described in the Web Content Accessibility Guidelines~\cite{w3c-wcag}. It is also important to visually check colour contrast through simulators. The Developer Tools in Firefox provide one such simulator, which can visualize various forms of colour vision deficiency --- see \autoref{fig:deuteranopia}.
 
 % TODO: talk about wheelchair access tags in OSM
+
+Physical disabilities can also be accommodated for in a map using OpenStreetMap data. In its simplest form, a point of interest can be tagged with \texttt{wheelchair=(yes|limited|no)}. This tag indicates to what degree an amenity can be accessed by a wheelchair user. \texttt{wheelchair=*} tagging is quite well-used, though not ubiquitous, with around 2.5 million elements tagged worldwide according to Taginfo~\cite{taginfo-wheelchair}. Routing software for wheelchair and walking frame users must avoid features like stairs (\texttt{highway=steps}) and full-height kerbs. Adding this tagging is well-supported in ``on-the-go'' map editing apps like StreetComplete, which has a ``quest'' dedicated to adding this information~\cite{streetcomplete}.
+
+% TODO: smoothness=* tags
+
+% TODO: talk about single handed controls, for amputees, people using canes etc
 
 % FIXME: this is all out of date
 
