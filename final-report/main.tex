@@ -15,7 +15,7 @@
             citecolor={black},
             urlcolor={blue!60!black},
             pdfauthor={George Honeywood},
-            pdftitle={Final Year Project --- Interim Report}]{hyperref} 
+            pdftitle={Final Year Project --- Final Report}]{hyperref}
 
 % prevent long urls in the in the bibliography from overfilling (weird breaks are preferred)
 \setcounter{biburlnumpenalty}{9000}
@@ -101,7 +101,7 @@
 
 \section{Literature review}
 
-Whilst researching my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge  that supplemented information that I have picked up over the years due to being involved with the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
+Whilst researching my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge that supplemented information that I have picked up over the years from contributing to the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
 
 For more up to date or specific information I often relied on the OpenStreetMap Wiki~\cite{osm-wiki}, which provides a helpful reference for both OSM specific information and other GIS adjacent topics. These include general information about map projections~\cite{osm-wiki-mercator}, and details about the Z/X/Y tiling scheme that is common for web maps~\cite{osm-wiki-tile-names}.
 
@@ -489,11 +489,17 @@ A common form of visual impairment is colour vision deficiency (colour blindness
 
 % TODO: talk about wheelchair access tags in OSM
 
-Physical disabilities can also be accommodated for in a map using OpenStreetMap data. In its simplest form, a point of interest can be tagged with \texttt{wheelchair=(yes|limited|no)}. This tag indicates to what degree an amenity can be accessed by a wheelchair user. \texttt{wheelchair=*} tagging is quite well-used, though not ubiquitous, with around 2.5 million elements tagged worldwide according to Taginfo~\cite{taginfo-wheelchair}. Routing software for wheelchair and walking frame users must avoid features like stairs (\texttt{highway=steps}) and full-height kerbs. Adding this tagging is well-supported in ``on-the-go'' map editing apps like StreetComplete, which has a ``quest'' dedicated to adding this information~\cite{streetcomplete}.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/street-complete-kerb.jpg}
+    \caption{Adding kerb height data using the StreetComplete app}\label{fig:sc-kerb}
+\end{figure}
 
-% TODO: smoothness=* tags
+Physical disabilities can also be accommodated in an OpenStreetMap-based map. In its simplest form, a point of interest can be tagged with \texttt{wheelchair=(yes|limited|no)}. This tag indicates to what degree an amenity can be accessed by a wheelchair user. \texttt{wheelchair=*} tagging is quite well-used, though not ubiquitous, with around 2.5 million uses worldwide according to Taginfo~\cite{taginfo-wheelchair}. Routing software for wheelchair and walking frame users must avoid features like stairs (\texttt{highway=steps}) and full-height kerbs. Adding this tagging is well-supported in ``on-the-go'' map editing apps like StreetComplete, which has a ``quest'' dedicated to adding this adding kerb details --- see \autoref{fig:sc-kerb}~\cite{streetcomplete}. 
 
-% TODO: talk about single handed controls, for amputees, people using canes etc
+There are specialized map viewers, specifically designed to make viewing wheelchair tagging simple --- most popularly Wheelmap, which uses green, orange, or red to indicate wheelchair accessibility~\cite{wheelmap}. Wheelmap can also be used to add this tagging to amenities, through a simple form, that lowers the barrier of entry for contributing this information to OSM\@. \texttt{smoothness=*} tagging is also valuable to wheelchair users~\cite{osm-wiki-smoothness}. This key has textual values ranging from \texttt{excellent} to \texttt{very\_horrible}, with wheelchair users unlikely to be able to traverse anything at the level of \texttt{smoothness=bad} or worse. Routers can use this information to inform the paths they choose.
+
+One accessibility consideration that I have made whilst developing this project is to include multiple alternative interaction gestures where possible. For example, when zooming the map, you can pick from either the two finger ``pinch'' zoom gesture, or alternatively a single finger tap and hold. This allows people with the ability to use only one hand, such as amputees, or walking stick users, to make full use of the application.
 
 % FIXME: this is all out of date
 

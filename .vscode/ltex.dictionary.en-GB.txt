@@ -18,3 +18,17 @@ JSDoc
 TalkBack
 VoiceOver
 StreetComplete
+Wheelmap
+OsmAnd
+OSMStats
+MBTiles
+tilenames
+Equirectangular
+WebMercator
+EPSG
+Cartographica
+Geovisualization
+SIGCHI
+Wayfinding
+WCAG
+Taginfo
