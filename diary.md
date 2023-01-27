@@ -76,6 +76,8 @@ Worked on the professional issues' section of the report, talking about accessib
 
 ### Week 19 (2023-01-23)
 
+Finished off the professional issues section. Talked about visual impairments and physical disabilities, and how they impact usage of an OSM-based map. Also discussed how mappers can help make OSM accessible by using certain tags, like `wheelchair=*` or `smoothness=*`. Debating writing a conclusion paragraph for it.
+
 ### Week 20 (2023-01-30)
 
 ### Week 21 (2023-02-06)
