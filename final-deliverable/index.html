@@ -6,7 +6,7 @@
 
     <!-- prevent favicon.ico requests -->
     <link rel="icon" href="data:," />
-    <title>Proof of concept: rendering tiled OSM data</title>
+    <title>OSMO: Final deliverable</title>
 
     <style>
       body {
@@ -19,7 +19,7 @@
 
       #geolocate {
         position: absolute;
-        z-index: 10;
+        z-index: 1;
         top: 10px;
         right: 10px;
       }
@@ -27,8 +27,15 @@
   </head>
 
   <body>
-    <h1>Proof of concept: rendering tiled OSM data</h1>
+    <h1>OSMO: Final deliverable</h1>
+    <!-- stands for OpenStreetMap Offline :) -->
     
+    <!-- 
+      TODO: the JavaScript should  probably contruct the required <canvas> and
+      <button> elements.
+
+      this would make it easier to embed the map on other websites.
+    -->
     <div id="map-container">
       <canvas id="map"></canvas>
       <button id="geolocate">Geolocate!</button>
