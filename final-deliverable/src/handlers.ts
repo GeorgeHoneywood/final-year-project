@@ -3,6 +3,8 @@ import type { Coord } from "./types.js";
 
 // window for second tap to occur to be considered double tap 
 const DOUBLE_TAP_TIMEOUT = 300;
+// maximum speed that the map will translate at during a fling
+const FLING_VELOCITY_CLAMP = 25
 
 /**
  * registers event handlers, that allow the user to control the CanasMap
@@ -209,6 +211,9 @@ function handleKeyboard(map: CanvasMap) {
 
 function handleMouse(map: CanvasMap, canvas: HTMLCanvasElement) {
     let mousePosition: Coord | null = null;
+    let previousPosition: Coord | null = null;
+    let velocity: Coord | null = null;
+    let flinging = false
 
     canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
@@ -221,11 +226,67 @@ function handleMouse(map: CanvasMap, canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
         e.preventDefault();
         mouseDown = true;
+        flinging = false
     });
+
+    /**
+     * force value to be inside FLING_VELOCITY_CLAMP
+     * for example:
+     * 
+     * ```
+     * clamp(-1000) = -100
+     * clamp(200) = 100
+     * clamp(45) = 45
+     * ```
+     * @param value to clamp
+     * @returns clamped value
+     */
+    function clamp(value: number): number {
+        return Math.max(
+            Math.min(value, FLING_VELOCITY_CLAMP),
+            -FLING_VELOCITY_CLAMP,
+        );
+    }
 
     canvas.addEventListener("mouseup", (e) => {
         e.preventDefault();
         mouseDown = false;
+
+        const fling = () => {
+            if (!velocity) return
+
+            // continue flinging until velocity low
+            if (velocity.x > 2 ||
+                velocity.x < -2 ||
+                velocity.y > 2 ||
+                velocity.y < -2) {
+                flinging = true
+                console.log("flinging")
+
+                map.translate({
+                    // clamp to a maximum translation speed
+                    x: clamp(velocity.x),
+                    y: clamp(velocity.y),
+                })
+
+                // FIXME: linear damping is flawed
+                // often the y-portion of the fling will will end before the
+                // x-portion, or vice-versa, which looks very odd
+                if (velocity.x > 0) { velocity.x -= 1 }
+                else { velocity.x += 1 }
+                if (velocity.y > 0) { velocity.y -= 1 }
+                else { velocity.y += 1 }
+
+                // continue the fling
+                requestAnimationFrame(fling)
+            } else {
+                flinging = false
+                console.log("stop flinging")
+            }
+        }
+
+        // for a nice smooth fling
+        requestAnimationFrame(fling)
     });
 
     canvas.addEventListener("mouseout", (e) => {
@@ -242,9 +303,30 @@ function handleMouse(map: CanvasMap, canvas: HTMLCanvasElement) {
             y: rect.bottom - e.clientY,
         };
 
-        if (mouseDown) {
-            map.translate({ x: e.movementX, y: -e.movementY });
+        previousPosition ??= mousePosition
+
+
+        const change = {
+            x: mousePosition.x - previousPosition.x,
+            y: mousePosition.y - previousPosition.y,
         }
+        // if flinging, don't update velocity
+        if (!flinging) {
+            // FIXME: this is not a good method for measuring velocity.
+            // it only accounts for the speed to the mouse movement right before
+            // the mouseup event
+
+            // TODO: instead time how long between mousedown & mouseup,
+            // and use velocity = distance / time
+
+            velocity = change
+        }
+
+        if (mouseDown) {
+            map.translate({ x: change.x, y: change.y });
+        }
+
+        previousPosition = mousePosition
     });
 }
 
