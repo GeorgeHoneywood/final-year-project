@@ -447,7 +447,7 @@ Regarding user documentation, so far my proof of concepts have been simple enoug
 
 In terms of developer documentation, where appropriate I have written JSDoc comments, particularly for functions that provide a \emph{public} API\@. These explicitly detail the purpose of the function, how it should be used, and what the arguments should be set to. In addition to these JSDoc comments, where the code itself is not completely clear or intentions aren't obvious, I have written comments inline.
 
-\section{Profiling and optimizations}\label{sec:profiling}
+\section{Profiling and optimization}\label{sec:profiling}
 
 The \texttt{render()} function is critically important to the responsiveness of the application. As the \texttt{requestAnimationFrame()} callback fires 60 times a second, we should aim to have the \texttt{render()} function run in under \(1000/60=16.666\) ms, so that we have a new frame to show with each refresh of the screen. 
 
