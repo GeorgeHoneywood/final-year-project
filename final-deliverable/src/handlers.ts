@@ -333,11 +333,20 @@ function handleMouse(map: CanvasMap, canvas: HTMLCanvasElement) {
 function handleGPS(map: CanvasMap, geolocate_button: HTMLButtonElement) {
     geolocate_button.addEventListener("click", () => {
         console.log("geolocating!");
+        let updatedViewport = false
         if (navigator.geolocation) {
             // TODO: handle GeolocationPositionError 
             // ref: https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
             navigator.geolocation.watchPosition((pos: GeolocationPosition) => {
                 map.setUserPosition(pos.coords);
+                if (!updatedViewport) {
+                    // set map to be centred on GPS position
+                    map.setPosition({
+                        x: pos.coords.longitude,
+                        y: pos.coords.latitude,
+                    })
+                    updatedViewport = true
+                }
             });
         } else {
             console.log("geolocation is unsupported!");

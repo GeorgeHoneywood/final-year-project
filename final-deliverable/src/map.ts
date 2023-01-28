@@ -119,6 +119,25 @@ class CanvasMap {
     }
 
     /**
+     * Set the viewport of the map to be centred at this position, at a
+     * hardcoded zoom level
+     * @param {x: number, y: number} 
+     */
+    public setPosition({ x, y }: Coord) {
+        // transform the wgs84 coord into mercator space
+        const mercator = projectMercator({ x, y });
+
+        this.zoom_level = 14;
+        const scale = Math.pow(2, this.zoom_level);
+
+        // centre on the user position
+        this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
+        this.y_offset = -(mercator.y * scale) + this.canvas.height / 2;
+
+        this.dirty = true;
+    }
+
+    /**
      * Zoom the map in or out. Supplying a positive number will zoom in, and
      * negative out. Optionally supply a Coord to zoom around, otherwise it will
      * zoom to the centre of the screen.
@@ -150,6 +169,10 @@ class CanvasMap {
         }
     }
 
+    /**
+     * Set the position of the user, according to GPS
+     * @param coord GPS position
+     */
     public setUserPosition(coord: GeolocationCoordinates) {
         this.user_position = coord
         this.dirty = true;
