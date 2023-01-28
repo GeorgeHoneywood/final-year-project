@@ -74,14 +74,7 @@ class CanvasMap {
             }
         }
 
-        // transform the wgs84 coord into mercator space
-        const mercator = projectMercator({ x, y });
-        const scale = Math.pow(2, zoom_level);
-
-        // centre on the previous map location
-        this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
-        this.y_offset = -(mercator.y * scale) + this.canvas.height / 2;
-        this.zoom_level = zoom_level;
+        this.setPosition({x, y}, zoom_level)
 
         // calculate the base zoom levels for each zoom level
         for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
@@ -123,11 +116,11 @@ class CanvasMap {
      * hardcoded zoom level
      * @param {x: number, y: number} 
      */
-    public setPosition({ x, y }: Coord) {
+    public setPosition({ x, y }: Coord, zoom: number) {
         // transform the wgs84 coord into mercator space
         const mercator = projectMercator({ x, y });
 
-        this.zoom_level = 14;
+        this.zoom_level = zoom;
         const scale = Math.pow(2, this.zoom_level);
 
         // centre on the user position
