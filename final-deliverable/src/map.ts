@@ -373,6 +373,7 @@ class CanvasMap {
         }
 
         // draw labels on top
+        // FIXME: refactor to DRY this text rendering stuff
         for (const get_tile of required_tiles) {
             const tile = this.tile_cache[getIndexString(get_tile)]
             if (!tile) {
@@ -414,16 +415,37 @@ class CanvasMap {
 
                 const { x, y } = poi.position;
 
-                this.ctx.lineWidth = 2
-                this.ctx.strokeStyle = 'black';
-                // little box over the PoI, then label next to
-                this.ctx.strokeRect(
-                    x * scale + this.x_offset - 5,
-                    this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
-                    10,
-                    10,
-                );
-                this.drawStokedText(poi, { x, y }, scale);
+                // for places draw large stroked labels
+                if (poi.tags?.find((e) =>
+                    e.startsWith("place=")
+                )) {
+                    this.ctx.lineWidth = 2
+                    this.ctx.strokeStyle = 'black';
+                    // little box over the PoI, then label next to
+                    this.ctx.strokeRect(
+                        x * scale + this.x_offset - 5,
+                        this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                        10,
+                        10,
+                    );
+                    this.drawStokedText(poi, { x, y }, scale);
+                } else {
+                    this.ctx.font = '15px sans-serif';
+
+                    const label = poi.name ?? poi.house_number ?? ""
+                    const size = this.ctx.measureText(label)
+
+                    this.ctx.fillStyle = "black"
+                    this.ctx.fillText(
+                        label,
+                        (x) * scale
+                        + this.x_offset
+                        - size.width / 2,
+                        this.canvas.height
+                        - (y * scale + this.y_offset)
+                        + 15 / 2, // font height
+                    );
+                }
             }
 
             this.ctx.stroke();
@@ -481,8 +503,6 @@ class CanvasMap {
             proj.x * scale + this.x_offset + 10,
             this.canvas.height - (proj.y * scale + this.y_offset) + 5
         );
-
-
     }
 
     i = 0;

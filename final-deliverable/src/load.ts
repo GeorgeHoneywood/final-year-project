@@ -1,5 +1,5 @@
 
-// load an some map blob
+// load a map blob
 async function loadMapBlob(path: string): Promise<Blob> {
     const resp = await fetch(path);
     if (!resp.ok) {
