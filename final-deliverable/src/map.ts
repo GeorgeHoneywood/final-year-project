@@ -74,7 +74,7 @@ class CanvasMap {
             }
         }
 
-        this.setPosition({x, y}, zoom_level)
+        this.setViewport({x, y}, zoom_level)
 
         // calculate the base zoom levels for each zoom level
         for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
@@ -112,11 +112,12 @@ class CanvasMap {
     }
 
     /**
-     * Set the viewport of the map to be centred at this position, at a
-     * hardcoded zoom level
-     * @param {x: number, y: number} 
+     * Set the viewport of the map to be centred at this wgs84 position, at
+     * the chosen zoom level
+     * @param {x: number, y: number} wgs84 coord to centre on
+     * @param zoom level desired
      */
-    public setPosition({ x, y }: Coord, zoom: number) {
+    public setViewport({ x, y }: Coord, zoom: number) {
         // transform the wgs84 coord into mercator space
         const mercator = projectMercator({ x, y });
 

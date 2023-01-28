@@ -341,10 +341,10 @@ function handleGPS(map: CanvasMap, geolocate_button: HTMLButtonElement) {
                 map.setUserPosition(pos.coords);
                 if (!updatedViewport) {
                     // set map to be centred on GPS position
-                    map.setPosition({
+                    map.setViewport({
                         x: pos.coords.longitude,
                         y: pos.coords.latitude,
-                    })
+                    }, 15)
                     updatedViewport = true
                 }
             });
