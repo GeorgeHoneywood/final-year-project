@@ -1,8 +1,8 @@
 {
 	"scripts": {
-		"build": "esbuild src/demo.ts --bundle --sourcemap --minify --outfile=dist/bundle.js",
+		"build": "esbuild src/main.ts --bundle --sourcemap --minify --outfile=dist/bundle.js",
 		"upload": "pnpm build && ./upload.sh",
-		"dev": "esbuild src/demo.ts --bundle --sourcemap --servedir=./ --outfile=dist/bundle.js",
+		"dev": "esbuild src/main.ts --bundle --sourcemap --servedir=./ --outfile=dist/bundle.js",
 		"test": "jest --verbose",
 		"test:watch": "jest --verbose --watch"
 	},
