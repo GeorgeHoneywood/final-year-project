@@ -9,27 +9,80 @@
     <title>OSMO: Final deliverable</title>
 
     <style>
+
       body {
-        font-family: sans;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0px;
+      }
+
+      button {
+        padding: 6px;
+        font-size: medium;
+        background-color: white;
+        border-radius: 3px;
+        border: none;
+        /* border: 1px solid black; */
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.8);
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #d8d8d8;
       }
 
       #map-container {
         position: relative;
+        
+      }
+
+      #map-container > * {
+        position: absolute;
+      }
+
+      #map:focus {
+        outline: none;
+      }
+
+      #title {
+        z-index: 1;
+        top: 5px;
+        left: 5px;
+        margin: 0px;
+        padding: 5px;
+        background-color: white;
+        border-radius: 3px;
       }
 
       #geolocate {
-        position: absolute;
         z-index: 1;
-        top: 10px;
-        right: 10px;
+        top: 5px;
+        right: 5px;
+      }
+
+      #search {
+        z-index: 1;
+        top: 60px;
+        left: 5px;
+      }
+
+      #search-result {
+        z-index: 2;
+        top: 60px;
+        left: 5px;
+        width: calc(100% - 30px);
+        max-width: 500px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 3px;
+      }
+
+      .hidden {
+        display: none;
       }
     </style>
   </head>
 
   <body>
-    <h1>OSMO: Final deliverable</h1>
-    <!-- stands for OpenStreetMap Offline :) -->
-    
     <!-- 
       TODO: the JavaScript should  probably contruct the required <canvas> and
       <button> elements.
@@ -37,7 +90,14 @@
       this would make it easier to embed the map on other websites.
     -->
     <div id="map-container">
-      <canvas id="map"></canvas>
+      <!-- stands for OpenStreetMap Offline :) -->
+      <h1 id="title">OSMO</h1>
+      <!-- 
+        tabindex makes it selectable, so key* events are fire
+        note that the canvas sets its' own size, so no css required
+      -->
+      <canvas id="map" tabindex="1"></canvas>
+      <button id="search">Search!</button>
       <button id="geolocate">Geolocate!</button>
     </div>
 

@@ -91,8 +91,8 @@ class CanvasMap {
     }
 
     private setCanvasSize() {
-        this.canvas.width = window.innerWidth - 16;
-        this.canvas.height = window.innerHeight - 76;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
     }
 
     public setDirty() {
@@ -471,7 +471,7 @@ class CanvasMap {
         // draw the user's position
         this.drawUserPosition(scale);
 
-        this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
+        // this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
 
         this.updateUrlHash();
 
