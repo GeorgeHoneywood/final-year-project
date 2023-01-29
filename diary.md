@@ -80,6 +80,8 @@ Finished off the professional issues section. Talked about visual impairments an
 
 Worked on map fling --- where map continues to scroll after fast movement. Only for mouse controls at the moment.
 
+Started work on search (geocoding), using the Nominatim API hosted by the OSMF. Improved styling, by making the canvas fullscreen, and overlaying the title atop it.
+
 ### Week 20 (2023-01-30)
 
 ### Week 21 (2023-02-06)
