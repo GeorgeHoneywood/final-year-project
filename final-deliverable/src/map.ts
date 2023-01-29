@@ -74,7 +74,7 @@ class CanvasMap {
             }
         }
 
-        this.setViewport({x, y}, zoom_level)
+        this.setViewport({ x, y }, zoom_level)
 
         // calculate the base zoom levels for each zoom level
         for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {

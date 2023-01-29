@@ -1,4 +1,5 @@
 import type { CanvasMap } from "./map.js";
+import { search } from "./search.js";
 import type { Coord } from "./types.js";
 
 // window for second tap to occur to be considered double tap 
@@ -15,6 +16,7 @@ const FLING_VELOCITY_CLAMP = 25
 function registerEventHandlers(
     map: CanvasMap,
     canvas: HTMLCanvasElement,
+    search_button: HTMLButtonElement,
     geolocate_button: HTMLButtonElement,
 ) {
     // register mouse event handlers 
@@ -22,10 +24,34 @@ function registerEventHandlers(
     // register touch event handlers
     handleTouch(map, canvas);
     // register keyboard event handlers for WASD+- controls
-    handleKeyboard(map);
+    handleKeyboard(map, canvas);
 
     // register geolocate button
     handleGPS(map, geolocate_button);
+
+    search_button.addEventListener("click", () => {
+        // show search menu
+        // FIXME: should either pass all these references in, or none of them...
+        const search_container = document.getElementById("search-result")
+        const search_form = document.getElementById("search-form") as HTMLFormElement
+        if (!search_container || !search_form) {
+            console.log("required element not found!")
+            return
+        }
+
+        search_container.classList.toggle("hidden")
+
+        search_form.addEventListener("submit", async (e) => {
+            e.preventDefault()
+            const data = new FormData(search_form)
+
+            const query = data.get("query")
+            if (!query) { return }
+
+            // TODO: template out this JSON, into 
+            console.log(await search(query as string))
+        })
+    })
 
     // handle window resizes
     window.addEventListener("resize", (e) => {
@@ -178,8 +204,8 @@ function handleTouch(map: CanvasMap, canvas: HTMLCanvasElement) {
     });
 }
 
-function handleKeyboard(map: CanvasMap) {
-    document.addEventListener("keydown", (e) => {
+function handleKeyboard(map: CanvasMap, canvas: HTMLCanvasElement) {
+    canvas.addEventListener("keydown", (e) => {
         switch (e.key) {
             case "w":
                 e.preventDefault();
@@ -225,6 +251,9 @@ function handleMouse(map: CanvasMap, canvas: HTMLCanvasElement) {
 
     canvas.addEventListener("mousedown", (e) => {
         e.preventDefault();
+
+        (e.target! as HTMLCanvasElement).focus() // allows keyboard events to fire
+
         mouseDown = true;
         flinging = false
     });
