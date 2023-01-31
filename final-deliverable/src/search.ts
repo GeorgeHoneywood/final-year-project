@@ -1,3 +1,5 @@
+import { BBox } from "./types";
+
 export interface NominatimResult {
     place_id: number;
     licence: string;
@@ -17,9 +19,12 @@ export interface NominatimResult {
  * @param query to search for
  * @returns search results
  */
-async function search(query: string): Promise<NominatimResult> {
+async function search(query: string, bbox: BBox): Promise<NominatimResult> {
+    const viewbox = `${bbox.bottom_left.x.toFixed(4)},${bbox.bottom_left.y.toFixed(4)},${bbox.top_right.x.toFixed(4)},${bbox.top_right.y.toFixed(4)}`
+
+    // NOTE: bounded=1 forces results to be within the viewbox
     const resp = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&viewbox=${encodeURIComponent(viewbox)}&bounded=1`,
         {
             "headers": {
                 "Accept": "application/json",

@@ -49,7 +49,7 @@ function registerEventHandlers(
             if (!query) { return }
 
             // TODO: template out this JSON, into 
-            console.log(await search(query as string))
+            console.log(await search(query as string, map.getViewport()))
         })
     })
 

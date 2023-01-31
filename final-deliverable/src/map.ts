@@ -1,7 +1,7 @@
 import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
 import { MapsforgeParser } from "./mapsforge/mapsforge.js";
 import { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
-import { Coord } from "./types.js";
+import { BBox, Coord } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
@@ -131,6 +131,24 @@ class CanvasMap {
         this.dirty = true;
     }
 
+    public getViewport(): BBox {
+        const scale = Math.pow(2, this.zoom_level);
+
+        const mercator_bottom_left: Coord = {
+            x: -(this.x_offset) / scale,
+            y: -(this.y_offset) / scale,
+        }
+        const mercator_top_right: Coord = {
+            x: -(this.canvas.width - this.x_offset) / scale,
+            y: ((this.canvas.height) - this.y_offset) / scale,
+        }
+
+        return {
+            bottom_left: unprojectMercator(mercator_bottom_left),
+            top_right: unprojectMercator(mercator_top_right),
+        }
+    }
+
     /**
      * Zoom the map in or out. Supplying a positive number will zoom in, and
      * negative out. Optionally supply a Coord to zoom around, otherwise it will
@@ -184,6 +202,8 @@ class CanvasMap {
             return;
         }
         this.dirty = false;
+
+        console.log(this.getViewport())
 
         const begin = performance.now();
 
