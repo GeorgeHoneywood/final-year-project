@@ -32,24 +32,46 @@ function registerEventHandlers(
 
     // search bits
     // FIXME: should either pass all these references in, or none of them...
-    const search_container = document.getElementById("search-box")
-    const search_form = document.getElementById("search-form") as HTMLFormElement
-    if (!search_container || !search_form) {
+    const search_results = document.querySelector(".search-results")
+    const search_input = document.querySelector("#search-form input[name=query]") as HTMLInputElement
+    const search_button = document.getElementById("search-button") as HTMLButtonElement
+    console.log(search_input, search_button)
+    if (!search_results || !search_button) {
         console.log("required element not found!")
         return
     }
 
-    search_form.addEventListener("submit", async (e) => {
-        e.preventDefault()
-        const data = new FormData(search_form)
+    async function doSearch() {
+        if (!search_results) {
+            console.log("required element not found 2!")
+            return
+        }
 
-        const query = data.get("query")
-        if (!query) { return }
+        const results = await search(search_input.value, map.getViewport())
+        
+        let output = ``
 
-        // TODO: template out this JSON, into 
-        console.log(await search(query as string, map.getViewport()))
+        for (const res of results){
+            output += `
+            <div class="search-result">
+                <p>${res.display_name}</p>
+            </div>`
+        }
+
+        search_results.innerHTML = output
+    }
+
+    search_input.addEventListener("keydown", (e) => {
+        if (e.key == "Enter") {
+            e.preventDefault()
+            doSearch()
+        }
     })
 
+    search_button.addEventListener("click", (e) => {
+        e.preventDefault()
+        doSearch()
+    })
 
     // handle window resizes
     window.addEventListener("resize", (e) => {

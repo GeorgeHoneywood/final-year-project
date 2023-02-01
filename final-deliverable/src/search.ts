@@ -19,7 +19,7 @@ export interface NominatimResult {
  * @param query to search for
  * @returns search results
  */
-async function search(query: string, bbox: BBox): Promise<NominatimResult> {
+async function search(query: string, bbox: BBox): Promise<NominatimResult[]> {
     const viewbox = `${bbox.bottom_left.x.toFixed(4)},${bbox.bottom_left.y.toFixed(4)},${bbox.top_right.x.toFixed(4)},${bbox.top_right.y.toFixed(4)}`
 
     // NOTE: bounded=1 forces results to be within the viewbox

@@ -203,8 +203,6 @@ class CanvasMap {
         }
         this.dirty = false;
 
-        console.log(this.getViewport())
-
         const begin = performance.now();
 
         // make sure the canvas takes up most of the screen
