@@ -6,7 +6,6 @@ import { registerEventHandlers } from "./handlers.js";
 
 // references to the DOM, that we pass through the application
 const canvas = document.getElementById("map") as HTMLCanvasElement;
-const search_button = document.getElementById("search") as HTMLButtonElement;
 const geolocate_button = document.getElementById("geolocate") as HTMLButtonElement;
 
 async function main() {
@@ -21,7 +20,7 @@ async function main() {
     console.log({ parser })
 
     const map = new CanvasMap(canvas, parser);
-    registerEventHandlers(map, canvas, search_button, geolocate_button)
+    registerEventHandlers(map, canvas, geolocate_button)
 }
 
 main();

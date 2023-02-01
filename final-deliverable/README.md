@@ -1,4 +1,4 @@
-# Final deliverable
+# Final deliverable: OSMO (OSM Offline)
 
 This is the code for the final submission, that builds on the proof of concepts.
 
@@ -8,4 +8,4 @@ To run the demo locally, you will need to install the dependencies. This can be 
 
 To run the tests, you'll also need to download [dorset-with-debug.map](https://files.george.honeywood.org.uk/2022-11-16-dorset-with-debug.map), put it in the `data/` folder, and rename it to `dorset-with-debug.map`.
 
-Map data © [OpenStreetMap Contributors (ODbL)](https://www.openstreetmap.org/copyright).
+Map data © [OpenStreetMap Contributors (ODbL)](https://www.openstreetmap.org/copyright). Icons from [Font Awesome](https://fontawesome.com/).

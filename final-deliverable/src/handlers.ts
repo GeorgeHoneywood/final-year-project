@@ -16,7 +16,6 @@ const FLING_VELOCITY_CLAMP = 25
 function registerEventHandlers(
     map: CanvasMap,
     canvas: HTMLCanvasElement,
-    search_button: HTMLButtonElement,
     geolocate_button: HTMLButtonElement,
 ) {
     // register mouse event handlers 
@@ -29,29 +28,28 @@ function registerEventHandlers(
     // register geolocate button
     handleGPS(map, geolocate_button);
 
-    search_button.addEventListener("click", () => {
-        // show search menu
-        // FIXME: should either pass all these references in, or none of them...
-        const search_container = document.getElementById("search-result")
-        const search_form = document.getElementById("search-form") as HTMLFormElement
-        if (!search_container || !search_form) {
-            console.log("required element not found!")
-            return
-        }
 
-        search_container.classList.toggle("hidden")
 
-        search_form.addEventListener("submit", async (e) => {
-            e.preventDefault()
-            const data = new FormData(search_form)
+    // search bits
+    // FIXME: should either pass all these references in, or none of them...
+    const search_container = document.getElementById("search-box")
+    const search_form = document.getElementById("search-form") as HTMLFormElement
+    if (!search_container || !search_form) {
+        console.log("required element not found!")
+        return
+    }
 
-            const query = data.get("query")
-            if (!query) { return }
+    search_form.addEventListener("submit", async (e) => {
+        e.preventDefault()
+        const data = new FormData(search_form)
 
-            // TODO: template out this JSON, into 
-            console.log(await search(query as string, map.getViewport()))
-        })
+        const query = data.get("query")
+        if (!query) { return }
+
+        // TODO: template out this JSON, into 
+        console.log(await search(query as string, map.getViewport()))
     })
+
 
     // handle window resizes
     window.addEventListener("resize", (e) => {

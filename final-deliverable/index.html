@@ -4,11 +4,19 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- prevent favicon.ico requests -->
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="assets/favicon.svg" />
     <title>OSMO: Final deliverable</title>
 
     <style>
+      :root {
+        --white: #fff;
+        --black: #111111;
+        --yellow: #c89c00;
+      }
+
+      html, body, #map-container {
+        height: 100%;
+      }
 
       body {
         font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -18,12 +26,15 @@
       button {
         padding: 6px;
         font-size: medium;
-        background-color: white;
+        background-color: var(--white);
         border-radius: 3px;
         border: none;
         /* border: 1px solid black; */
-        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.8);
         cursor: pointer;
+      }
+
+      shadow {
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.8);
       }
 
       button:hover {
@@ -32,11 +43,11 @@
 
       #map-container {
         position: relative;
-        
       }
 
       #map-container > * {
         position: absolute;
+        z-index: 1;
       }
 
       #map:focus {
@@ -44,40 +55,70 @@
       }
 
       #title {
-        z-index: 1;
+        z-index: 2;
         top: 5px;
-        left: 5px;
+        right: 5px;
         margin: 0px;
         padding: 5px;
-        background-color: white;
+        background-color: var(--white);
         border-radius: 3px;
+      }
+
+      @media only screen and (max-width: 600px) {
+        #title {
+          display: none;
+        }
       }
 
       #geolocate {
-        z-index: 1;
-        top: 5px;
-        right: 5px;
+        bottom: 10px;
+        right: 10px;
       }
 
       #search {
-        z-index: 1;
         top: 60px;
         left: 5px;
       }
 
-      #search-result {
+      #search-box {
         z-index: 2;
-        top: 60px;
+        top: 5px;
         left: 5px;
+        max-width: 450px;
         width: calc(100% - 30px);
-        max-width: 500px;
-        background-color: white;
+        background-color: var(--white);
         padding: 10px;
-        border-radius: 3px;
+        border-radius: 5px;
       }
 
-      .hidden {
-        display: none;
+      .icon {
+        height: 25px;
+        width: 25px;
+        display: block;
+        background-clip: content-box;
+        background-origin: content-box;
+      }
+
+      .geolocate {
+        background-image: url("assets/geolocate.svg");
+      }
+
+      .search {
+        background-image: url("assets/search.svg");
+      }
+
+      #search-form {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+      }
+
+      #search-form input[name=query] {
+        background-color: var(--white);
+        font-size: 14pt;
+        margin-right: 10px;
+        flex: 1 1;
+        min-width: 0;
       }
     </style>
   </head>
@@ -97,14 +138,17 @@
         note that the canvas sets its' own size, so no css required
       -->
       <canvas id="map" tabindex="1"></canvas>
-      <button id="search">Search!</button>
-      <button id="geolocate">Geolocate!</button>
-      <div id="search-result" class="hidden">
-        <form id="search-form">
-          <input name="query" type="text">
-          <input type="submit">
-        </form>
+      <div id="search-box">
+        <div id="search-form">
+          <input name="query" type="text" placeholder="10 Downing Street">
+          <button>
+            <span class="icon search"></span>
+          </button>
+        </div>
       </div>
+      <button id="geolocate" class="shadow" >
+        <span class="icon geolocate"></span>
+      </button>
     </div>
 
     <script src="dist/bundle.js"></script>
