@@ -84,6 +84,10 @@ Started work on search (geocoding), using the Nominatim API hosted by the OSMF. 
 
 ### Week 20 (2023-01-30)
 
+Added the ability to bind the search to the current map viewport. Made search results show up beneath the search bar, where you can click them to pan the map to the location.
+
+UI improvements. Made search bar responsive, and always visible. Replaced text with icons where possible. 
+
 ### Week 21 (2023-02-06)
 
 ### Week 22 (2023-02-13)
