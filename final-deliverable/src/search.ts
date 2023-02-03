@@ -24,7 +24,7 @@ async function search(query: string, bbox: BBox): Promise<NominatimResult[]> {
 
     // NOTE: bounded=1 forces results to be within the viewbox
     const resp = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&viewbox=${encodeURIComponent(viewbox)}&bounded=1`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&viewbox=${encodeURIComponent(viewbox)}&bounded=0`,
         {
             "headers": {
                 "Accept": "application/json",

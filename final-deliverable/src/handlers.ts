@@ -48,18 +48,33 @@ function registerEventHandlers(
         }
 
         const results = await search(search_input.value, map.getViewport())
-        
+
         let output = ``
 
-        for (const res of results){
+        for (const res of results) {
             output += `
-            <div class="search-result">
-                <p>${res.display_name}</p>
+            <div class="search-result" data-coordinate="${res.lon}, ${res.lat}">
+                ${res.display_name}
             </div>`
         }
 
         search_results.innerHTML = output
     }
+
+    search_results.addEventListener("click", (e) => {
+        if (!e.target || !(e.target as HTMLElement).classList.contains("search-result")) {
+            return
+        }
+
+        const [x, y] = (e.target as HTMLElement)
+            .dataset["coordinate"]!
+            .split(",")
+
+        map.setViewport({
+            x: +x,
+            y: +y,
+        }, 16)
+    })
 
     search_input.addEventListener("keydown", (e) => {
         if (e.key == "Enter") {

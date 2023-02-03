@@ -113,6 +113,24 @@
         align-items: stretch;
       }
 
+      .search-result {
+        margin-top: 10pt;
+        cursor: pointer;
+        padding: 3pt;
+      }
+
+      .search-result:hover {
+        margin-top: 10pt;
+        cursor: pointer;
+        background-color: #d8d8d8;
+      }
+
+      .search-results .search-result:not(:first-child) {
+        border-top: 2pt solid;
+        padding-top: 10pt;
+      }
+
+
       #search-form input[name=query] {
         background-color: var(--white);
         font-size: 14pt;
