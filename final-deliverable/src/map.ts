@@ -191,6 +191,23 @@ class CanvasMap {
     }
 
     /**
+     * Check if a point is within the bounds of the currently loaded map file
+     * @param coord to check
+     * @returns true if within, false if outside
+     */
+    public withinMapExtent(coord: Coord): boolean {
+        const bbox = this.parser.bbox
+
+        if (
+            (coord.x > bbox.min_long && coord.x < bbox.max_long)
+            && (coord.y > bbox.min_lat && coord.y < bbox.max_lat)
+        ) {
+            return true
+        }
+        return false
+    }
+
+    /**
      * Renders out the map to the canvas. Should be called via
      * requestAnimationFrame, as this allows the map to be rendered at a stable
      * frame rate.

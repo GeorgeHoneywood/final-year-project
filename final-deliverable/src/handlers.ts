@@ -52,8 +52,15 @@ function registerEventHandlers(
         let output = ``
 
         for (const res of results) {
+            const valid = map.withinMapExtent({
+                x: +res.lon, y: +res.lat
+            })
+
             output += `
-            <div class="search-result" data-coordinate="${res.lon}, ${res.lat}">
+            <div 
+                class="search-result ${!valid ? `invalid-result` : ``}"
+                data-coordinate="${res.lon}, ${res.lat}"
+            >
                 ${res.display_name}
             </div>`
         }
