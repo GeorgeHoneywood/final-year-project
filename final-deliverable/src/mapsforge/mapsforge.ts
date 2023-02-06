@@ -147,7 +147,7 @@ class MapsforgeParser {
         }
 
         const header_length = new DataView(
-            await magic_bytes.slice(20, 24)
+            magic_bytes.slice(20, 24)
         ).getInt32(0)
 
         const header = new Reader(
