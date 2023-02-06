@@ -35,3 +35,7 @@ proof-of-concepts/4-rendering-osm-data/data/london.map
 final-deliverable/data/dorset-zi.map
 final-deliverable/data/dorset-tag-values.map
 final-deliverable/data/dorset.map
+*.lua
+final-deliverable/data/england.map
+final-deliverable/data/london-zi.map
+final-deliverable/data/london.map

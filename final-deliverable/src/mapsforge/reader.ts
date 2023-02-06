@@ -1,6 +1,10 @@
 /**
  * A helper class to read data from a DataView, whilst remembering the current
- * offset throughout the file
+ * offset throughout the file.
+ * 
+ * See the "Gneral remarks" in the specification for details about these
+ * encodings:
+ * https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md#general-remarks
  */
 class Reader {
     data: DataView
@@ -58,7 +62,7 @@ class Reader {
             | BigInt(this.data.getUint8(this.offset++))
     }
 
-    // decode a variable length unsigned integer as a number
+    // decode a variable length _unsigned_ integer as a number
     getVUint() {
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant
@@ -83,7 +87,7 @@ class Reader {
         return value
     }
 
-    // decode a variable length signed integer as a number
+    // decode a variable length _signed_ integer as a number
     getVSint() {
         // if the first bit is 1, need to read the next byte rest of the 7 bits
         // are the numeric value, starting with the least significant

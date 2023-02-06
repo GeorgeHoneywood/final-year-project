@@ -59,9 +59,22 @@ class ZoomLevel {
 const tag_wildcard = /^.*=%([bifhs])$/;
 
 /**
- * Reads some file encoded in the Mapsforge binary map file specification
- * 
- * See here: https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md
+ * Reads some file encoded in the Mapsforge binary map file specification.
+ *
+ * _NOTE: You must call .readHeader(), before other methods of this class. This
+ * populates the index required to read tile data._
+ *
+ * See here:
+ * https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md
+ *
+ * In cases where the specification was incomplete or inaccurate, I used the
+ * original Java source code as a supplement:
+ * https://github.com/mapsforge/mapsforge/tree/master/mapsforge-map-reader/src/main/java/org/mapsforge/map/reader
+ *
+ * To help remedy these issues for future implementors of the spec, I
+ * contributed a PR to clear up some details:
+ * https://github.com/mapsforge/mapsforge/pull/1374
+ *
  */
 class MapsforgeParser {
     blob: Blob | null

@@ -1,3 +1,8 @@
+/*
+Classes used to represent mapsforge OSM data abstractions. Some styling
+currently decided here to speed up rendering hot path.
+*/
+
 import { Coord } from '../types'
 
 class Way {
