@@ -309,7 +309,7 @@ class MapsforgeParser {
             )
         )
 
-        // FIXME: handle the end of file case, where there aren't any more index blocks
+        // NOTE: EOF condition handled by the previous tile bounds check
         const block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
         const next_block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
 
@@ -356,12 +356,13 @@ class MapsforgeParser {
 
         // should now be at the beginning of PoI data
         // use this to skip to the beginning of ways if we aren't reading all PoIs
-        const start_of_way_data = tile_data.getVUint()
+        // const start_of_way_data = \
+        tile_data.getVUint()
 
         const pois: PoI[] = this.readPoIs(zoom_table, tile_top_left_coord, tile_data)
 
         // should now be at the beginning of way data
-        // FIXME: add to offset here if we aren't reading all the PoIs
+        // NOTE: need to add to offset here if we aren't reading all the PoIs
 
         const ways: Way[] = this.readWays(zoom_table, tile_top_left_coord, tile_data)
 
@@ -462,7 +463,8 @@ class MapsforgeParser {
             }
 
             // TODO: presumably could be used to skip over a way
-            const way_data_size = tile_data.getVUint()
+            // const way_data_size = \
+            tile_data.getVUint()
 
             // skip over the "sub tile bitmap", unsure what it is for
             tile_data.shiftOffset(2)
