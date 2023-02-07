@@ -1,3 +1,6 @@
+// TODO: ideally this would be written in typescript, but getting service worker
+// types imported is surprisingly difficult.
+
 // code reused from first proof of concept
 // following this guide: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
 

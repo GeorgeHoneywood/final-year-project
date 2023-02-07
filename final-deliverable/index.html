@@ -9,13 +9,15 @@
 
     <style>
       :root {
-        --white: #fff;
-        --black: #111111;
+        --white: #F2F2F2;
+        --black: #222222;
         --yellow: #c89c00;
+        --grey: #d9d9d9;
       }
 
       html, body, #map-container {
         height: 100%;
+        color: var(--black);
       }
 
       body {
@@ -27,9 +29,9 @@
         padding: 6px;
         font-size: medium;
         background-color: var(--white);
-        border-radius: 3px;
+        border-radius: 5px;
         border: none;
-        /* border: 1px solid black; */
+        border: 2px solid var(--grey);
         cursor: pointer;
       }
 
@@ -60,8 +62,11 @@
         right: 5px;
         margin: 0px;
         padding: 5px;
+        padding-left: 10pt;
+        padding-right: 10pt;
         background-color: var(--white);
-        border-radius: 3px;
+        border-radius: 10px;
+        border: 2px solid var(--grey);
       }
 
       @media only screen and (max-width: 600px) {
@@ -75,20 +80,17 @@
         right: 10px;
       }
 
-      #search {
-        top: 60px;
-        left: 5px;
-      }
-
       #search-box {
         z-index: 2;
+        border-radius: 10px;
         top: 5px;
         left: 5px;
         max-width: 450px;
         width: calc(100% - 30px);
         background-color: var(--white);
-        padding: 10px;
-        border-radius: 5px;
+        padding: 7px;
+        border-radius: 10px;
+        border: 2px solid var(--grey);
       }
 
       .icon {
@@ -122,11 +124,11 @@
       .search-result:hover {
         margin-top: 10pt;
         cursor: pointer;
-        background-color: #d8d8d8;
+        background-color: var(--grey);
       }
 
       .search-results .search-result:not(:first-child) {
-        border-top: 2pt solid;
+        border-top: 2pt solid var(--grey);
         padding-top: 10pt;
       }
 
@@ -136,10 +138,13 @@
 
       #search-form input[name=query] {
         background-color: var(--white);
-        font-size: 14pt;
+        font-size: 12pt;
         margin-right: 10px;
+        padding-left: 8px;
         flex: 1 1;
         min-width: 0;
+        border: 2px solid var(--grey);
+        border-radius: 5px;
       }
     </style>
   </head>
