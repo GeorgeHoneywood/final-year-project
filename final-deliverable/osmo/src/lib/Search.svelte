@@ -1,15 +1,11 @@
 <script lang="ts">
     import type { CanvasMap } from "../util/map"
     import { search } from "../util/search"
-    import { fade } from 'svelte/transition';
-    // search bits
-    // FIXME: should either pass all these references in, or none of them...
-    // const search_results = document.querySelector(".search-results")
-    let search_input = ""
+    import { fade } from "svelte/transition"
+
     export let map: CanvasMap
-    // const search_button = document.getElementById(
-    //     "search-button",
-    // ) as HTMLButtonElement
+
+    let search_input = ""
     let results = []
 
     async function doSearch() {
@@ -34,27 +30,6 @@
     }
 
     let promise = null
-
-    // search_results.addEventListener("click", (e) => {
-    //     if (
-    //         !e.target ||
-    //         !(e.target as HTMLElement).classList.contains("search-result")
-    //     ) {
-    //         return
-    //     }
-
-    //     const [x, y] = (e.target as HTMLElement).dataset["coordinate"]!.split(
-    //         ",",
-    //     )
-
-    //     map.setViewport(
-    //         {
-    //             x: +x,
-    //             y: +y,
-    //         },
-    //         16,
-    //     )
-    // })
 </script>
 
 <div id="search-box">
@@ -69,9 +44,16 @@
             bind:value={search_input}
         />
         {#if search_input}
-        <button type="reset" on:click={() => results = []}>
-            <span class="icon cross" />
-        </button>
+            <button
+                type="reset"
+                on:click|preventDefault={() => {
+                    results = []
+                    search_input = ""
+                }}
+                transition:fade
+            >
+                <span class="icon cross" />
+            </button>
         {/if}
         <button id="search-button" type="submit">
             <span class="icon search" />
@@ -89,15 +71,11 @@
                             ? `invalid-result`
                             : ``}"
                         on:keydown={() => {}}
-                        on:click={() => {
+                        on:click={() =>
                             map.setViewport(
-                                {
-                                    x: +res.coord.x,
-                                    y: +res.coord.y,
-                                },
+                                { x: +res.coord.x, y: +res.coord.y },
                                 16,
-                            )
-                        }}
+                            )}
                     >
                         {res.name}
                     </div>
