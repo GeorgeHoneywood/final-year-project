@@ -68,6 +68,11 @@
             placeholder="10 Downing Street"
             bind:value={search_input}
         />
+        {#if search_input}
+        <button type="reset" on:click={() => results = []}>
+            <span class="icon cross" />
+        </button>
+        {/if}
         <button id="search-button" type="submit">
             <span class="icon search" />
         </button>

@@ -103,6 +103,10 @@ button:hover {
   background-image: url("assets/search.svg");
 }
 
+.cross {
+  background-image: url("assets/cross.svg");
+}
+
 #search-form {
   display: flex;
   justify-content: space-between;
