@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { registerEventHandlers } from "./util/handlers.js"
     import { MapsforgeParser } from "./util/mapsforge/mapsforge.js"
     import { loadMapBlob } from "./util/load.js"
     import { CanvasMap } from "./util/map.js"
@@ -27,14 +26,13 @@
         console.log({ parser })
 
         canvas_map = new CanvasMap(canvas, parser)
-        // registerEventHandlers(canvas_map, canvas)
 
         window.addEventListener("resize", (e) => {
             // TODO: this should adjust offsets so that the centre of the map
             // stays in the centre when the window resizes
             e.preventDefault()
 
-            canvas_map.setDirty()
+            
         })
     }
 
@@ -350,6 +348,8 @@
     }
 </script>
 
+<svelte:window on:resize|preventDefault={() => {canvas_map.setDirty()}} />
+
 <!-- on:blur noop to prevent a11y lint error -->
 <canvas
     id="map"
@@ -367,5 +367,5 @@
     on:touchcancel={touch.touchcancel}
     on:keydown={keyboard}
 />
-<Search />
+<Search map={canvas_map}/>
 <Geolocate map={canvas_map} />
