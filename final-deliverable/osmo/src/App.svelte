@@ -1,46 +1,68 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import Counter from './lib/Counter.svelte'
+    import { MapsforgeParser } from "./util/mapsforge/mapsforge.js"
+    import { loadMapBlob } from "./util/load.js"
+    import { CanvasMap } from "./util/map.js"
+    import { registerServiceWorker } from "./util/register-sw.js"
+    import { registerEventHandlers } from "./util/handlers.js"
+
+    // references to the DOM, that we pass through the application
+    let canvas: HTMLCanvasElement
+    const geolocate_button = document.getElementById(
+        "geolocate",
+    ) as HTMLButtonElement
+
+    async function main() {
+        await registerServiceWorker()
+
+        // load entire map blob
+        const parser = new MapsforgeParser(await loadMapBlob("data/egham.map"))
+        // load dynamically using HTTP range requests
+        // const parser = new MapsforgeParser(null, new URL("data/egham.map", location.href))
+
+        await parser.readHeader()
+        console.log({ parser })
+
+        const map = new CanvasMap(canvas, parser)
+        registerEventHandlers(map, canvas, geolocate_button)
+    }
+    main()
+
+  
 </script>
 
 <main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer"> 
-      <img src="/vite.svg" class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer"> 
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+    <!-- 
+  TODO: the JavaScript should  probably contruct the required <canvas> and
+  <button> elements.
 
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  this would make it easier to embed the map on other websites.
+-->
+    <div id="map-container">
+        <!-- stands for OpenStreetMap Offline :) -->
+        <h1 id="title">OSMO</h1>
+        <!-- 
+    tabindex makes it selectable, so key* events are fire
+    note that the canvas sets its' own size, so no css required
+  -->
+        <canvas id="map" tabindex="0" bind:this={canvas}/>
+        <div id="search-box">
+            <div id="search-form">
+                <input
+                    name="query"
+                    type="text"
+                    placeholder="10 Downing Street"
+                />
+                <button id="search-button">
+                    <span class="icon search" />
+                </button>
+            </div>
+            <div class="search-results" />
+        </div>
+        <button id="geolocate" class="shadow">
+            <span class="icon geolocate" />
+        </button>
+    </div>
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
 </style>

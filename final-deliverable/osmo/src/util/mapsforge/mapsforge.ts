@@ -5,12 +5,12 @@ import {
     unprojectMercator,
     zxyToMercatorCoord,
 } from "../geom"
-import { Coord } from "../types"
+import type { Coord } from "../types"
 import {
-    PoI,
     Tile,
+    PoI,
     Way,
-    ZoomTable
+    type ZoomTable
 } from "./objects"
 import { Reader } from "./reader"
 

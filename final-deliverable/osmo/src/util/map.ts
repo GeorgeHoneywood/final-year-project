@@ -1,7 +1,7 @@
 import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
-import { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
-import { BBox, Coord } from "./types.js";
+import type { MapsforgeParser } from "./mapsforge/mapsforge.js";
+import type { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
+import type { BBox, Coord } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;

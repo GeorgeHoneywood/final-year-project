@@ -1,6 +1,6 @@
 // geometry helper functions
 
-import { Coord } from "./types.js";
+import type { Coord } from "./types.js";
 
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 

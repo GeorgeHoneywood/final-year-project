@@ -1,4 +1,4 @@
-import { BBox } from "./types";
+import type { BBox } from "./types";
 
 export interface NominatimResult {
     place_id: number;

@@ -3,7 +3,7 @@ Classes used to represent mapsforge OSM data abstractions. Some styling
 currently decided here to speed up rendering hot path.
 */
 
-import { Coord } from '../types'
+import type { Coord } from '../types'
 
 class Way {
     // the id of the Way in OpenStreetMap. only available if debug info is present
