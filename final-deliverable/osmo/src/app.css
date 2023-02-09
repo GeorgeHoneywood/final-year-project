@@ -8,7 +8,6 @@
 html,
 body,
 #app,
-main,
 #map-container {
   height: 100%;
   color: var(--black);
@@ -29,62 +28,12 @@ button {
   cursor: pointer;
 }
 
-shadow {
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.8);
-}
-
 button:hover {
   background-color: #d8d8d8;
 }
 
-#map-container {
-  position: relative;
-}
-
-#map-container > * {
-  position: absolute;
-  z-index: 1;
-}
-
-#map:focus {
-  outline: none;
-}
-
-#title {
-  z-index: 2;
-  top: 5px;
-  right: 5px;
-  margin: 0px;
-  padding: 5px;
-  padding-left: 10pt;
-  padding-right: 10pt;
-  background-color: var(--white);
-  border-radius: 10px;
-  border: 2px solid var(--grey);
-}
-
-@media only screen and (max-width: 600px) {
-  #title {
-      display: none;
-  }
-}
-
-#geolocate {
-  bottom: 10px;
-  right: 10px;
-}
-
-#search-box {
-  z-index: 2;
-  border-radius: 10px;
-  top: 5px;
-  left: 5px;
-  max-width: 450px;
-  width: calc(100% - 30px);
-  background-color: var(--white);
-  padding: 7px;
-  border-radius: 10px;
-  border: 2px solid var(--grey);
+shadow {
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.8);
 }
 
 .icon {
@@ -93,54 +42,4 @@ button:hover {
   display: block;
   background-clip: content-box;
   background-origin: content-box;
-}
-
-.geolocate {
-  background-image: url("assets/geolocate.svg");
-}
-
-.search {
-  background-image: url("assets/search.svg");
-}
-
-.cross {
-  background-image: url("assets/cross.svg");
-}
-
-#search-form {
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-}
-
-.search-result {
-  margin-top: 10pt;
-  cursor: pointer;
-  padding: 3pt;
-}
-
-.search-result:hover {
-  margin-top: 10pt;
-  cursor: pointer;
-  background-color: var(--grey);
-}
-
-.search-results .search-result:not(:first-child) {
-  border-top: 2pt solid var(--grey);
-  padding-top: 10pt;
-}
-
-.invalid-result {
-  text-decoration: line-through;
-}
-
-#search-form input[name="query"] {
-  background-color: var(--white);
-  font-size: 12pt;
-  margin-right: 10px;
-  padding-left: 8px;
-  flex: 1 1;
-  min-width: 0;
-  border: 2px solid var(--grey);
-  border-radius: 5px;
 }

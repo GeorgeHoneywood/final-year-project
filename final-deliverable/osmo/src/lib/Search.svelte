@@ -88,3 +88,63 @@
         {/await}
     </div>
 </div>
+
+<style>
+    .search {
+        background-image: url("assets/search.svg");
+    }
+
+    .cross {
+        background-image: url("assets/cross.svg");
+    }
+
+    #search-box {
+        border-radius: 10px;
+        top: 5px;
+        left: 5px;
+        max-width: 450px;
+        width: calc(100% - 30px);
+        background-color: var(--white);
+        padding: 7px;
+        border-radius: 10px;
+        border: 2px solid var(--grey);
+    }
+
+    #search-form {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+
+    .search-result {
+        margin-top: 10pt;
+        cursor: pointer;
+        padding: 3pt;
+    }
+
+    .search-result:hover {
+        margin-top: 10pt;
+        cursor: pointer;
+        background-color: var(--grey);
+    }
+
+    .search-results .search-result:not(:first-child) {
+        border-top: 2pt solid var(--grey);
+        padding-top: 10pt;
+    }
+
+    .invalid-result {
+        text-decoration: line-through;
+    }
+
+    #search-form input[name="query"] {
+        background-color: var(--white);
+        font-size: 12pt;
+        margin-right: 10px;
+        padding-left: 8px;
+        flex: 1 1;
+        min-width: 0;
+        border: 2px solid var(--grey);
+        border-radius: 5px;
+    }
+</style>

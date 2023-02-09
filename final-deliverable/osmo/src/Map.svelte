@@ -31,8 +31,6 @@
             // TODO: this should adjust offsets so that the centre of the map
             // stays in the centre when the window resizes
             e.preventDefault()
-
-            
         })
     }
 
@@ -321,34 +319,38 @@
     const keyboard = (e) => {
         switch (e.key) {
             case "w":
-                e.preventDefault();
-                canvas_map.translate({ x: 0, y: -20 });
-                break;
+                e.preventDefault()
+                canvas_map.translate({ x: 0, y: -20 })
+                break
             case "s":
-                e.preventDefault();
-                canvas_map.translate({ x: 0, y: 20 });
-                break;
+                e.preventDefault()
+                canvas_map.translate({ x: 0, y: 20 })
+                break
             case "a":
-                e.preventDefault();
-                canvas_map.translate({ x: 20, y: 0 });
-                break;
+                e.preventDefault()
+                canvas_map.translate({ x: 20, y: 0 })
+                break
             case "d":
-                e.preventDefault();
-                canvas_map.translate({ x: -20, y: 0 });
-                break;
+                e.preventDefault()
+                canvas_map.translate({ x: -20, y: 0 })
+                break
             case "+":
-                e.preventDefault();
-                canvas_map.zoom(1);
-                break;
+                e.preventDefault()
+                canvas_map.zoom(1)
+                break
             case "-":
-                e.preventDefault();
-                canvas_map.zoom(-1);
-                break;
+                e.preventDefault()
+                canvas_map.zoom(-1)
+                break
         }
     }
 </script>
 
-<svelte:window on:resize|preventDefault={() => {canvas_map.setDirty()}} />
+<svelte:window
+    on:resize|preventDefault={() => {
+        canvas_map.setDirty()
+    }}
+/>
 
 <!-- on:blur noop to prevent a11y lint error -->
 <canvas
@@ -367,5 +369,15 @@
     on:touchcancel={touch.touchcancel}
     on:keydown={keyboard}
 />
-<Search map={canvas_map}/>
+<Search map={canvas_map} />
 <Geolocate map={canvas_map} />
+
+<style >
+    #map {
+        z-index: 0;
+    }
+
+    #map:focus {
+        outline: none;
+    }
+</style>

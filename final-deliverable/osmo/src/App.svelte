@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import { registerServiceWorker } from "./util/register-sw.js"
 
     import Map from "./Map.svelte"
@@ -8,27 +7,43 @@
         await registerServiceWorker()
     }
     main()
-
-  
 </script>
 
-<main>
+<div id="map-container">
+    <!-- stands for OpenStreetMap Offline :) -->
+    <h1 id="title">OSMO</h1>
     <!-- 
-  TODO: the JavaScript should  probably contruct the required <canvas> and
-  <button> elements.
-
-  this would make it easier to embed the map on other websites.
--->
-    <div id="map-container">
-        <!-- stands for OpenStreetMap Offline :) -->
-        <h1 id="title">OSMO</h1>
-        <!-- 
     tabindex makes it selectable, so key* events are fire
     note that the canvas sets its' own size, so no css required
   -->
-        <Map />
-    </div>
-</main>
+    <Map />
+</div>
 
 <style>
+    #map-container {
+        position: relative;
+    }
+
+    :global(#map-container > *) {
+        position: absolute;
+        z-index: 2;
+    }
+
+    #title {
+        top: 5px;
+        right: 5px;
+        margin: 0px;
+        padding: 5px;
+        padding-left: 10pt;
+        padding-right: 10pt;
+        background-color: var(--white);
+        border-radius: 10px;
+        border: 2px solid var(--grey);
+    }
+
+    @media only screen and (max-width: 650px) {
+        #title {
+            display: none;
+        }
+    }
 </style>
