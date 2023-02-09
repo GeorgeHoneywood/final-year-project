@@ -7,7 +7,7 @@
     import type { Coord } from "../map/types.js"
 
     let canvas: HTMLCanvasElement
-    let canvas_map: CanvasMap
+    let map: CanvasMap
 
     // window for second tap to occur to be considered double tap
     const DOUBLE_TAP_TIMEOUT = 300
@@ -25,13 +25,7 @@
         await parser.readHeader()
         console.log({ parser })
 
-        canvas_map = new CanvasMap(canvas, parser)
-
-        window.addEventListener("resize", (e) => {
-            // TODO: this should adjust offsets so that the centre of the map
-            // stays in the centre when the window resizes
-            e.preventDefault()
-        })
+        map = new CanvasMap(canvas, parser)
     }
 
     load()
@@ -66,8 +60,8 @@
             e.preventDefault()
 
             e.deltaY < 0
-                ? canvas_map.zoom(0.2, mousePosition!)
-                : canvas_map.zoom(-0.2, mousePosition!)
+                ? map.zoom(0.2, mousePosition!)
+                : map.zoom(-0.2, mousePosition!)
         },
         mousedown: (e) => {
             e.preventDefault()
@@ -93,7 +87,7 @@
                     flinging = true
                     console.log("flinging")
 
-                    canvas_map.translate({
+                    map.translate({
                         // clamp to a maximum translation speed
                         x: clamp(velocity.x),
                         y: clamp(velocity.y),
@@ -158,7 +152,7 @@
             }
 
             if (mouseDown) {
-                canvas_map.translate({ x: change.x, y: change.y })
+                map.translate({ x: change.x, y: change.y })
             }
 
             previousPosition = mousePosition
@@ -234,7 +228,7 @@
                 previousDoubleTapDistance ??= doubleTapDistance
 
                 // zoom about the position of the double tap
-                canvas_map.zoom(
+                map.zoom(
                     (previousDoubleTapDistance - doubleTapDistance) / 100,
                     doubleTapPosition,
                 )
@@ -247,7 +241,7 @@
                 const idx = getCurrentTouchIndex(touches[0].identifier)
 
                 if (idx >= 0) {
-                    canvas_map.translate({
+                    map.translate({
                         x: -(currentTouches[idx].pageX - touches[0].pageX),
                         y: currentTouches[idx].pageY - touches[0].pageY,
                     })
@@ -277,7 +271,7 @@
                 }
 
                 // zoom about the pinch center
-                canvas_map.zoom(
+                map.zoom(
                     -(previousPinchDistance - pinchDistance) / 100,
                     pinchCenter,
                 )
@@ -320,27 +314,27 @@
         switch (e.key) {
             case "w":
                 e.preventDefault()
-                canvas_map.translate({ x: 0, y: -20 })
+                map.translate({ x: 0, y: -20 })
                 break
             case "s":
                 e.preventDefault()
-                canvas_map.translate({ x: 0, y: 20 })
+                map.translate({ x: 0, y: 20 })
                 break
             case "a":
                 e.preventDefault()
-                canvas_map.translate({ x: 20, y: 0 })
+                map.translate({ x: 20, y: 0 })
                 break
             case "d":
                 e.preventDefault()
-                canvas_map.translate({ x: -20, y: 0 })
+                map.translate({ x: -20, y: 0 })
                 break
             case "+":
                 e.preventDefault()
-                canvas_map.zoom(1)
+                map.zoom(1)
                 break
             case "-":
                 e.preventDefault()
-                canvas_map.zoom(-1)
+                map.zoom(-1)
                 break
         }
     }
@@ -348,7 +342,7 @@
 
 <svelte:window
     on:resize|preventDefault={() => {
-        canvas_map.setDirty()
+        map.setDirty()
     }}
 />
 
@@ -373,8 +367,8 @@
     on:touchcancel={touch.touchcancel}
     on:keydown={keyboard}
 />
-<Search map={canvas_map} />
-<Geolocate map={canvas_map} />
+<Search {map} />
+<Geolocate {map} />
 
 <style>
     #map {
