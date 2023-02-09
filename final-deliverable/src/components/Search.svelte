@@ -91,11 +91,11 @@
 
 <style>
     .search {
-        background-image: url("assets/search.svg");
+        background-image: url("/icons/search.svg");
     }
 
     .cross {
-        background-image: url("assets/cross.svg");
+        background-image: url("/icons/cross.svg");
     }
 
     #search-box {

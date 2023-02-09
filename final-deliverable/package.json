@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
 		"test": "jest --verbose",
-		"test:watch": "jest --verbose --watch"
+		"test:watch": "jest --verbose --watch",
+    "upload": "pnpm build && ./upload.sh"
 
   },
   "devDependencies": {
