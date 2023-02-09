@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { registerServiceWorker } from "./util/register-sw.js"
+    import { registerServiceWorker } from "./map/register-sw.js"
 
-    import Map from "./Map.svelte"
+    import Map from "./components/Map.svelte"
 
     async function main() {
         await registerServiceWorker()
@@ -12,10 +12,6 @@
 <div id="map-container">
     <!-- stands for OpenStreetMap Offline :) -->
     <h1 id="title">OSMO</h1>
-    <!-- 
-    tabindex makes it selectable, so key* events are fire
-    note that the canvas sets its' own size, so no css required
-  -->
     <Map />
 </div>
 

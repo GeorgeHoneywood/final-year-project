@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { CanvasMap } from "../util/map"
+    import type { CanvasMap } from "../map/map"
 
     export let map: CanvasMap
 
@@ -39,7 +39,7 @@
     .geolocate {
         background-image: url("assets/geolocate.svg");
     }
-    
+
     #geolocate {
         bottom: 10px;
         right: 10px;

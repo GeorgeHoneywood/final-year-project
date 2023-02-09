@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { MapsforgeParser } from "./util/mapsforge/mapsforge.js"
-    import { loadMapBlob } from "./util/load.js"
-    import { CanvasMap } from "./util/map.js"
-    import Geolocate from "./lib/Geolocate.svelte"
-    import Search from "./lib/Search.svelte"
-    import type { Coord } from "./util/types.js"
+    import { MapsforgeParser } from "../map/mapsforge/mapsforge.js"
+    import { loadMapBlob } from "../map/load.js"
+    import { CanvasMap } from "../map/map.js"
+    import Geolocate from "./Geolocate.svelte"
+    import Search from "./Search.svelte"
+    import type { Coord } from "../map/types.js"
 
     let canvas: HTMLCanvasElement
     let canvas_map: CanvasMap
@@ -353,6 +353,10 @@
 />
 
 <!-- on:blur noop to prevent a11y lint error -->
+<!-- 
+    tabindex makes it selectable, so key* events are fire
+    note that the canvas sets its' own size, so no css required
+-->
 <canvas
     id="map"
     tabindex="0"
@@ -372,7 +376,7 @@
 <Search map={canvas_map} />
 <Geolocate map={canvas_map} />
 
-<style >
+<style>
     #map {
         z-index: 0;
     }
