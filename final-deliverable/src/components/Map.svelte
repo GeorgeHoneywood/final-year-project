@@ -17,7 +17,7 @@
     async function load() {
         // load entire map blob
         const parser = new MapsforgeParser(
-            await loadMapBlob("data/egham.map"),
+            await loadMapBlob("data/ferndown.map"),
         )
         // load dynamically using HTTP range requests
         // const parser = new MapsforgeParser(null, new URL("data/egham.map", location.href))

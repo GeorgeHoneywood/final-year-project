@@ -18,6 +18,10 @@ body {
   margin: 0px;
 }
 
+hr {
+  border: 1px solid var(--grey);
+}
+
 button {
   padding: 6px;
   font-size: medium;
@@ -42,4 +46,7 @@ shadow {
   display: block;
   background-clip: content-box;
   background-origin: content-box;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }

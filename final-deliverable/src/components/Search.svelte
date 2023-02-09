@@ -8,6 +8,28 @@
     let search_input = ""
     let results = []
 
+    import { cubicInOut } from "svelte/easing"
+
+    function scaleY(
+        node,
+        { delay = 0, duration = 200, easing = (x) => x, baseScale = 0 },
+    ) {
+        const m = getComputedStyle(node).transform.match(/scale\(([0-9.]+)\)/)
+        const s = m ? +m[1] : 1
+        const is = 1 - baseScale
+
+        return {
+            delay,
+            duration,
+            css: (t) => {
+                const eased = easing(t)
+                return `transform-origin: top center; transform: scale(100%, ${
+                    eased * s * is + baseScale
+                })`
+            },
+        }
+    }
+
     async function doSearch() {
         let addresses = []
         results = []
@@ -50,7 +72,6 @@
                     results = []
                     search_input = ""
                 }}
-                transition:fade
             >
                 <span class="icon cross" />
             </button>
@@ -59,34 +80,47 @@
             <span class="icon search" />
         </button>
     </form>
-    <div class="search-results">
-        {#await promise}
-            <p>...loading</p>
-        {:then}
-            {#if results}
-                {#each results as res}
-                    <div
-                        transition:fade
-                        class="search-result {!res.valid
-                            ? `invalid-result`
-                            : ``}"
-                        on:keydown={() => {}}
-                        on:click={() =>
-                            map.setViewport(
-                                { x: +res.coord.x, y: +res.coord.y },
-                                16,
-                            )}
-                    >
-                        {res.name}
-                    </div>
-                {/each}
-            {:else}
-                <p>none</p>
-            {/if}
-        {:catch error}
-            <p style="color: red">{error.message}</p>
-        {/await}
-    </div>
+    {#key results}
+        <div
+            class="search-results"
+            style={!results.length ? "display: none;" : ""}
+            in:scaleY={{
+                delay: 0,
+                duration: 400,
+                easing: cubicInOut,
+                baseScale: 0.0,
+            }}
+        >
+            {#await promise}
+                <p>...loading</p>
+            {:then}
+                {#if results}
+                    {#each results as res}
+                        <hr />
+                        <div
+                            class="search-result {!res.valid
+                                ? `invalid-result`
+                                : ``}"
+                            on:keydown={() => {}}
+                            on:click={() => {
+                                results = []
+                                map.setViewport(
+                                    { x: +res.coord.x, y: +res.coord.y },
+                                    16,
+                                )
+                            }}
+                        >
+                            {res.name}
+                        </div>
+                    {/each}
+                {:else}
+                    <p>none</p>
+                {/if}
+            {:catch error}
+                <p style="color: red">{error.message}</p>
+            {/await}
+        </div>
+    {/key}
 </div>
 
 <style>
@@ -99,38 +133,42 @@
     }
 
     #search-box {
-        border-radius: 10px;
         top: 5px;
         left: 5px;
         max-width: 450px;
         width: calc(100% - 30px);
-        background-color: var(--white);
-        padding: 7px;
-        border-radius: 10px;
-        border: 2px solid var(--grey);
     }
 
     #search-form {
         display: flex;
         justify-content: space-between;
         align-items: stretch;
+
+        padding: 7px;
+        border-radius: 10px;
+        background-color: var(--white);
+        border: 2px solid var(--grey);
+    }
+
+    .search-results {
+        background-color: var(--white);
+        border-radius: 10px;
+        border: 2px solid var(--grey);
+        padding: 7px;
+        margin-top: 7px;
     }
 
     .search-result {
-        margin-top: 10pt;
         cursor: pointer;
-        padding: 3pt;
+        padding: 5px;
     }
 
     .search-result:hover {
-        margin-top: 10pt;
-        cursor: pointer;
         background-color: var(--grey);
     }
 
-    .search-results .search-result:not(:first-child) {
-        border-top: 2pt solid var(--grey);
-        padding-top: 10pt;
+    .search-results hr:first-child {
+        display: none;
     }
 
     .invalid-result {
@@ -140,11 +178,15 @@
     #search-form input[name="query"] {
         background-color: var(--white);
         font-size: 12pt;
-        margin-right: 10px;
+        margin-right: 7px;
         padding-left: 8px;
         flex: 1 1;
         min-width: 0;
         border: 2px solid var(--grey);
         border-radius: 5px;
+    }
+
+    #search-form button[type="reset"] {
+        margin-right: 7px;
     }
 </style>
