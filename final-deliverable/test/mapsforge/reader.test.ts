@@ -2,7 +2,7 @@ import { describe, test, expect, } from '@jest/globals';
 
 // FIXME: should use a an absolute import here.
 // this is nasty
-import { Reader } from '../../src/mapsforge/reader'
+import { Reader } from '../../src/map/mapsforge/reader'
 
 describe("Reader should be able decode values from the mapsforge file", () => {
     describe.each([

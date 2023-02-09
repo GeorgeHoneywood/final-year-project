@@ -1,11 +1,11 @@
 import { describe, test, expect } from '@jest/globals';
 import fs from "fs/promises"
 
-import { MapsforgeParser } from "../../src/mapsforge/mapsforge"
+import { MapsforgeParser } from "../../src/map/mapsforge/mapsforge"
 
 describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     test('should throw an error for files without magic bytes', async () => {
-        const junk_file = new Blob([await fs.readFile("./data/random-bytes.map")])
+        const junk_file = new Blob([await fs.readFile("./public/data/random-bytes.map")])
 
         const parser = new MapsforgeParser(junk_file)
 
@@ -15,7 +15,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test('should be able to decode header fields', async () => {
-        const albania = new Blob([await fs.readFile("./data/ferndown.map")])
+        const albania = new Blob([await fs.readFile("./public/data/ferndown.map")])
         const p = new MapsforgeParser(albania)
         await p.readHeader()
 
@@ -82,7 +82,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test('should be able to read a file with debug info', async () => {
-        const ferndown_debug = new Blob([await fs.readFile("./data/ferndown-with-debug.map")])
+        const ferndown_debug = new Blob([await fs.readFile("./public/data/ferndown-with-debug.map")])
 
         const p = new MapsforgeParser(ferndown_debug)
 
@@ -100,7 +100,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test("should be able to load a map tile", async () => {
-        const ferndown = new Blob([await fs.readFile("./data/ferndown.map")])
+        const ferndown = new Blob([await fs.readFile("./public/data/ferndown.map")])
         const p = new MapsforgeParser(ferndown)
         await p.readHeader()
 
@@ -137,7 +137,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     })
 
     test("should return the base zoom level for some zoom", async () => {
-        const ferndown = new Blob([await fs.readFile("./data/ferndown.map")])
+        const ferndown = new Blob([await fs.readFile("./public/data/ferndown.map")])
         const p = new MapsforgeParser(ferndown)
         await p.readHeader()
 
