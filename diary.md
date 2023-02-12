@@ -90,6 +90,10 @@ UI improvements. Made search bar responsive, and always visible. Replaced text w
 
 ### Week 21 (2023-02-06)
 
+Big refactor to use Svelte front-end framework. This made all the UI code much cleaner, with no more passing DOM references through the JavaScript code. Now there is a big `Map.svelte` component, which holds all the Touch/Mouse/Keyboard event handlers. Also allowed me to scope the CSS to each component, instead of having a single massive chunk of CSS in `index.html`.
+
+Using a proper UI framework made it much easier to make the search form reactive. Worked on making it resettable. Also added a nice dropdown animation for when the results pop in. 
+
 ### Week 22 (2023-02-13)
 
 ### Week 23 (2023-02-20)
