@@ -5,7 +5,7 @@ import type { BBox, Coord } from "./types.js";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    private gl: WebGL2RenderingContext;
 
     private parser: MapsforgeParser;
 
@@ -43,12 +43,9 @@ class CanvasMap {
      */
     public constructor(canvas: HTMLCanvasElement, parser: MapsforgeParser) {
         this.canvas = canvas;
-        this.ctx = this.canvas.getContext("2d")!;
-        this.ctx.font = "15px Arial";
+        this.gl = this.canvas.getContext("webgl2")!;
 
         this.parser = parser;
-
-        this.ctx.miterLimit = 2;
 
         // must set canvas size, otherwise we cannot centre the map properly
         this.setCanvasSize();
@@ -87,7 +84,129 @@ class CanvasMap {
             }
         }
 
-        requestAnimationFrame(() => this.render()); // ensure that this==this
+        // note: following tutorial at https://webgl2fundamentals.org/webgl/lessons/webgl-fundamentals.html
+
+        var vertexShaderSource = `#version 300 es
+     
+        // an attribute is an input (in) to a vertex shader.
+        // It will receive data from a buffer
+        in vec2 a_position;
+
+        uniform vec2 u_resolution;
+         
+        // all shaders have a main function
+        void main() {
+            // convert the position from pixels to 0.0 to 1.0
+            vec2 zeroToOne = a_position / u_resolution;
+         
+            // convert from 0->1 to 0->2
+            vec2 zeroToTwo = zeroToOne * 2.0;
+         
+            // convert from 0->2 to -1->+1 (clip space)
+            vec2 clipSpace = zeroToTwo - 1.0;
+         
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        }
+        `;
+
+        var fragmentShaderSource = `#version 300 es
+         
+        // fragment shaders don't have a default precision so we need
+        // to pick one. highp is a good default. It means "high precision"
+        precision highp float;
+
+        uniform vec4 u_color;
+         
+        // we need to declare an output for the fragment shader
+        out vec4 outColor;
+         
+        void main() {
+          // Just set the output to a constant reddish-purple
+          outColor = u_color;
+        }
+        `;
+
+        var vertexShader = this.createShader(this.gl, this.gl.VERTEX_SHADER, vertexShaderSource);
+        var fragmentShader = this.createShader(this.gl, this.gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+        var program = this.createProgram(this.gl, vertexShader, fragmentShader);
+        var positionAttributeLocation = this.gl.getAttribLocation(program, "a_position");
+        var resolutionUniformLocation = this.gl.getUniformLocation(program, "u_resolution");
+        var colorLocation = this.gl.getUniformLocation(program, "u_color");
+
+        var positionBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
+
+        // three 2d points
+        var positions = [
+            10, 20,
+            140, 20,
+            10, 120,
+            10, 120,
+            140, 20,
+            140, 120,
+        ];
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
+
+        var vao = this.gl.createVertexArray();
+        this.gl.bindVertexArray(vao);
+        this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+        var size = 2;          // 2 components per iteration
+        var type = this.gl.FLOAT;   // the data is 32bit floats
+        var normalize = false; // don't normalize the data
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        this.gl.vertexAttribPointer(
+            positionAttributeLocation, size, type, normalize, stride, offset)
+
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+
+        // clear canvas
+        this.gl.clearColor(0, 0, 0, 0);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        
+        this.gl.useProgram(program);
+
+        this.gl.bindVertexArray(vao);
+
+        this.gl.uniform2f(resolutionUniformLocation, this.gl.canvas.width, this.gl.canvas.height);
+        this.gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
+        
+
+        var primitiveType = this.gl.TRIANGLES;
+        var offset = 0;
+        var count = 6;
+        this.gl.drawArrays(primitiveType, offset, count);
+
+        // requestAnimationFrame(() => this.render()); // ensure that this==this
+    }
+
+    private createShader(gl, type, source) {
+        var shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+            return shader;
+        }
+
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+    }
+
+    createProgram(gl, vertexShader, fragmentShader) {
+        var program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+            return program;
+        }
+
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
     }
 
     private setCanvasSize() {
@@ -226,14 +345,14 @@ class CanvasMap {
         this.setCanvasSize();
 
         // clear canvas
-        this.ctx.fillStyle = "#f2efe9"
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.gl.fillStyle = "#f2efe9"
+        this.gl.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
 
         const top_left_coord = unprojectMercator({
-            y: (this.ctx.canvas.height - this.y_offset) / scale,
+            y: (this.gl.canvas.height - this.y_offset) / scale,
             x: -(this.x_offset / scale),
         })
 
@@ -247,7 +366,7 @@ class CanvasMap {
 
         const bottom_right_coord = unprojectMercator({
             y: -(this.y_offset / scale),
-            x: ((this.ctx.canvas.width - this.x_offset) / scale),
+            x: ((this.gl.canvas.width - this.x_offset) / scale),
         })
 
         const bottom_right = coordZToXYZ(
@@ -319,33 +438,33 @@ class CanvasMap {
                 // handle multipolygons
                 for (const path of way.paths) {
                     total_ways++
-                    this.ctx.beginPath();
+                    this.gl.beginPath();
                     for (const { x, y } of path) {
-                        this.ctx.lineTo(
+                        this.gl.lineTo(
                             x * scale + this.x_offset,
                             this.canvas.height - (y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
                         );
                     }
                     // feature styles
                     if (way.is_closed && way.is_building) {
-                        this.ctx.fillStyle = "#edc88e"
-                        this.ctx.fill()
+                        this.gl.fillStyle = "#edc88e"
+                        this.gl.fill()
                         totals['building']++
                     } else if (way.is_closed && way.is_natural) {
-                        this.ctx.fillStyle = "#3f7a3f"
-                        this.ctx.fill()
+                        this.gl.fillStyle = "#3f7a3f"
+                        this.gl.fill()
                         totals['natural']++
                     } else if (way.is_closed && way.is_water) {
-                        this.ctx.fillStyle = "#53b9ef"
-                        this.ctx.fill()
+                        this.gl.fillStyle = "#53b9ef"
+                        this.gl.fill()
                         totals['water']++
                     } else if (way.is_closed && way.is_beach) {
-                        this.ctx.fillStyle = "#f9e0bb"
-                        this.ctx.fill()
+                        this.gl.fillStyle = "#f9e0bb"
+                        this.gl.fill()
                         totals['beach']++
                     } else if (way.is_closed && way.is_grass) {
-                        this.ctx.fillStyle = "#8dc98d"
-                        this.ctx.fill()
+                        this.gl.fillStyle = "#8dc98d"
+                        this.gl.fill()
                         totals['grass']++
                     } else if (way.is_closed && way.is_residential) {
                         // FIXME: residential landuse rendering on top of roads
@@ -356,20 +475,20 @@ class CanvasMap {
                         // pedestrian areas
                         // FIXME: need to stroke the path if not an area
                         if (way.tags?.find((e) => e === "area=yes")) {
-                            this.ctx.fillStyle = "#f9c1bb"
-                            this.ctx.fill()
+                            this.gl.fillStyle = "#f9c1bb"
+                            this.gl.fill()
                             totals['path']++
                         }
                     } else if (way.is_closed && way.is_road) {
                         // road areas
                         // FIXME: need to stroke the road if not an area
                         if (way.tags?.find((e) => e === "area=yes")) {
-                            this.ctx.fillStyle = "#7a7979"
-                            this.ctx.fill()
+                            this.gl.fillStyle = "#7a7979"
+                            this.gl.fill()
                             totals['road']++
                         }
                     } else if (way.is_road) {
-                        this.ctx.strokeStyle = "#7a7979"
+                        this.gl.strokeStyle = "#7a7979"
                         let scale = 1
 
                         if (way.tags?.find((e) =>
@@ -377,42 +496,42 @@ class CanvasMap {
                             || e.startsWith("highway=trunk")
                         )) {
                             // major roads in orange
-                            this.ctx.strokeStyle = "#fcba64"
+                            this.gl.strokeStyle = "#fcba64"
 
                             // major roads should be twice as thick as normal roads
                             scale = 2
                         }
 
                         if (this.zoom_level < 15) {
-                            this.ctx.lineWidth = 2 * scale
+                            this.gl.lineWidth = 2 * scale
                         } else if (this.zoom_level < 17) {
-                            this.ctx.lineWidth = 4 * scale
+                            this.gl.lineWidth = 4 * scale
                         } else {
-                            this.ctx.lineWidth = 6 * scale
+                            this.gl.lineWidth = 6 * scale
                         }
                         totals['road']++
-                        this.ctx.stroke()
+                        this.gl.stroke()
                     } else if (way.is_path) {
-                        this.ctx.strokeStyle = "#f9897c"
+                        this.gl.strokeStyle = "#f9897c"
                         if (this.zoom_level < 15) {
-                            this.ctx.lineWidth = 2
+                            this.gl.lineWidth = 2
                         } else if (this.zoom_level < 17) {
-                            this.ctx.lineWidth = 4
+                            this.gl.lineWidth = 4
                         } else {
-                            this.ctx.lineWidth = 6
+                            this.gl.lineWidth = 6
                         }
                         totals['path']++
-                        this.ctx.stroke()
+                        this.gl.stroke()
                     } else if (way.is_railway) {
-                        this.ctx.lineWidth = 6
-                        this.ctx.strokeStyle = "#ed5c4b"
-                        this.ctx.stroke()
+                        this.gl.lineWidth = 6
+                        this.gl.strokeStyle = "#ed5c4b"
+                        this.gl.stroke()
                         totals['railway']++
                     } else if (way.is_coastline) {
-                        this.ctx.strokeStyle = "black"
-                        this.ctx.lineWidth = 1
+                        this.gl.strokeStyle = "black"
+                        this.gl.lineWidth = 1
                         totals['coastline']++
-                        this.ctx.stroke()
+                        this.gl.stroke()
                     } else {
                         // if we don't render it
                         continue
@@ -442,13 +561,13 @@ class CanvasMap {
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
                     // draw the label centered on the geometry
-                    this.ctx.font = '15px sans-serif';
+                    this.gl.font = '15px sans-serif';
 
                     const label = way.name ?? way.house_number ?? ""
-                    const size = this.ctx.measureText(label)
+                    const size = this.gl.measureText(label)
 
-                    this.ctx.fillStyle = "black"
-                    this.ctx.fillText(
+                    this.gl.fillStyle = "black"
+                    this.gl.fillText(
                         label,
                         (way.paths[0][0].x + way.label_position.x) * scale
                         + this.x_offset
@@ -471,10 +590,10 @@ class CanvasMap {
                 if (poi.tags?.find((e) =>
                     e.startsWith("place=")
                 )) {
-                    this.ctx.lineWidth = 2
-                    this.ctx.strokeStyle = 'black';
+                    this.gl.lineWidth = 2
+                    this.gl.strokeStyle = 'black';
                     // little box over the PoI, then label next to
-                    this.ctx.strokeRect(
+                    this.gl.strokeRect(
                         x * scale + this.x_offset - 5,
                         this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
                         10,
@@ -482,13 +601,13 @@ class CanvasMap {
                     );
                     this.drawStokedText(poi, { x, y }, scale);
                 } else {
-                    this.ctx.font = '15px sans-serif';
+                    this.gl.font = '15px sans-serif';
 
                     const label = poi.name ?? poi.house_number ?? ""
-                    const size = this.ctx.measureText(label)
+                    const size = this.gl.measureText(label)
 
-                    this.ctx.fillStyle = "black"
-                    this.ctx.fillText(
+                    this.gl.fillStyle = "black"
+                    this.gl.fillText(
                         label,
                         (x) * scale
                         + this.x_offset
@@ -500,7 +619,7 @@ class CanvasMap {
                 }
             }
 
-            this.ctx.stroke();
+            this.gl.stroke();
         }
 
         // draw the user's position
@@ -526,9 +645,9 @@ class CanvasMap {
                 y: this.user_position.latitude
             });
 
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = "red";
-            this.ctx.strokeRect(
+            this.gl.lineWidth = 2;
+            this.gl.strokeStyle = "red";
+            this.gl.strokeRect(
                 x * scale + this.x_offset - 10,
                 this.canvas.height - (y * scale + this.y_offset) - 10,
                 20,
@@ -538,19 +657,19 @@ class CanvasMap {
     }
 
     private drawStokedText(poi: PoI, proj: { x: number; y: number; }, scale: number) {
-        this.ctx.strokeStyle = 'black';
-        this.ctx.font = '20px sans-serif';
-        this.ctx.lineWidth = 4;
+        this.gl.strokeStyle = 'black';
+        this.gl.font = '20px sans-serif';
+        this.gl.lineWidth = 4;
 
         const label = poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? ""
-        this.ctx.strokeText(
+        this.gl.strokeText(
             label,
             proj.x * scale + this.x_offset + 10,
             this.canvas.height - (proj.y * scale + this.y_offset) + 5
         );
 
-        this.ctx.fillStyle = 'white';
-        this.ctx.fillText(
+        this.gl.fillStyle = 'white';
+        this.gl.fillText(
             label,
             proj.x * scale + this.x_offset + 10,
             this.canvas.height - (proj.y * scale + this.y_offset) + 5
@@ -599,9 +718,9 @@ class CanvasMap {
         // mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
         // wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)},
 
-        this.ctx.font = "15px sans-serif";
-        this.ctx.fillStyle = 'black';
-        this.ctx.fillText(
+        this.gl.font = "15px sans-serif";
+        this.gl.fillStyle = 'black';
+        this.gl.fillText(
             `z${this.zoom_level.toFixed(1)},
              frame_time=${(performance.now() - begin).toFixed(0)}ms,
              tile_x,y=${top_left.x},${top_left.y},
