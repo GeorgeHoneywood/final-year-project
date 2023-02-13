@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { CanvasMap } from "../map/map"
     import { search } from "../map/search"
-    import { fade } from "svelte/transition"
 
     export let map: CanvasMap
 
