@@ -14,6 +14,9 @@
     // maximum speed that the map will translate at during a fling
     const FLING_VELOCITY_CLAMP = 25
 
+    // whether the browser is currently online or offline
+    let online: boolean
+
     async function load() {
         // load entire map blob
         const parser = new MapsforgeParser(
@@ -344,6 +347,7 @@
     on:resize|preventDefault={() => {
         map.setDirty()
     }}
+    bind:online
 />
 
 <!-- on:blur noop to prevent a11y lint error -->
@@ -367,7 +371,9 @@
     on:touchcancel={touch.touchcancel}
     on:keydown={keyboard}
 />
-<Search {map} />
+{#if online}
+    <Search {map} />
+{/if}
 <Geolocate {map} />
 
 <style>
