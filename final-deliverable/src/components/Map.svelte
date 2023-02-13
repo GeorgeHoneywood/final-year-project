@@ -5,6 +5,7 @@
     import Geolocate from "./Geolocate.svelte"
     import Search from "./Search.svelte"
     import type { Coord } from "../map/types.js"
+    import Offline from "./Offline.svelte"
 
     let canvas: HTMLCanvasElement
     let map: CanvasMap
@@ -373,6 +374,8 @@
 />
 {#if online}
     <Search {map} />
+{:else}
+    <Offline />
 {/if}
 <Geolocate {map} />
 
