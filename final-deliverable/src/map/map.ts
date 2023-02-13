@@ -138,14 +138,30 @@ class CanvasMap {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
 
         // three 2d points
-        var positions = [
-            10, 20,
-            140, 20,
-            10, 120,
-            10, 120,
-            140, 20,
-            140, 120,
+        var position = [
+            0, 0,
+            10, 10,
+            20, 20,
+            30, 30,
+            40, 40,
+            50, 50,
+            60, 60,
+            70, 70,
+            80, 80,
+            90, 90,
+            100, 100,
+            150, 100,
         ];
+
+        const positions = []
+
+        for (let i = 0; i < 1_000_000; i++) {
+            positions.push(...position.map((e) => e + i / 2000))
+        }
+
+        const before = performance.now()
+        console.log(before)
+
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
 
         var vao = this.gl.createVertexArray();
@@ -165,19 +181,30 @@ class CanvasMap {
         // clear canvas
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        
+
         this.gl.useProgram(program);
 
         this.gl.bindVertexArray(vao);
 
         this.gl.uniform2f(resolutionUniformLocation, this.gl.canvas.width, this.gl.canvas.height);
-        this.gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
-        
 
-        var primitiveType = this.gl.TRIANGLES;
+
+        this.gl.uniform4f(colorLocation, 0, 0, Math.random(), 1);
+
+
+        var primitiveType = this.gl.LINE_STRIP;
         var offset = 0;
-        var count = 6;
+        var count = positions.length / 2;
+        this.gl.uniform4f(colorLocation, 0, 0, Math.random(), 1);
+
+
+        var primitiveType = this.gl.LINES;
+        var offset = 0;
+        var count = positions.length / 2;
+
+
         this.gl.drawArrays(primitiveType, offset, count);
+        console.log(`tooking some time ${performance.now() - before}, length is ${count}`)
 
         // requestAnimationFrame(() => this.render()); // ensure that this==this
     }
@@ -345,8 +372,8 @@ class CanvasMap {
         this.setCanvasSize();
 
         // clear canvas
-        this.gl.fillStyle = "#f2efe9"
-        this.gl.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // this.gl.fillStyle = "#f2efe9"
+        // this.gl.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
         const scale = Math.pow(2, this.zoom_level);
