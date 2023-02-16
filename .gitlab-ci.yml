@@ -13,6 +13,6 @@ unit-test-job:
   cache:
     key:
       files:
-        - pnpm-lock.yaml
+        - final-deliverable/pnpm-lock.yaml
     paths:
-      - .pnpm-store
+      - final-deliverable/.pnpm-store
