@@ -2,7 +2,7 @@
 stages:
   - test
 
-unit-test-job:
+test-job:
   stage: test
   before_script:
     - cd final-deliverable
