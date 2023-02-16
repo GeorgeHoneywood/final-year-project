@@ -54,40 +54,64 @@ class CanvasMap {
         this.setCanvasSize();
 
         // load the previous map position from the url hash, if possible
+        this.initMapPosition();
+
+        // calculate the base zoom levels for each zoom level
+        this.initBaseZoomLevels();
+
+        requestAnimationFrame(() => this.render()); // ensure that this==this
+    }
+
+    private initBaseZoomLevels() {
+        for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
+            // FIXME: this is pretty inefficient, .getBaseZoom() does a linear
+            // search each call
+            const zoom_interval = this.parser.getBaseZoom(i);
+            this.base_zooms[i] = {
+                min_zoom: zoom_interval.min_zoom_level,
+                base_zoom: zoom_interval.base_zoom_level,
+            };
+        }
+    }
+
+    private initMapPosition() {
         let [zoom_level, y, x] = window.location.hash
             .substring(1)
             .split("/")
             .map((e) => +e);
 
+        // check if previous position is within map bounds, otherwise reset
+        // NOTE: this is important when switching map files
+        if (!this.withinMapExtent({ x, y })) {
+            zoom_level = null
+            x = null
+            y = null
+        }
+
         // if there is no previous location, try to use the map_start_position
         if (!zoom_level || !y || !x) {
-            if (parser.map_start_location) {
-                zoom_level = parser.map_start_location.zoom;
-                y = parser.map_start_location.lat;
-                x = parser.map_start_location.long;
+            if (this.parser.map_start_location) {
+                zoom_level = this.parser.map_start_location.zoom;
+                y = this.parser.map_start_location.lat;
+                x = this.parser.map_start_location.long;
             } else {
                 // centre to the middle of the data bbox if no map start
                 // position available
                 zoom_level = 15;
-                y = (this.parser.bbox.max_lat + this.parser.bbox.min_lat) / 2
-                x = (this.parser.bbox.max_long + this.parser.bbox.min_long) / 2
+                y = (this.parser.bbox.max_lat + this.parser.bbox.min_lat) / 2;
+                x = (this.parser.bbox.max_long + this.parser.bbox.min_long) / 2;
             }
         }
 
-        this.setViewport({ x, y }, zoom_level)
+        this.setViewport({ x, y }, zoom_level);
+    }
 
-        // calculate the base zoom levels for each zoom level
-        for (let i = 0; i < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level; i++) {
-            // FIXME: this is pretty inefficient, .getBaseZoom() does a linear
-            // search each call
-            const zoom_interval = this.parser.getBaseZoom(i)
-            this.base_zooms[i] = {
-                min_zoom: zoom_interval.min_zoom_level,
-                base_zoom: zoom_interval.base_zoom_level,
-            }
-        }
-
-        requestAnimationFrame(() => this.render()); // ensure that this==this
+    public setMapParser(parser: MapsforgeParser) {
+        this.parser = parser;
+        this.base_zooms = []
+        this.tile_cache = {}
+        this.initBaseZoomLevels()
+        this.initMapPosition()
     }
 
     private setCanvasSize() {

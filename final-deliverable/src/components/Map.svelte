@@ -6,6 +6,7 @@
     import Search from "./Search.svelte"
     import type { Coord } from "../map/types.js"
     import Offline from "./Offline.svelte"
+    import OpenFile from "./OpenFile.svelte"
 
     let canvas: HTMLCanvasElement
     let map: CanvasMap
@@ -18,13 +19,19 @@
     // whether the browser is currently online or offline
     let online: boolean
 
-    async function load() {
-        // load entire map blob
-        const parser = new MapsforgeParser(
-            await loadMapBlob("data/ferndown.map"),
-        )
-        // load dynamically using HTTP range requests
-        // const parser = new MapsforgeParser(null, new URL("data/egham.map", location.href))
+    async function main(url = "data/ferndown.map", blob: Blob) {
+        let parser: MapsforgeParser
+        if (blob) {
+            console.log("blob")
+            parser = new MapsforgeParser(blob)
+        } else {
+            console.log("url", url)
+            // load dynamically using HTTP range requests
+            parser = new MapsforgeParser(
+                null,
+                new URL(url, location.href),
+            )
+        }
 
         await parser.readHeader()
         console.log({ parser })
@@ -32,7 +39,7 @@
         map = new CanvasMap(canvas, parser)
     }
 
-    load()
+    main(undefined, undefined)
 
     /**
      * force value to be inside FLING_VELOCITY_CLAMP
@@ -377,6 +384,7 @@
 {:else}
     <Offline />
 {/if}
+<OpenFile {map} />
 <Geolocate {map} />
 
 <style>
