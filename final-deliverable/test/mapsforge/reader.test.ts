@@ -8,7 +8,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
     describe.each([
         {
             name: "1 byte",
-            value: [0b0111_1111],
+            value: [0b0011_1111], // FIXME: intentionally broken, should be: [0b011_1111],
             want: 127
         },
         {
