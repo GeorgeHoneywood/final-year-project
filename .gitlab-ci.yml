@@ -4,7 +4,15 @@ stages:
 
 unit-test-job:
   stage: test
+  before_script:
+    - cd final-deliverable
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install
   script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
+    - pnpm test
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
