@@ -1,7 +1,7 @@
 import { describe, test, expect } from '@jest/globals';
 import fs from "fs/promises"
 
-import { MapsforgeParser } from "../../src/map/mapsforge/mapsforge"
+import { MapsforgeParser } from "@/map/mapsforge/mapsforge"
 
 describe("MapsforgeParser should correctly parse Mapsforge files", () => {
     test('should throw an error for files without magic bytes', async () => {

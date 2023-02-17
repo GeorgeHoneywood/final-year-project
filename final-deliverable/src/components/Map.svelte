@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { MapsforgeParser } from "../map/mapsforge/mapsforge.js"
-    import { loadMapBlob } from "../map/load.js"
-    import { CanvasMap } from "../map/map.js"
+    import { MapsforgeParser } from "@/map/mapsforge/mapsforge.js"
+    import { loadMapBlob } from "@/map/load.js"
+    import { CanvasMap } from "@/map/map.js"
     import Geolocate from "./Geolocate.svelte"
     import Search from "./Search.svelte"
-    import type { Coord } from "../map/types.js"
+    import type { Coord } from "@/map/types.js"
     import Offline from "./Offline.svelte"
     import OpenFile from "./OpenFile.svelte"
 

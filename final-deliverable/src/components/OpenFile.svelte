@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { CanvasMap } from "../map/map"
-    import { MapsforgeParser } from "../map/mapsforge/mapsforge"
+    import type { CanvasMap } from "@/map/map"
+    import { MapsforgeParser } from "@/map/mapsforge/mapsforge"
 
     export let map: CanvasMap
 

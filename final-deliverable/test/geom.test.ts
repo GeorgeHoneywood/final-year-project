@@ -1,4 +1,4 @@
-import { coordZToXYZ, zxyToMercatorCoord , unprojectMercator} from "../src/map/geom";
+import { coordZToXYZ, zxyToMercatorCoord , unprojectMercator} from "@/map/geom";
 
 import { describe, test, expect } from '@jest/globals';
 

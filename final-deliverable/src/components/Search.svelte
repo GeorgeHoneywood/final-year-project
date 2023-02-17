@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { CanvasMap } from "../map/map"
-    import { search } from "../map/search"
+    import type { CanvasMap } from "@/map/map"
+    import { search } from "@/map/search"
 
     export let map: CanvasMap
 
