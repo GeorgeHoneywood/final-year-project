@@ -96,6 +96,10 @@ Using a proper UI framework made it much easier to make the search form reactive
 
 ### Week 22 (2023-02-13)
 
+Improved offline handling, swapping the search bar for an offline icon when there is no internet access. New fancy favicon.
+
+Added support for opening a local map file, on the user's device. Set up Gitlab CI, with self-hosted runner. Spent a while debugging why tests were taking 3 minutes, when locally they take 2 seconds. Turned out to be [this bug](https://gist.github.com/charlyie/76ff7d288165c7d42e5ef7d304245916). Also upgraded dependencies.
+
 ### Week 23 (2023-02-20)
 
 ### Week 24 (2023-02-27)
