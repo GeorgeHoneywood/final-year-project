@@ -1,11 +1,9 @@
-
+/** @type {import('jest').Config} */
 const config = {
-  extensionsToTreatAsEsm: ['.ts'],
-  // preset: 'ts-jest',
-  transform: { '^.+\\.(t|j)sx?$': '@swc-node/jest', },
-  testEnvironment: 'node',
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc-node/jest'],
+  },
   roots: ["./test/"]
-
 };
 
 export default config;
