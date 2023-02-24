@@ -28,6 +28,7 @@ class CanvasMap {
 
     private x_offset = 0;
     private y_offset = 0;
+    private dpr = 1;
 
     // when dirty, rerender the map
     // rerendering otherwise is a waste of CPU time
@@ -115,8 +116,13 @@ class CanvasMap {
     }
 
     private setCanvasSize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.dpr = window.devicePixelRatio;
+        this.canvas.width = window.innerWidth * this.dpr;
+        this.canvas.height = window.innerHeight * this.dpr;
+
+        // scale canvas back down from drawn size to rendered size
+        // on screens where DPR = 1, then this will do nothing
+        this.ctx.scale(this.dpr, this.dpr);
     }
 
     public setDirty() {
