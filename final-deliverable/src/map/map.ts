@@ -193,6 +193,8 @@ class CanvasMap {
         { x, y }: Coord = {
             x: this.canvas.width / 2,
             y: this.canvas.height / 2,
+            // x: window.innerWidth / 2,
+            // y: window.innerHeight / 2,
         },
     ) {
         const new_zoom = this.zoom_level + zoom_delta;
@@ -202,8 +204,15 @@ class CanvasMap {
             new_zoom >= this.parser.zoom_intervals[0].min_zoom_level
             && new_zoom < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level
         ) {
-            this.x_offset = x - (x - this.x_offset) * Math.pow(2, zoom_delta);
-            this.y_offset = y - (y - this.y_offset) * Math.pow(2, zoom_delta);
+            console.log({ x, y, dpr: this.dpr, c_w: this.canvas.width, w_w: window.innerWidth })
+
+            // x  *= this.dpr *1.5
+
+            // zoom into the canvas, by adjusting the x_offset and y_offset,
+            // handling the dpr scaling
+            this.x_offset = x - (x - this.x_offset) * (2 ** zoom_delta);
+            // this.y_offset = (y* this.dpr) - ((y* this.dpr) - this.y_offset) * (2 ** zoom_delta);
+            this.y_offset = (y) - (y - this.y_offset) * (2 ** zoom_delta);
 
             this.zoom_level = new_zoom
 
@@ -536,7 +545,7 @@ class CanvasMap {
         // draw the user's position
         this.drawUserPosition(scale);
 
-        // this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
+        this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
 
         this.updateUrlHash();
 
@@ -632,15 +641,15 @@ class CanvasMap {
         this.ctx.font = "15px sans-serif";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
-            `z${this.zoom_level.toFixed(1)},
-             frame_time=${(performance.now() - begin).toFixed(0)}ms,
-             tile_x,y=${top_left.x},${top_left.y},
-             tile_count=${tile_count},
-             total_ways=${total_ways},
+            `z${this.zoom_level.toFixed(1)}
+             ft=${(performance.now() - begin).toFixed(0)}ms
+             tile_x,y=${top_left.x},${top_left.y}
+             tiles=${tile_count}
+             ways=${total_ways}
              totals=${JSON.stringify(totals)}`
-                .split("\n").map(e => e.trim()).join(" "),
+                .split("\n").map(e => e.trim()).join(";"),
             5,
-            15,
+            80,
         );
     }
 }
