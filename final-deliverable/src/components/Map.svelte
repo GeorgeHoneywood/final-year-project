@@ -1,12 +1,15 @@
 <script lang="ts">
-    import { MapsforgeParser } from "@/map/mapsforge/mapsforge.js"
-    import { loadMapBlob } from "@/map/load.js"
+    // import { loadMapBlob } from "@/map/load.js"
     import { CanvasMap } from "@/map/map.js"
-    import Geolocate from "./Geolocate.svelte"
-    import Search from "./Search.svelte"
+    import { MapsforgeParser } from "@/map/mapsforge/mapsforge.js"
     import type { Coord } from "@/map/types.js"
+
+    import Geolocate from "./Geolocate.svelte"
     import Offline from "./Offline.svelte"
     import OpenFile from "./OpenFile.svelte"
+    import Search from "./Search.svelte"
+
+    import { onMount } from "svelte"
 
     let canvas: HTMLCanvasElement
     let map: CanvasMap
@@ -19,7 +22,10 @@
     // whether the browser is currently online or offline
     let online: boolean
 
-    async function main(url = "data/ferndown.map", blob: Blob) {
+    onMount(async () => {
+        const blob = undefined // await loadMapBlob()
+        const url = "data/ferndown.map"
+
         let parser: MapsforgeParser
         if (blob) {
             console.log("blob")
@@ -34,9 +40,9 @@
         console.log({ parser })
 
         map = new CanvasMap(canvas, parser)
-    }
 
-    main(undefined, undefined)
+        reactToDPRChange()
+    })
 
     /**
      * force value to be inside FLING_VELOCITY_CLAMP
@@ -232,7 +238,7 @@
 
                 // we only care about the distance in the y-axis for double taps
                 const doubleTapDistance =
-                    doubleTapPosition.y - (touches[0].pageY - rect.top);
+                    doubleTapPosition.y - (touches[0].pageY - rect.top)
                 previousDoubleTapDistance ??= doubleTapDistance
 
                 // zoom about the position of the double tap
@@ -338,6 +344,37 @@
                 break
         }
     }
+
+    function reactToDPRChange() {
+        // listen for changes in device pixel ratio
+        // this can happen when a user moves the window between monitors
+        let dpr = window.devicePixelRatio
+        for (const i of [1, 2, 3]) {
+            window
+                .matchMedia(`(resolution: ${i}dppx)`)
+                .addEventListener("change", (e) => {
+                    if (e.matches) {
+                        map.setDirty()
+
+                        if (!canvas) {
+                            console.log("no canvas")
+                            return
+                        }
+                        // FIXME: this isn't quite right.
+                        // it works for dpr changes in steps of 1, but not 2
+                        // think it should be based on canvas pixel size, not css size
+                        let offset = canvas.getBoundingClientRect().height
+                        if (dpr < window.devicePixelRatio) {
+                            offset = -offset
+                        }
+                        console.log("offset", offset)
+
+                        map.translate({ y: offset, x: 0 })
+                        dpr = window.devicePixelRatio
+                    }
+                })
+        }
+    }
 </script>
 
 <svelte:window
@@ -349,8 +386,7 @@
 
 <!-- on:blur noop to prevent a11y lint error -->
 <!-- 
-    tabindex makes it selectable, so key* events are fire
-    note that the canvas sets its' own size, so no css required
+    tabindex makes it selectable, so key* events are fired
 -->
 <canvas
     id="map"
