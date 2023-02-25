@@ -27,10 +27,7 @@
         } else {
             console.log("url", url)
             // load dynamically using HTTP range requests
-            parser = new MapsforgeParser(
-                null,
-                new URL(url, location.href),
-            )
+            parser = new MapsforgeParser(null, new URL(url, location.href))
         }
 
         await parser.readHeader()
@@ -230,12 +227,12 @@
                 const rect = canvas.getBoundingClientRect()
                 doubleTapPosition ??= {
                     x: touches[0].pageX - rect.left,
-                    y: rect.bottom - touches[0].pageY,
+                    y: touches[0].pageY - rect.top,
                 }
 
                 // we only care about the distance in the y-axis for double taps
                 const doubleTapDistance =
-                    doubleTapPosition.y - rect.bottom - touches[0].pageY
+                    doubleTapPosition.y - (touches[0].pageY - rect.top);
                 previousDoubleTapDistance ??= doubleTapDistance
 
                 // zoom about the position of the double tap
@@ -254,7 +251,7 @@
                 if (idx >= 0) {
                     map.translate({
                         x: -(currentTouches[idx].pageX - touches[0].pageX),
-                        y: currentTouches[idx].pageY - touches[0].pageY,
+                        y: -(currentTouches[idx].pageY - touches[0].pageY),
                     })
                     currentTouches.splice(idx, 1, copyTouch(touches[0]))
                 }
@@ -269,16 +266,8 @@
 
                 const rect = canvas.getBoundingClientRect()
                 pinchCenter ??= {
-                    x:
-                        (touches[0].pageX -
-                            rect.left +
-                            (touches[1].pageX - rect.left)) /
-                        2,
-                    y:
-                        (rect.bottom -
-                            touches[0].pageY +
-                            (rect.bottom - touches[1].pageY)) /
-                        2,
+                    x: (touches[0].pageX + touches[1].pageX - rect.left) / 2,
+                    y: (touches[0].pageY + touches[1].pageY - rect.top) / 2,
                 }
 
                 // zoom about the pinch center
