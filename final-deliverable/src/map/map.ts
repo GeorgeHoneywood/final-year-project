@@ -191,10 +191,12 @@ class CanvasMap {
     public zoom(
         zoom_delta: number,
         { x, y }: Coord = {
-            x: this.canvas.width / 2,
-            y: this.canvas.height / 2,
+            // x: this.canvas.width / 2,
+            // y: this.canvas.height / 2,
             // x: window.innerWidth / 2,
             // y: window.innerHeight / 2,
+            x: 0,
+            y: 0,
         },
     ) {
         const new_zoom = this.zoom_level + zoom_delta;
@@ -204,15 +206,28 @@ class CanvasMap {
             new_zoom >= this.parser.zoom_intervals[0].min_zoom_level
             && new_zoom < this.parser.zoom_intervals[this.parser.zoom_intervals.length - 1].max_zoom_level
         ) {
-            console.log({ x, y, dpr: this.dpr, c_w: this.canvas.width, w_w: window.innerWidth })
+            console.log({ x, y, dpr: this.dpr, c_w: this.canvas.width, w_w: window.innerWidth, c_h: this.canvas.height, w_h: window.innerHeight })
 
-            // x  *= this.dpr *1.5
+            // x *= this.dpr
 
+            y = window.innerHeight - y
+
+            let scale = 2 ** this.zoom_level;
+
+            const x_off = (x - this.x_offset) / scale;
+            const y_off = ((this.canvas.height - y) - this.y_offset) / scale;
+            scale *= (2 ** zoom_delta);
             // zoom into the canvas, by adjusting the x_offset and y_offset,
             // handling the dpr scaling
-            this.x_offset = x - (x - this.x_offset) * (2 ** zoom_delta);
+            // this.x_offset = x - (x - this.x_offset) * (2 ** zoom_delta);
+            // this.x_offset =  ( this.x_offset) * scale;
             // this.y_offset = (y* this.dpr) - ((y* this.dpr) - this.y_offset) * (2 ** zoom_delta);
-            this.y_offset = (y) - (y - this.y_offset) * (2 ** zoom_delta);
+            // this.y_offset = (y) - (y - this.y_offset) * (2 ** zoom_delta);
+            // this.y_offset = (this.y_offset) * (2 ** zoom_delta);
+            this.x_offset = x - (x_off * scale);
+            this.y_offset = (this.canvas.height - y) - (y_off * scale);
+
+            console.log({ y_off: this.y_offset, x_off: this.x_offset })
 
             this.zoom_level = new_zoom
 
