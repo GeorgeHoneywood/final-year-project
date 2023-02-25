@@ -116,7 +116,7 @@ class CanvasMap {
     }
 
     private setCanvasSize() {
-        this.dpr = window.devicePixelRatio;
+        this.dpr = window.devicePixelRatio || 1;
         const size = this.canvas.getBoundingClientRect();
         this.canvas.width = size.width * this.dpr;
         this.canvas.height = size.height * this.dpr;
