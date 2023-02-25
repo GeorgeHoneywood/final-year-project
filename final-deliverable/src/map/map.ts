@@ -22,8 +22,9 @@ class CanvasMap {
         }
     } = {}
 
-    // zoom level, where 1 is the whole world this is scaled by calling
-    // Math.pow(2, zoom_level) to get a non-logarithmic number
+    // zoom level, where 1 is the whole world, and 19 is close enough to see
+    // details.
+    // this is scaled via 2 ** zoom_level which gives an exponential number
     private zoom_level = 0;
 
     private x_offset = 0;
@@ -153,7 +154,7 @@ class CanvasMap {
         const mercator = projectMercator({ x, y });
 
         this.zoom_level = zoom;
-        const scale = Math.pow(2, this.zoom_level);
+        const scale = 2 ** this.zoom_level;
 
         // centre on the user position
         this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
@@ -163,7 +164,7 @@ class CanvasMap {
     }
 
     public getViewport(): BBox {
-        const scale = Math.pow(2, this.zoom_level);
+        const scale = 2 ** this.zoom_level;
 
         const mercator_bottom_left: Coord = {
             x: -(this.x_offset) / scale,
@@ -271,7 +272,7 @@ class CanvasMap {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
-        const scale = Math.pow(2, this.zoom_level);
+        const scale = 2 ** this.zoom_level;
 
         const top_left_coord = unprojectMercator({
             y: (this.ctx.canvas.height - this.y_offset) / scale,
@@ -609,7 +610,7 @@ class CanvasMap {
             this.i = 0;
         }
 
-        const scale = Math.pow(2, this.zoom_level);
+        const scale = 2 ** this.zoom_level;
 
         const mercatorCenter: Coord = {
             x: ((this.canvas.width / 2) - this.x_offset) / scale,
