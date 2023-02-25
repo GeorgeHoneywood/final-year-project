@@ -117,8 +117,9 @@ class CanvasMap {
 
     private setCanvasSize() {
         this.dpr = window.devicePixelRatio;
-        this.canvas.width = window.innerWidth * this.dpr;
-        this.canvas.height = window.innerHeight * this.dpr;
+        const size = this.canvas.getBoundingClientRect();
+        this.canvas.width = size.width * this.dpr;
+        this.canvas.height = size.height * this.dpr;
 
         // scale canvas back down from drawn size to rendered size
         // on screens where DPR = 1, then this will do nothing
