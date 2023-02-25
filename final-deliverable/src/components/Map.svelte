@@ -141,7 +141,7 @@
             const rect = canvas.getBoundingClientRect()
             mousePosition = {
                 x: e.clientX - rect.left,
-                y: rect.bottom - e.clientY,
+                y: e.clientY - rect.top,
             }
 
             previousPosition ??= mousePosition
