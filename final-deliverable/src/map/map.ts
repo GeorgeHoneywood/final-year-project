@@ -593,8 +593,6 @@ class CanvasMap {
 
         this.drawDebugInfo(begin, top_left, required_tiles.length, total_ways, totals);
 
-        this.updateUrlHash();
-
         requestAnimationFrame(() => this.render());
 
         function getIndexString(get_tile: TilePosition) {
@@ -643,8 +641,10 @@ class CanvasMap {
     }
 
     /**
-     * Update the URL hash to reflect the current map position
-     * Should be called whenever the user has finished moving the map
+     * Update the URL hash to reflect the current map position.
+     * 
+     * Should be called whenever the user has finished moving the map 
+     * --- i.e. on mouseup or touchend.
      */
     public updateUrlHash() {
         const { centre } = this.getViewport();

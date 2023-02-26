@@ -87,6 +87,7 @@
         mouseup: (e) => {
             e.preventDefault()
             mouseDown = false
+            map.updateUrlHash()
 
             const fling = () => {
                 if (!velocity) return
@@ -287,6 +288,7 @@
         },
         touchend: (e) => {
             e.preventDefault()
+            map.updateUrlHash()
 
             const touches = e.changedTouches
 
