@@ -124,9 +124,13 @@ class CanvasMap {
 
         // scale canvas back down from drawn size to rendered size
         // on screens where DPR = 1, then this will do nothing
-        this.ctx.translate(50, 50);
-        this.ctx.scale(this.dpr*0.4, this.dpr*0.4);
-        // this.ctx.scale(this.dpr, this.dpr);
+        this.ctx.scale(this.dpr, this.dpr);
+
+        // NOTE: this is useful for debugging issues where too many tiles are
+        // being rendered:
+        // 
+        // this.ctx.translate(50, 50);
+        // this.ctx.scale(this.dpr*0.4, this.dpr*0.4);
     }
 
     public setDirty() {
@@ -271,20 +275,16 @@ class CanvasMap {
         this.setCanvasSize();
 
         // clear canvas
-        this.ctx.fillStyle =  "#111" //"#f2efe9"
+        this.ctx.fillStyle = "#f2efe9";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
         const scale = 2 ** this.zoom_level;
 
         const size = this.canvas.getBoundingClientRect();
-        console.log(size.height)
-        console.log(this.y_offset)
-        console.log(size.height - this.y_offset)
-        console.log(size.height - this.y_offset + size.height)
 
         const top_left_coord = unprojectMercator({
-            y: (-this.y_offset+ this.canvas.height) / scale,
+            y: (-this.y_offset + this.canvas.height) / scale,
             x: -(this.x_offset / scale),
         })
 
@@ -297,7 +297,7 @@ class CanvasMap {
         )
 
         const bottom_right_coord = unprojectMercator({
-            y: -((this.y_offset) / scale),
+            y: -((this.y_offset - (this.canvas.height - size.height)) / scale),
             x: ((size.width - this.x_offset) / scale),
         })
 
@@ -311,7 +311,7 @@ class CanvasMap {
         // in z/y/x tilespace, as these are the tiles we need to fetch
         const required_tiles: TilePosition[] = []
         for (let x = top_left.x; x < bottom_right.x + 1; x++) {
-            for (let y = top_left.y; y < bottom_right.y+1; y++) {
+            for (let y = top_left.y; y < bottom_right.y + 1; y++) {
                 required_tiles.push({
                     x,
                     y,
@@ -384,7 +384,7 @@ class CanvasMap {
                         totals['building']++
                     } else if (way.is_closed && way.is_natural) {
                         this.ctx.fillStyle = "#3f7a3f"
-                        // this.ctx.fill()
+                        this.ctx.fill()
                         totals['natural']++
                     } else if (way.is_closed && way.is_water) {
                         this.ctx.fillStyle = "#53b9ef"
@@ -396,7 +396,7 @@ class CanvasMap {
                         totals['beach']++
                     } else if (way.is_closed && way.is_grass) {
                         this.ctx.fillStyle = "#8dc98d"
-                        // this.ctx.fill()
+                        this.ctx.fill()
                         totals['grass']++
                     } else if (way.is_closed && way.is_residential) {
                         // FIXME: residential landuse rendering on top of roads
@@ -575,7 +575,7 @@ class CanvasMap {
                 this.ctx.fillText(
                     `${tile.z}/${tile.x}/${tile.y}`,
                     top_left.x * scale + this.x_offset + 12,
-                    this.canvas.height - (top_left.y * scale + this.y_offset- 8),
+                    this.canvas.height - (top_left.y * scale + this.y_offset - 8),
                 )
             }
         }
@@ -586,8 +586,8 @@ class CanvasMap {
         this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
 
         console.log({
-            x_tiles: bottom_right.x - top_left.x+1,
-            y_tiles: bottom_right.y - top_left.y+1,
+            x_tiles: bottom_right.x - top_left.x + 1,
+            y_tiles: bottom_right.y - top_left.y + 1,
         })
 
         console.log(bottom_right.x)
