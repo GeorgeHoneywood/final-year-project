@@ -1,5 +1,5 @@
 <script lang="ts">
-    // import { loadMapBlob } from "@/map/load.js"
+    import { loadMapBlob } from "@/map/load.js"
     import { CanvasMap } from "@/map/map.js"
     import { MapsforgeParser } from "@/map/mapsforge/mapsforge.js"
     import type { Coord } from "@/map/types.js"
@@ -21,8 +21,8 @@
     let online: boolean
 
     onMount(async () => {
-        const blob = undefined // await loadMapBlob()
-        const url = "data/ferndown.map"
+        const blob = await loadMapBlob("data/ferndown.map")
+        const url = undefined // "data/england.map"
 
         let parser: MapsforgeParser
         if (blob) {
