@@ -661,7 +661,7 @@ class CanvasMap {
 
         const mercatorCenter: Coord = {
             x: -(this.x_offset) / scale,
-            y: -((this.canvas.height - size.height) - this.y_offset) / scale,
+            y: ((this.canvas.height - size.height) - this.y_offset) / scale,
         }
 
         const wgs84Center = unprojectMercator(mercatorCenter)
