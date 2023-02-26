@@ -16,8 +16,6 @@
 
     // window for second tap to occur to be considered double tap
     const DOUBLE_TAP_TIMEOUT = 300
-    // maximum speed that the map will translate at during a fling
-    const FLING_VELOCITY_CLAMP = 25
 
     // whether the browser is currently online or offline
     let online: boolean
@@ -44,102 +42,36 @@
         reactToDPRChange()
     })
 
-    /**
-     * force value to be inside FLING_VELOCITY_CLAMP
-     * for example:
-     *
-     * ```
-     * clamp(-1000) = -100
-     * clamp(200) = 100
-     * clamp(45) = 45
-     * ```
-     * @param value to clamp
-     * @returns clamped value
-     */
-    function clamp(value: number): number {
-        return Math.max(
-            Math.min(value, FLING_VELOCITY_CLAMP),
-            -FLING_VELOCITY_CLAMP,
-        )
-    }
-
     let mousePosition: Coord | null = null
     let previousPosition: Coord | null = null
-    let velocity: Coord | null = null
-    let flinging = false
     let mouseDown = false
 
     const mouse = {
-        wheel: (e) => {
+        wheel: (e: WheelEvent) => {
             e.preventDefault()
 
             e.deltaY < 0
                 ? map.zoom(0.2, mousePosition!)
                 : map.zoom(-0.2, mousePosition!)
         },
-        mousedown: (e) => {
-            e.preventDefault()
+        mousedown: (e: MouseEvent) => {
+            e.preventDefault() // NOTE: for some reason the formatter keeps moving the semicolon to the next line
             ;(e.target! as HTMLCanvasElement).focus() // allows keyboard events to fire
 
             mouseDown = true
-            flinging = false
         },
-        mouseup: (e) => {
+        mouseup: (e: MouseEvent) => {
             e.preventDefault()
             mouseDown = false
             map.updateUrlHash()
-
-            const fling = () => {
-                if (!velocity) return
-
-                // continue flinging until velocity low
-                if (
-                    velocity.x > 2 ||
-                    velocity.x < -2 ||
-                    velocity.y > 2 ||
-                    velocity.y < -2
-                ) {
-                    flinging = true
-                    console.log("flinging")
-
-                    map.translate({
-                        // clamp to a maximum translation speed
-                        x: clamp(velocity.x),
-                        y: clamp(velocity.y),
-                    })
-
-                    // FIXME: linear damping is flawed
-                    // often the y-portion of the fling will will end before the
-                    // x-portion, or vice-versa, which looks very odd
-                    if (velocity.x > 0) {
-                        velocity.x -= 1
-                    } else {
-                        velocity.x += 1
-                    }
-                    if (velocity.y > 0) {
-                        velocity.y -= 1
-                    } else {
-                        velocity.y += 1
-                    }
-
-                    // continue the fling
-                    requestAnimationFrame(fling)
-                } else {
-                    flinging = false
-                    console.log("stop flinging")
-                }
-            }
-
-            // for a nice smooth fling
-            requestAnimationFrame(fling)
         },
 
-        mouseout: (e) => {
+        mouseout: (e: MouseEvent) => {
             e.preventDefault()
             mouseDown = false
         },
 
-        mousemove: (e) => {
+        mousemove: (e: MouseEvent) => {
             e.preventDefault()
 
             const rect = canvas.getBoundingClientRect()
@@ -153,17 +85,6 @@
             const change = {
                 x: mousePosition.x - previousPosition.x,
                 y: mousePosition.y - previousPosition.y,
-            }
-            // if flinging, don't update velocity
-            if (!flinging) {
-                // FIXME: this is not a good method for measuring velocity.
-                // it only accounts for the speed to the mouse movement right before
-                // the mouseup event
-
-                // TODO: instead time how long between mousedown & mouseup,
-                // and use velocity = distance / time
-
-                velocity = change
             }
 
             if (mouseDown) {
@@ -202,7 +123,7 @@
     }
 
     const touch = {
-        touchstart: (e) => {
+        touchstart: (e: TouchEvent) => {
             e.preventDefault()
 
             const touches = e.changedTouches
@@ -224,7 +145,7 @@
                 wasDoubleTapped = true
             }
         },
-        touchmove: (e) => {
+        touchmove: (e: TouchEvent) => {
             e.preventDefault()
 
             const touches = e.changedTouches
@@ -286,7 +207,7 @@
                 previousPinchDistance = pinchDistance
             }
         },
-        touchend: (e) => {
+        touchend: (e: TouchEvent) => {
             e.preventDefault()
             map.updateUrlHash()
 
@@ -313,12 +234,12 @@
             doubleTapPosition = null
         },
 
-        touchcancel: (e) => {
+        touchcancel: (e: TouchEvent) => {
             console.log("noop")
         },
     }
 
-    const keyboard = (e) => {
+    const keyboard = (e: KeyboardEvent) => {
         switch (e.key) {
             case "w":
                 e.preventDefault()
