@@ -161,30 +161,45 @@ class CanvasMap {
 
         this.zoom_level = zoom;
         const scale = 2 ** this.zoom_level;
-
         const size = this.canvas.getBoundingClientRect();
 
-        this.x_offset = -(mercator.x * scale)
-        this.y_offset = (this.canvas.height - size.height) - (mercator.y * scale);
+        this.x_offset = (size.width / 2) - (mercator.x * scale)
+        this.y_offset = (((this.dpr - 1) * size.height + this.canvas.height) / 2) - (mercator.y * scale);
 
         this.dirty = true;
     }
 
     public getViewport(): BBox {
         const scale = 2 ** this.zoom_level;
+        const size = this.canvas.getBoundingClientRect();
 
         const mercator_bottom_left: Coord = {
             x: -(this.x_offset) / scale,
-            y: -(this.y_offset) / scale,
+            y: -(this.y_offset - (this.canvas.height - size.height)) / scale,
         }
         const mercator_top_right: Coord = {
-            x: -(this.canvas.width - this.x_offset) / scale,
-            y: ((this.canvas.height) - this.y_offset) / scale,
+            x: (size.width - this.x_offset) / scale,
+            y: (this.canvas.height - this.y_offset) / scale,
         }
 
+        const bottom_left = unprojectMercator(mercator_bottom_left);
+        const top_right = unprojectMercator(mercator_top_right);
+
         return {
-            bottom_left: unprojectMercator(mercator_bottom_left),
-            top_right: unprojectMercator(mercator_top_right),
+            bottom_left,
+            top_right,
+            bottom_right: {
+                x: top_right.x,
+                y: bottom_left.y,
+            },
+            top_left: {
+                x: bottom_left.x,
+                y: top_right.y,
+            },
+            centre: {
+                x: (bottom_left.x + top_right.x) / 2,
+                y: (bottom_left.y + top_right.y) / 2,
+            },
         }
     }
 
@@ -281,25 +296,18 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         const scale = 2 ** this.zoom_level;
 
-        const size = this.canvas.getBoundingClientRect();
-
-        const top_left_coord = unprojectMercator({
-            y: (-this.y_offset + this.canvas.height) / scale,
-            x: -(this.x_offset / scale),
-        })
-
         const base_zoom_interval = this.base_zooms[this.zoom_level | 0]
+
+        const {
+            top_left: top_left_coord,
+            bottom_right: bottom_right_coord,
+        } = this.getViewport()
 
         const top_left = coordZToXYZ(
             top_left_coord.y,
             top_left_coord.x,
             base_zoom_interval.base_zoom,
         )
-
-        const bottom_right_coord = unprojectMercator({
-            y: -((this.y_offset - (this.canvas.height - size.height)) / scale),
-            x: ((size.width - this.x_offset) / scale),
-        })
 
         const bottom_right = coordZToXYZ(
             bottom_right_coord.y,
@@ -583,15 +591,7 @@ class CanvasMap {
         // draw the user's position
         this.drawUserPosition(scale);
 
-        this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
-
-        console.log({
-            x_tiles: bottom_right.x - top_left.x + 1,
-            y_tiles: bottom_right.y - top_left.y + 1,
-        })
-
-        console.log(bottom_right.x)
-        console.log(top_left.x)
+        this.drawDebugInfo(begin, top_left, required_tiles.length, total_ways, totals);
 
         this.updateUrlHash();
 
@@ -642,31 +642,14 @@ class CanvasMap {
         );
     }
 
-    i = 0;
-    // updating the URL too often gets the tab killed in firefox,
-    // so only do it every 10th update
-    // TODO: should only update when the user has stopped moving
-    // i.e. on mouseup or touchend
-    private updateUrlHash() {
-        if (this.i !== 10) {
-            this.i++;
-            return;
-        } else {
-            this.i = 0;
-        }
+    /**
+     * Update the URL hash to reflect the current map position
+     * Should be called whenever the user has finished moving the map
+     */
+    public updateUrlHash() {
+        const { centre } = this.getViewport();
 
-        const scale = 2 ** this.zoom_level;
-
-        const size = this.canvas.getBoundingClientRect();
-
-        const mercatorCenter: Coord = {
-            x: -(this.x_offset) / scale,
-            y: ((this.canvas.height - size.height) - this.y_offset) / scale,
-        }
-
-        const wgs84Center = unprojectMercator(mercatorCenter)
-
-        window.location.hash = `${this.zoom_level.toFixed(0)}/${wgs84Center.y.toFixed(4)}/${wgs84Center.x.toFixed(4)}`
+        window.location.hash = `${this.zoom_level.toFixed(0)}/${centre.y.toFixed(4)}/${centre.x.toFixed(4)}`
     }
 
     /**
@@ -676,18 +659,7 @@ class CanvasMap {
      * @param scale the current zoom scale
      * @param top_left the top left tile x,y coordinate
      */
-    private drawDebugInfo(begin: number, scale: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, totals: Record<string, number>) {
-        // const mercatorCenter: Coord = {
-        //     x: ((this.canvas.width / 2) - this.x_offset) / scale,
-        //     y: ((this.canvas.height / 2) - this.y_offset) / scale,
-        // };
-        // const wgs84Center = unprojectMercator(mercatorCenter);
-
-        // x=${this.x_offset.toPrecision(8)},
-        // y=${this.y_offset.toPrecision(8)},
-        // mercator_x,y=${mercatorCenter.x.toFixed(4)},${mercatorCenter.y.toFixed(4)},
-        // wgs84_x,y = ${wgs84Center.x.toFixed(4)},${wgs84Center.y.toFixed(4)},
-
+    private drawDebugInfo(begin: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, totals: Record<string, number>) {
         this.ctx.font = "15px sans-serif";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
