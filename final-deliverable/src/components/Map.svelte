@@ -362,10 +362,12 @@
                             console.log("no canvas")
                             return
                         }
-                        // FIXME: this isn't quite right.
-                        // it works for dpr changes in steps of 1, but not 2
-                        // think it should be based on canvas pixel size, not css size
-                        let offset = canvas.getBoundingClientRect().height
+
+                        // accounting for the amount of dpr change
+                        let offset =
+                            canvas.getBoundingClientRect().height *
+                            Math.abs(window.devicePixelRatio - dpr)
+
                         if (dpr < window.devicePixelRatio) {
                             offset = -offset
                         }
