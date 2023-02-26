@@ -1,4 +1,4 @@
-import { coordZToXYZ, projectMercator, unprojectMercator } from "./geom.js";
+import { coordZToXYZ, projectMercator, unprojectMercator, zxyToMercatorCoord } from "./geom.js";
 import type { MapsforgeParser } from "./mapsforge/mapsforge.js";
 import type { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
 import type { BBox, Coord } from "./types.js";
@@ -124,7 +124,9 @@ class CanvasMap {
 
         // scale canvas back down from drawn size to rendered size
         // on screens where DPR = 1, then this will do nothing
-        this.ctx.scale(this.dpr, this.dpr);
+        this.ctx.translate(50, 50);
+        this.ctx.scale(this.dpr*0.4, this.dpr*0.4);
+        // this.ctx.scale(this.dpr, this.dpr);
     }
 
     public setDirty() {
@@ -156,9 +158,10 @@ class CanvasMap {
         this.zoom_level = zoom;
         const scale = 2 ** this.zoom_level;
 
-        // centre on the user position
-        this.x_offset = -(mercator.x * scale) + this.canvas.width / 2;
-        this.y_offset = -(mercator.y * scale) + this.canvas.height / 2;
+        const size = this.canvas.getBoundingClientRect();
+
+        this.x_offset = -(mercator.x * scale)
+        this.y_offset = (this.canvas.height - size.height) - (mercator.y * scale);
 
         this.dirty = true;
     }
@@ -268,14 +271,20 @@ class CanvasMap {
         this.setCanvasSize();
 
         // clear canvas
-        this.ctx.fillStyle = "#f2efe9"
+        this.ctx.fillStyle =  "#111" //"#f2efe9"
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
         const scale = 2 ** this.zoom_level;
 
+        const size = this.canvas.getBoundingClientRect();
+        console.log(size.height)
+        console.log(this.y_offset)
+        console.log(size.height - this.y_offset)
+        console.log(size.height - this.y_offset + size.height)
+
         const top_left_coord = unprojectMercator({
-            y: (this.ctx.canvas.height - this.y_offset) / scale,
+            y: (-this.y_offset+ this.canvas.height) / scale,
             x: -(this.x_offset / scale),
         })
 
@@ -288,8 +297,8 @@ class CanvasMap {
         )
 
         const bottom_right_coord = unprojectMercator({
-            y: -(this.y_offset / scale),
-            x: ((this.ctx.canvas.width - this.x_offset) / scale),
+            y: -((this.y_offset) / scale),
+            x: ((size.width - this.x_offset) / scale),
         })
 
         const bottom_right = coordZToXYZ(
@@ -302,7 +311,7 @@ class CanvasMap {
         // in z/y/x tilespace, as these are the tiles we need to fetch
         const required_tiles: TilePosition[] = []
         for (let x = top_left.x; x < bottom_right.x + 1; x++) {
-            for (let y = top_left.y; y < bottom_right.y + 1; y++) {
+            for (let y = top_left.y; y < bottom_right.y+1; y++) {
                 required_tiles.push({
                     x,
                     y,
@@ -375,7 +384,7 @@ class CanvasMap {
                         totals['building']++
                     } else if (way.is_closed && way.is_natural) {
                         this.ctx.fillStyle = "#3f7a3f"
-                        this.ctx.fill()
+                        // this.ctx.fill()
                         totals['natural']++
                     } else if (way.is_closed && way.is_water) {
                         this.ctx.fillStyle = "#53b9ef"
@@ -387,7 +396,7 @@ class CanvasMap {
                         totals['beach']++
                     } else if (way.is_closed && way.is_grass) {
                         this.ctx.fillStyle = "#8dc98d"
-                        this.ctx.fill()
+                        // this.ctx.fill()
                         totals['grass']++
                     } else if (way.is_closed && way.is_residential) {
                         // FIXME: residential landuse rendering on top of roads
@@ -545,10 +554,44 @@ class CanvasMap {
             this.ctx.stroke();
         }
 
+        const show_tile_borders = true
+
+        // render tile borders
+        if (show_tile_borders) {
+            this.ctx.strokeStyle = "lime"
+            this.ctx.lineWidth = 2
+            this.ctx.font = '10px sans-serif';
+
+            for (const tile of required_tiles) {
+                const top_left = zxyToMercatorCoord(tile.z, tile.x, tile.y)
+
+                this.ctx.strokeRect(
+                    top_left.x * scale + this.x_offset,
+                    this.canvas.height - (top_left.y * scale + this.y_offset),
+                    10,
+                    10,
+                )
+                this.ctx.fillStyle = "black"
+                this.ctx.fillText(
+                    `${tile.z}/${tile.x}/${tile.y}`,
+                    top_left.x * scale + this.x_offset + 12,
+                    this.canvas.height - (top_left.y * scale + this.y_offset- 8),
+                )
+            }
+        }
+
         // draw the user's position
         this.drawUserPosition(scale);
 
         this.drawDebugInfo(begin, scale, top_left, required_tiles.length, total_ways, totals);
+
+        console.log({
+            x_tiles: bottom_right.x - top_left.x+1,
+            y_tiles: bottom_right.y - top_left.y+1,
+        })
+
+        console.log(bottom_right.x)
+        console.log(top_left.x)
 
         this.updateUrlHash();
 
@@ -600,8 +643,10 @@ class CanvasMap {
     }
 
     i = 0;
-    // updating the URL too often get the tab killed in firefox,
+    // updating the URL too often gets the tab killed in firefox,
     // so only do it every 10th update
+    // TODO: should only update when the user has stopped moving
+    // i.e. on mouseup or touchend
     private updateUrlHash() {
         if (this.i !== 10) {
             this.i++;
@@ -612,9 +657,11 @@ class CanvasMap {
 
         const scale = 2 ** this.zoom_level;
 
+        const size = this.canvas.getBoundingClientRect();
+
         const mercatorCenter: Coord = {
-            x: ((this.canvas.width / 2) - this.x_offset) / scale,
-            y: ((this.canvas.height / 2) - this.y_offset) / scale,
+            x: -(this.x_offset) / scale,
+            y: -((this.canvas.height - size.height) - this.y_offset) / scale,
         }
 
         const wgs84Center = unprojectMercator(mercatorCenter)
