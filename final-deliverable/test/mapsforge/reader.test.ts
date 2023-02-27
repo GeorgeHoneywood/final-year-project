@@ -112,7 +112,7 @@ describe("Reader should be able decode values from the mapsforge file", () => {
             value: [0b1000_0000, 0b0000_0001, ...Array.from({ length: 126 }, () => 0x61)],
             want: Array.from({ length: 126 }, () => "a").join("")
         },
-    ])("should be able to variable length strings", ({ name, value, want }) => {
+    ])("should be able to decode variable length strings", ({ name, value, want }) => {
         test(`${name}: [${value}].getVString() == ${want}`, () => {
             const reader = new Reader(
                 new Uint8ClampedArray(
