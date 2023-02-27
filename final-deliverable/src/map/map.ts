@@ -54,6 +54,7 @@ class CanvasMap {
 
         // must set canvas size, otherwise we cannot centre the map properly
         this.setCanvasSize();
+        this.handleDPRChange();
 
         // load the previous map position from the url hash, if possible
         this.initMapPosition();
@@ -131,6 +132,39 @@ class CanvasMap {
         // 
         // this.ctx.translate(50, 50);
         // this.ctx.scale(this.dpr*0.4, this.dpr*0.4);
+    }
+
+    private handleDPRChange() {
+        // listen for changes in device pixel ratio
+        // this can happen when a user moves the window between monitors
+        let dpr = window.devicePixelRatio
+        for (const i of [1, 2, 3]) {
+            window
+                .matchMedia(`(resolution: ${i}dppx)`)
+                .addEventListener("change", (e) => {
+                    if (e.matches) {
+                        this.setDirty()
+
+                        if (!this.canvas) {
+                            console.log("no canvas")
+                            return
+                        }
+
+                        // accounting for the amount of dpr change
+                        let offset =
+                            this.canvas.getBoundingClientRect().height *
+                            Math.abs(window.devicePixelRatio - dpr)
+
+                        if (dpr < window.devicePixelRatio) {
+                            offset = -offset
+                        }
+                        console.log("offset", offset)
+
+                        this.translate({ y: offset, x: 0 })
+                        dpr = window.devicePixelRatio
+                    }
+                })
+        }
     }
 
     public setDirty() {

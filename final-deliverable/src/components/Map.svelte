@@ -38,8 +38,6 @@
         console.log({ parser })
 
         map = new CanvasMap(canvas, parser)
-
-        reactToDPRChange()
     })
 
     let mousePosition: Coord | null = null
@@ -265,39 +263,6 @@
                 e.preventDefault()
                 map.zoom(-1)
                 break
-        }
-    }
-
-    function reactToDPRChange() {
-        // listen for changes in device pixel ratio
-        // this can happen when a user moves the window between monitors
-        let dpr = window.devicePixelRatio
-        for (const i of [1, 2, 3]) {
-            window
-                .matchMedia(`(resolution: ${i}dppx)`)
-                .addEventListener("change", (e) => {
-                    if (e.matches) {
-                        map.setDirty()
-
-                        if (!canvas) {
-                            console.log("no canvas")
-                            return
-                        }
-
-                        // accounting for the amount of dpr change
-                        let offset =
-                            canvas.getBoundingClientRect().height *
-                            Math.abs(window.devicePixelRatio - dpr)
-
-                        if (dpr < window.devicePixelRatio) {
-                            offset = -offset
-                        }
-                        console.log("offset", offset)
-
-                        map.translate({ y: offset, x: 0 })
-                        dpr = window.devicePixelRatio
-                    }
-                })
         }
     }
 </script>
