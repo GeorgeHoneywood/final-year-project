@@ -323,7 +323,7 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         const scale = 2 ** this.zoom_level;
 
-        const base_zoom_interval = this.base_zooms[this.zoom_level | 0]
+        const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
 
         const {
             top_left: top_left_coord,
@@ -395,7 +395,7 @@ class CanvasMap {
             }
 
             // how many PoIs and ways we should show at our current zoom level
-            const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
+            const zoom_row = tile.zoom_table[(this.zoom_level - 1 | 0) - base_zoom_interval.min_zoom]
 
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
@@ -518,7 +518,7 @@ class CanvasMap {
             }
 
             // how many PoIs and ways we should show at our current zoom level
-            const zoom_row = tile.zoom_table[(this.zoom_level | 0) - base_zoom_interval.min_zoom]
+            const zoom_row = tile.zoom_table[(this.zoom_level - 1 | 0) - base_zoom_interval.min_zoom]
 
             // render way labels
             for (let i = 0; i < zoom_row.way_count; i++) {
