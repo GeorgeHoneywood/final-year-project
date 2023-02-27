@@ -21,15 +21,16 @@
     let online: boolean
 
     onMount(async () => {
+        // const blob = undefined
         const blob = await loadMapBlob("data/ferndown.map")
-        const url = undefined // "data/england.map"
+        const url = "data/england.map"
 
         let parser: MapsforgeParser
         if (blob) {
-            console.log("blob")
+            console.log("loading from blob")
             parser = new MapsforgeParser(blob)
         } else {
-            console.log("url", url)
+            console.log("loading from url:", url)
             // load dynamically using HTTP range requests
             parser = new MapsforgeParser(null, new URL(url, location.href))
         }
