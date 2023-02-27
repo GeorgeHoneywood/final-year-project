@@ -2,7 +2,7 @@
 stages:
   - test
 
-test-job:
+test:
   stage: test
   before_script:
     - cd final-deliverable
@@ -16,3 +16,9 @@ test-job:
         - final-deliverable/pnpm-lock.yaml
     paths:
       - final-deliverable/.pnpm-store
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
