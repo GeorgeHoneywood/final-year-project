@@ -4,13 +4,14 @@ import {
     projectMercator,
     unprojectMercator,
     zxyToMercatorCoord,
-} from "../geom"
-import type { Coord } from "../types"
+} from "@/map/geom"
+import type { Coord } from "@/map/types"
 import {
     Tile,
     PoI,
     Way,
-    type ZoomTable
+    type ZoomTable,
+    type TilePosition
 } from "./objects"
 import { Reader } from "./reader"
 
@@ -62,7 +63,7 @@ const tag_wildcard = /^.*=%([bifhs])$/;
  * Reads some file encoded in the Mapsforge binary map file specification.
  *
  * _NOTE: You must call .readHeader(), before other methods of this class. This
- * populates the index required to read tile data._
+ * populates the index required to read tile data.
  *
  * See here:
  * https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md
@@ -288,12 +289,10 @@ class MapsforgeParser {
      * @param y tile coord
      * @returns a Tile containing map data
      */
-    public async readBaseTile(zoom: number, x: number, y: number): Promise<Tile | null> {
-        const zoom_interval = this.getBaseZoom(zoom)
+    public async readBaseTile(base_tile: TilePosition): Promise<Tile | null> {
+        const zoom_interval = this.getBaseZoom(base_tile.z)
 
-        const base_tile = { z: zoom, x, y }
-
-        console.log(`loading tile z${zoom}/${x}/${y}`)
+        console.log(`loading tile z${base_tile.z}/${base_tile.x}/${base_tile.y}`)
 
         if (base_tile.x < zoom_interval.left_tile_x || base_tile.x > zoom_interval.right_tile_x) {
             console.log("tile not found!")
@@ -380,6 +379,7 @@ class MapsforgeParser {
         const ways: Way[] = this.readWays(zoom_table, tile_top_left_coord, tile_data)
 
         return new Tile(
+            base_tile,
             zoom_table,
             pois,
             ways,

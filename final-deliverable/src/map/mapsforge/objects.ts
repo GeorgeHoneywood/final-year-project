@@ -1,9 +1,10 @@
 /*
-Classes used to represent mapsforge OSM data abstractions. Some styling
-currently decided here to speed up rendering hot path.
+ * Classes used to represent mapsforge OSM data abstractions. Some styling
+ * currently decided here to speed up rendering hot path.
 */
 
-import type { Coord } from '../types'
+import type { Coord } from '@/map/types'
+import { zxyToMercatorCoord } from '@/map/geom'
 
 class Way {
     // the id of the Way in OpenStreetMap. only available if debug info is present
@@ -150,12 +151,29 @@ class PoI {
 }
 
 class Tile {
+    // metadata
+    tile_position: TilePosition
+    top_left: Coord
+    bottom_right: Coord
+
     // the zoom table is relative to the zoom interval's min_zoom
     zoom_table: ZoomTable
     pois: PoI[]
     ways: Way[]
 
-    constructor(zoom_table: ZoomTable, pois: PoI[], ways: Way[]) {
+    constructor(tile_position: TilePosition, zoom_table: ZoomTable, pois: PoI[], ways: Way[]) {
+        this.tile_position = tile_position
+        this.top_left = zxyToMercatorCoord(
+            tile_position.z,
+            tile_position.x,
+            tile_position.y,
+        )
+        this.bottom_right = zxyToMercatorCoord(
+            tile_position.z,
+            tile_position.x + 1,
+            tile_position.y + 1,
+        )
+
         this.zoom_table = zoom_table
         this.pois = pois
         this.ways = ways

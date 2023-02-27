@@ -362,15 +362,13 @@ class CanvasMap {
             // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
                 this.tile_cache[tile_index] = null
-                this.parser.readBaseTile(
-                    get_tile.z,
-                    get_tile.x,
-                    get_tile.y,
-                ).then((res) => {
-                    this.tile_cache[tile_index] = res
-                    // once the tile loads, we must set dirty, so we render
-                    this.dirty = true
-                })
+                this.parser.readBaseTile(get_tile)
+                    .then((res) => {
+                        this.tile_cache[tile_index] = res
+                        // once the tile loads, we must set dirty, to render the
+                        // new data
+                        this.dirty = true
+                    })
             }
         }
 
@@ -525,8 +523,21 @@ class CanvasMap {
             // render way labels
             for (let i = 0; i < zoom_row.way_count; i++) {
                 const way = tile.ways[i]
+
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
+                    const x = (way.paths[0][0].x + way.label_position.x)
+                    const y = way.paths[0][0].y + way.label_position.y
+
+                    // console.log(tile.bottom_right, tile.top_left)
+                    if ((x > tile.bottom_right.x || x < tile.top_left.x)
+                        || (y < tile.bottom_right.y || y > tile.top_left.y)
+                    ) {
+                        // label is outside of the tile, skip it
+                        // prevents labels from being duplicated across tiles
+                        continue;
+                    }
+
                     // draw the label centered on the geometry
                     this.ctx.font = '15px sans-serif';
 
@@ -536,11 +547,11 @@ class CanvasMap {
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
                         label,
-                        (way.paths[0][0].x + way.label_position.x) * scale
+                        x * scale
                         + this.x_offset
                         - size.width / 2,
                         this.canvas.height
-                        - ((way.paths[0][0].y + way.label_position.y) * scale + this.y_offset)
+                        - ((y) * scale + this.y_offset)
                         + 15 / 2, // font height
                     );
                 }
