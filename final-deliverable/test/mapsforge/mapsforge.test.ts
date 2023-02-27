@@ -158,4 +158,41 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
             }
         }
     })
+
+    test("should be able to read map start positions", async () => {
+        const egham = new Blob([await fs.readFile(getPath("egham-v5-with-start-pos.map"))])
+        const p = new MapsforgeParser(egham)
+        await p.readHeader()
+
+        expect(p.map_start_location.lat).toBeCloseTo(51.4294)
+        expect(p.map_start_location.long).toBeCloseTo(-0.547)
+        expect(p.map_start_location.zoom).toBeCloseTo(21)
+    })
+
+    test("should be able to parse v5 files", async () => {
+        const egham = new Blob([await fs.readFile(getPath("egham-v5-with-start-pos.map"))])
+        const p = new MapsforgeParser(egham)
+        await p.readHeader()
+
+        const tile = await p.readBaseTile({ z: 14, x: 8167, y: 5453 })
+        expect(tile).toBeTruthy()
+
+        expect(tile.ways.length).toBe(1806)
+        expect(tile.pois.length).toBe(192)
+    })
+
+    test("should return a null tile when reading outside map file bbox", async () => {
+        const egham = new Blob([await fs.readFile(getPath("egham-v5-with-start-pos.map"))])
+        const p = new MapsforgeParser(egham)
+        await p.readHeader()
+
+        const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
+
+        const tile = await p.readBaseTile({
+            z: zoom_level.base_zoom_level,
+            x: zoom_level.right_tile_x + 1,
+            y: zoom_level.top_tile_y + 1,
+        })
+        expect(tile).toBeNull()
+    })
 })
