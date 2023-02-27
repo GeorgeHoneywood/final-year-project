@@ -596,8 +596,6 @@ class CanvasMap {
                     );
                 }
             }
-
-            this.ctx.stroke();
         }
 
         const show_tile_borders = true
