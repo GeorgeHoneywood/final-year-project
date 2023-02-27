@@ -526,8 +526,8 @@ class CanvasMap {
 
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
-                    const x = (way.paths[0][0].x + way.label_position.x)
-                    const y = way.paths[0][0].y + way.label_position.y
+                    let x = (way.paths[0][0].x + way.label_position.x)
+                    let y = way.paths[0][0].y + way.label_position.y
 
                     // console.log(tile.bottom_right, tile.top_left)
                     if ((x > tile.bottom_right.x || x < tile.top_left.x)
@@ -538,21 +538,29 @@ class CanvasMap {
                         continue;
                     }
 
+                    x = x * scale + this.x_offset
+                    y = this.canvas.height
+                        - ((y) * scale + this.y_offset)
+                        + 15 / 2 // font height
+
+                    // if label is off the canvas, skip it
+                    if (x < 0 || y < 0 || x > this.canvas.width || y > this.canvas.height) {
+                        // NOTE: this is a bit incorrect, as we only shift the label
+                        // position after we decided to render it
+                        continue;
+                    }
+
                     // draw the label centered on the geometry
                     this.ctx.font = '15px sans-serif';
-
                     const label = way.name ?? way.house_number ?? ""
                     const size = this.ctx.measureText(label)
+                    x -= size.width / 2
 
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
                         label,
-                        x * scale
-                        + this.x_offset
-                        - size.width / 2,
-                        this.canvas.height
-                        - ((y) * scale + this.y_offset)
-                        + 15 / 2, // font height
+                        x,
+                        y,
                     );
                 }
             }
