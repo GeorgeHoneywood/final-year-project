@@ -94,7 +94,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         const x = zoom_level.left_tile_x + 1
         const y = zoom_level.top_tile_y
-        const tile = await p.readBaseTile(zoom_level.base_zoom_level, x, y)
+        const tile = await p.readBaseTile({z: zoom_level.base_zoom_level, x, y})
 
         expect(tile).toBeTruthy()
     })
@@ -106,11 +106,11 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
 
-        const tile = (await p.readBaseTile(
-            zoom_level.base_zoom_level,
-            zoom_level.left_tile_x + 1,
-            zoom_level.top_tile_y + 1,
-        ))!
+        const tile = (await p.readBaseTile({
+            z: zoom_level.base_zoom_level,
+            x: zoom_level.left_tile_x + 1,
+            y: zoom_level.top_tile_y + 1,
+         } ))!
 
         expect(tile).toBeTruthy()
 
