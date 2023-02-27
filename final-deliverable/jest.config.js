@@ -3,7 +3,8 @@ const config = {
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc-node/jest', { "module": "commonjs" }],
   },
-  roots: ["./test/"]
+  roots: ["./test/"],
+  coverageReporters: ['cobertura', 'lcov', 'text'],
 };
 
 export default config;
