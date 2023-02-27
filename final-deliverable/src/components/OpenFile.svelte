@@ -12,7 +12,6 @@
     }
 
     $: if (files && files.length === 1) {
-        console.log(files)
         loadFile(files[0])
     }
 

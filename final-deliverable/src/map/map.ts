@@ -145,11 +145,6 @@ class CanvasMap {
                     if (e.matches) {
                         this.setDirty()
 
-                        if (!this.canvas) {
-                            console.log("no canvas")
-                            return
-                        }
-
                         // accounting for the amount of dpr change
                         let offset =
                             this.canvas.getBoundingClientRect().height *
@@ -158,8 +153,6 @@ class CanvasMap {
                         if (dpr < window.devicePixelRatio) {
                             offset = -offset
                         }
-                        console.log("offset", offset)
-
                         this.translate({ y: offset, x: 0 })
                         dpr = window.devicePixelRatio
                     }
