@@ -136,6 +136,7 @@ class Reader {
     // and text representations
     //
     // doesn't alter the offset
+    /* istanbul ignore next */
     printBytes(length = 20) {
         const values: string[] = []
         for (let i = this.offset; i < this.offset + length; i++) {

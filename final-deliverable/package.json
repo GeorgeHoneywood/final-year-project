@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "jest --verbose",
+    "test": "jest --verbose --coverage",
     "test:watch": "jest --verbose --watch",
     "upload": "pnpm build && ./upload.sh"
   },
