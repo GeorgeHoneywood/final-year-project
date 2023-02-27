@@ -20,5 +20,5 @@ test:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+        path: final-deliverable/coverage/cobertura-coverage.xml
 
