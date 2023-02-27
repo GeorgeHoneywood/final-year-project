@@ -102,6 +102,8 @@ Added support for opening a local map file, on the user's device. Set up Gitlab 
 
 ### Week 23 (2023-02-20)
 
+Added support for Hi-DPI screens. Previously the canvas size was always just the window.innerWidth/Height value, which is in CSS pixels -- which aren't necessarily correlated to real screen pixels. Now the canvas renders at a higher resolution to look crisp on screens with a higher DPI.
+
 ### Week 24 (2023-02-27)
 
 ### Week 25 (2023-03-06)
