@@ -693,7 +693,12 @@ class CanvasMap {
     public updateUrlHash() {
         const { centre } = this.getViewport();
 
-        window.location.hash = `${this.zoom_level.toFixed(0)}/${centre.y.toFixed(4)}/${centre.x.toFixed(4)}`
+        // using `replaceState` over updating `window.location.hash` should not
+        // add a new history entry
+        //
+        // however this does not seem to work in either chrome or firefox
+        // ff has this bug open: https://bugzilla.mozilla.org/show_bug.cgi?id=753264
+        window.history.replaceState(null, "", `#${this.zoom_level.toFixed(0)}/${centre.y.toFixed(4)}/${centre.x.toFixed(4)}`)
     }
 
     /**
