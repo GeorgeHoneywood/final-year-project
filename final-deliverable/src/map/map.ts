@@ -1,6 +1,7 @@
 import { coordZToXYZ, projectMercator, unprojectMercator, zxyToMercatorCoord } from "./geom.js";
 import type { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import type { PoI, Tile, TilePosition } from "./mapsforge/objects.js";
+import type { PoI, Tile } from "./mapsforge/objects.js";
+import { TilePosition } from './mapsforge/objects.js'
 import type { BBox, Coord } from "./types.js";
 
 class CanvasMap {
@@ -299,6 +300,25 @@ class CanvasMap {
     }
 
     /**
+     * Prefetches data within in the current viewport, in order to populate the
+     * service worker cache
+     */
+    public async prefetch() {
+        const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
+
+        const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom, true)
+        console.log(required_tiles)
+
+        for (const get_tile of required_tiles) {
+            // we don't need to add these to `this.tile_cache`, as we are just
+            // using this to populate the cache
+            await this.parser.readBaseTile(get_tile)
+            console.log("prefetched tile: ", get_tile.toString())
+        }
+    }
+
+
+    /**
      * Renders out the map to the canvas. Should be called via
      * requestAnimationFrame, as this allows the map to be rendered at a stable
      * frame rate.
@@ -325,39 +345,11 @@ class CanvasMap {
 
         const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
 
-        const {
-            top_left: top_left_coord,
-            bottom_right: bottom_right_coord,
-        } = this.getViewport()
-
-        const top_left = coordZToXYZ(
-            top_left_coord.y,
-            top_left_coord.x,
-            base_zoom_interval.base_zoom,
-        )
-
-        const bottom_right = coordZToXYZ(
-            bottom_right_coord.y,
-            bottom_right_coord.x,
-            base_zoom_interval.base_zoom,
-        )
-
-        // loop over the gap between the top left and bottom right of the screen
-        // in z/y/x tilespace, as these are the tiles we need to fetch
-        const required_tiles: TilePosition[] = []
-        for (let x = top_left.x; x < bottom_right.x + 1; x++) {
-            for (let y = top_left.y; y < bottom_right.y + 1; y++) {
-                required_tiles.push({
-                    x,
-                    y,
-                    z: base_zoom_interval.base_zoom | 0,
-                })
-            }
-        }
+        const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom);
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
-            const tile_index = getIndexString(get_tile)
+            const tile_index = get_tile.toString()
             // only fetch if we haven't already -- must check undefined, as a
             // tile will be null if there is no data, or it is still loading
             if (this.tile_cache[tile_index] === undefined) {
@@ -388,7 +380,7 @@ class CanvasMap {
 
         // draw ways first
         for (const get_tile of required_tiles) {
-            const tile = this.tile_cache[getIndexString(get_tile)]
+            const tile = this.tile_cache[get_tile.toString()]
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now
                 continue
@@ -511,7 +503,7 @@ class CanvasMap {
         // draw labels on top
         // FIXME: refactor to DRY this text rendering stuff
         for (const get_tile of required_tiles) {
-            const tile = this.tile_cache[getIndexString(get_tile)]
+            const tile = this.tile_cache[get_tile.toString()]
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now
                 continue
@@ -635,13 +627,50 @@ class CanvasMap {
         // draw the user's position
         this.drawUserPosition(scale);
 
-        this.drawDebugInfo(begin, top_left, required_tiles.length, total_ways, totals);
+        this.drawDebugInfo(begin, required_tiles[0], required_tiles.length, total_ways, totals);
 
         requestAnimationFrame(() => this.render());
+    }
 
-        function getIndexString(get_tile: TilePosition) {
-            return `${get_tile.z}/${get_tile.x}/${get_tile.y}`;
+    private getRequiredTiles(start_base_zoom: number, recursive: boolean = false) {
+        let base_zooms = [start_base_zoom]
+        if (recursive) {
+            for (const interval of this.parser.zoom_intervals) {
+                if (interval.base_zoom_level > start_base_zoom) {
+                    base_zooms.push(interval.base_zoom_level)
+                }
+            }
         }
+
+        const required_tiles: TilePosition[] = [];
+
+        for (const base_zoom of base_zooms) {
+            const {
+                top_left: top_left_coord, bottom_right: bottom_right_coord,
+            } = this.getViewport();
+
+            const top_left = coordZToXYZ(
+                top_left_coord.y,
+                top_left_coord.x,
+                base_zoom
+            );
+
+            const bottom_right = coordZToXYZ(
+                bottom_right_coord.y,
+                bottom_right_coord.x,
+                base_zoom
+            );
+
+            // loop over the gap between the top left and bottom right of the screen
+            // in z/y/x tilespace, as these are the tiles we need to fetch
+
+            for (let x = top_left.x; x < bottom_right.x + 1; x++) {
+                for (let y = top_left.y; y < bottom_right.y + 1; y++) {
+                    required_tiles.push(new TilePosition(base_zoom | 0, x, y));
+                }
+            }
+        }
+        return required_tiles;
     }
 
     // draw the user's current GPS position to the canvas,

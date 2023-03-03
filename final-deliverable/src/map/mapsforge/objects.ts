@@ -180,10 +180,20 @@ class Tile {
     }
 }
 
-type TilePosition = {
-    z: number,
-    y: number,
-    x: number,
+class TilePosition {
+    z: number
+    x: number
+    y: number
+
+    constructor(z: number, x: number, y: number) {
+        this.z = z
+        this.x = x
+        this.y = y
+    }
+
+    public toString(): string {
+        return `${this.z}/${this.x}/${this.y}`;
+    }
 }
 
 type ZoomTable = {
@@ -192,4 +202,4 @@ type ZoomTable = {
 }[]
 
 export { Way, PoI, Tile }
-export type { TilePosition, ZoomTable }
+export { TilePosition, type ZoomTable }
