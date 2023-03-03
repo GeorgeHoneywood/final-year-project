@@ -6,9 +6,11 @@
     div {
         bottom: 10px;
         right: 10px;
+        top: 90px;
 
         display: flex;
-        flex-direction: column;
+        flex-direction: column-reverse;
+        flex-wrap: wrap-reverse;
         gap: 8px;
     }
 </style>
