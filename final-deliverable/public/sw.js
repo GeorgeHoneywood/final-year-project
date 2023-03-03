@@ -15,7 +15,26 @@ const putInCache = async (request, response) => {
 };
 
 const cacheFirst = async ({ request }) => {
-    // if the fiile exists in the cache, use it
+    const range = request.headers.get('range');
+    // we are handling a partial map file request
+    if (range){
+        const key = `${request.url}-${range}`
+
+        const responseFromCache = await caches.match(key);
+        if (responseFromCache) {
+            console.log("served from the service worker cache", range)
+            return responseFromCache;
+        }
+
+        console.log("service worker fetching from network", range)
+        const responseFromNetwork = await fetch(request);
+        // creating a new Response wipes out the 206 Partial header
+        putInCache(key, new Response(await responseFromNetwork.clone().blob()));
+
+        return responseFromNetwork;
+    }
+
+    // if the file exists in the cache, use it
     const responseFromCache = await caches.match(request);
     if (responseFromCache) {
         return responseFromCache;
