@@ -22,6 +22,8 @@
     // whether the browser is currently online or offline
     let online: boolean
 
+    let map_size: DOMRect | null = null
+
     onMount(async () => {
         const blob = undefined
         // const blob = await loadMapBlob("data/egham.map")
@@ -41,6 +43,8 @@
         console.log({ parser })
 
         map = new CanvasMap(canvas, parser)
+
+        map_size = canvas.getBoundingClientRect()
     })
 
     let mousePosition: Coord | null = null
@@ -270,8 +274,20 @@
     }
 </script>
 
+<!-- 
+    handles window resizes, by shifting the map position so that the origin of the
+    resize is the top left
+-->
 <svelte:window
     on:resize|preventDefault={() => {
+        // FIXME: not particularly happy with this: would be better to have the origin
+        // of the map be the top left, not the bottom left
+        const new_size = canvas.getBoundingClientRect()
+        map.translate({
+            x: 0,
+            y: (map_size.height - new_size.height) * window.devicePixelRatio,
+        })
+        map_size = new_size
         map.setDirty()
     }}
     bind:online
