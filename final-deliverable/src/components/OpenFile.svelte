@@ -34,11 +34,6 @@
         background-image: url("/icons/folder.svg");
     }
 
-    button {
-        bottom: 60px;
-        right: 10px;
-    }
-
     input {
         display: none;
     }

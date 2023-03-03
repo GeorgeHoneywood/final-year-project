@@ -39,9 +39,4 @@
     .geolocate {
         background-image: url("/icons/geolocate.svg");
     }
-
-    #geolocate {
-        bottom: 10px;
-        right: 10px;
-    }
 </style>
