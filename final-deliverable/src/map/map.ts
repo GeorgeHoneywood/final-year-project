@@ -311,8 +311,11 @@ class CanvasMap {
 
         for (const get_tile of required_tiles) {
             // we don't need to add these to `this.tile_cache`, as we are just
-            // using this to populate the cache
-            await this.parser.readBaseTile(get_tile)
+            // using this to populate the service worker cache
+
+            // FIXME: this will create too many requests that all run at the
+            // same time, need a limit on paralellism
+            this.parser.readBaseTile(get_tile)
             console.log("prefetched tile: ", get_tile.toString())
         }
     }

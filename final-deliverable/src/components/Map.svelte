@@ -23,8 +23,8 @@
     let online: boolean
 
     onMount(async () => {
-        // const blob = undefined
-        const blob = await loadMapBlob("data/ferndown.map")
+        const blob = undefined
+        // const blob = await loadMapBlob("data/egham.map")
         const url = "data/england.map"
 
         let parser: MapsforgeParser
