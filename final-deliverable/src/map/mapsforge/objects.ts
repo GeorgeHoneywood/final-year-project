@@ -50,7 +50,7 @@ class Way {
         this.label_position = label_position
         this.layer = layer
 
-        this.name = name
+        this.name = name ? name.split("\r")[0] : null
         this.house_number = house_number
         this.ref = ref
 
@@ -142,7 +142,7 @@ class PoI {
         this.position = position
         this.layer = layer
 
-        this.name = name
+        this.name = name ? name.split("\r")[0] : null
         this.house_number = house_number
         this.elevation = elevation
 
