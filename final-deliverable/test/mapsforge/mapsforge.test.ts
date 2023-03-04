@@ -1,11 +1,13 @@
 import { describe, test, expect } from '@jest/globals';
 import fs from "fs/promises"
 import { join } from "path"
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { MapsforgeParser } from "@/map/mapsforge/mapsforge"
 
 const getPath = (path: string) => {
-    return join(__dirname, "files", path)
+    return join(dirname(fileURLToPath(import.meta.url)), "files", path)
 }
 
 describe("MapsforgeParser should correctly parse Mapsforge files", () => {

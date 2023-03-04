@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { loadMapBlob } from "@/map/load.js"
-    import { CanvasMap } from "@/map/map.js"
-    import { MapsforgeParser } from "@/map/mapsforge/mapsforge.js"
-    import type { Coord } from "@/map/types.js"
+    // import { loadMapBlob } from "@/map/load."
+    import { CanvasMap } from "@/map/map"
+    import { MapsforgeParser } from "@/map/mapsforge/mapsforge"
+    import type { Coord } from "@/map/types"
 
     import Geolocate from "./Geolocate.svelte"
     import Offline from "./Offline.svelte"
@@ -12,6 +12,8 @@
     import { onMount } from "svelte"
     import Download from "./Download.svelte"
     import Controls from "./Controls.svelte"
+
+    export let blob: Blob | undefined = undefined
 
     let canvas: HTMLCanvasElement
     let map: CanvasMap
@@ -25,7 +27,6 @@
     let map_size: DOMRect | null = null
 
     onMount(async () => {
-        const blob = undefined
         // const blob = await loadMapBlob("data/egham.map")
         const url = "data/england.map"
 

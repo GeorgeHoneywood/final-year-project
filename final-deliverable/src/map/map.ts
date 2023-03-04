@@ -1,8 +1,8 @@
-import { coordZToXYZ, projectMercator, unprojectMercator, zxyToMercatorCoord } from "./geom.js";
-import type { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import type { PoI, Tile } from "./mapsforge/objects.js";
-import { TilePosition } from './mapsforge/objects.js'
-import type { BBox, Coord } from "./types.js";
+import { coordZToXYZ, projectMercator, unprojectMercator, zxyToMercatorCoord } from "./geom";
+import type { MapsforgeParser } from "./mapsforge/mapsforge";
+import type { PoI, Tile } from "./mapsforge/objects";
+import { TilePosition } from './mapsforge/objects'
+import type { BBox, Coord } from "./types";
 
 class CanvasMap {
     private canvas: HTMLCanvasElement;
