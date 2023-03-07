@@ -346,9 +346,7 @@ class CanvasMap {
 
         // convert zoom level (1-18) into useful scale
         this.scale = 2 ** this.zoom_level;
-
         const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
-
         const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom);
 
         // read each tile we need to render
@@ -595,31 +593,7 @@ class CanvasMap {
             }
         }
 
-        const show_tile_borders = true
-
-        // render tile borders
-        if (show_tile_borders) {
-            this.ctx.strokeStyle = "lime"
-            this.ctx.lineWidth = 2
-            this.ctx.font = '10px sans-serif';
-
-            for (const tile of required_tiles) {
-                const top_left = zxyToMercatorCoord(tile.z, tile.x, tile.y)
-
-                this.ctx.strokeRect(
-                    this.scaleX(top_left.x),
-                    this.scaleY(top_left.y),
-                    10,
-                    10,
-                )
-                this.ctx.fillStyle = "black"
-                this.ctx.fillText(
-                    `${tile.z}/${tile.x}/${tile.y}`,
-                    this.scaleX(top_left.x) + 12,
-                    this.scaleY(top_left.y) - 8,
-                )
-            }
-        }
+        this.renderTileLabels(required_tiles);
 
         // draw the user's position
         this.drawUserPosition();
@@ -631,6 +605,29 @@ class CanvasMap {
 
     private scaleY = (y: number) => this.canvas.height - (y * this.scale + this.y_offset)
     private scaleX = (x: number) => x * this.scale + this.x_offset
+
+    private renderTileLabels(required_tiles: TilePosition[]) {
+        this.ctx.strokeStyle = "lime";
+        this.ctx.lineWidth = 2;
+        this.ctx.font = '10px sans-serif';
+
+        for (const tile of required_tiles) {
+            const top_left = zxyToMercatorCoord(tile.z, tile.x, tile.y);
+
+            this.ctx.strokeRect(
+                this.scaleX(top_left.x),
+                this.scaleY(top_left.y),
+                10,
+                10
+            );
+            this.ctx.fillStyle = "black";
+            this.ctx.fillText(
+                `${tile.z}/${tile.x}/${tile.y}`,
+                this.scaleX(top_left.x) + 12,
+                this.scaleY(top_left.y) - 8
+            );
+        }
+    }
 
     private lineTo(coord: Coord) {
         this.ctx.lineTo(
