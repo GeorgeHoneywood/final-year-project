@@ -27,7 +27,7 @@
     onMount(async () => {
         const blob = undefined
         // const blob = await loadMapBlob("data/egham.map")
-        const url = "data/england.map"
+        const url = "data/dorset.map"
 
         let parser: MapsforgeParser
         if (blob) {
@@ -176,6 +176,7 @@
                 previousDoubleTapDistance = doubleTapDistance
             } else if (touches.length === 1) {
                 // handle single-finger scrolling
+
                 // this handles the random single touches that occur during a pinch zoom
                 if (previousPinchDistance !== null) return
 
@@ -228,9 +229,10 @@
 
             // if we are pinch zooming, only stop once the last touch event has ended.
             // otherwise we get a a map jump when you remove one finger
-            if (currentTouches.length === 0) {
+            if (e.touches.length === 0) {
                 previousPinchDistance = null
                 pinchCenter = null
+                currentTouches.splice(0)
             }
 
             // clear out double tap stuff
@@ -240,7 +242,17 @@
         },
 
         touchcancel: (e: TouchEvent) => {
-            console.log("noop")
+            previousPinchDistance = null
+
+            const touches = e.changedTouches
+
+            for (let i = 0; i < touches.length; i++) {
+                const idx = getCurrentTouchIndex(touches[i].identifier)
+
+                if (idx >= 0) {
+                    currentTouches.splice(idx, 1)
+                }
+            }
         },
     }
 
