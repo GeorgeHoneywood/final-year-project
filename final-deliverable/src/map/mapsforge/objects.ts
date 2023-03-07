@@ -162,21 +162,28 @@ class Tile {
     ways: Way[]
 
     constructor(tile_position: TilePosition, zoom_table: ZoomTable, pois: PoI[], ways: Way[]) {
-        this.tile_position = tile_position
-        this.top_left = zxyToMercatorCoord(
-            tile_position.z,
-            tile_position.x,
-            tile_position.y,
-        )
-        this.bottom_right = zxyToMercatorCoord(
-            tile_position.z,
-            tile_position.x + 1,
-            tile_position.y + 1,
-        )
+        this.tile_position = tile_position;
+
+        ({ top_left: this.top_left, bottom_right: this.bottom_right } = Tile.tileBounds(tile_position))
 
         this.zoom_table = zoom_table
         this.pois = pois
         this.ways = ways
+    }
+
+    static tileBounds(tile_position: TilePosition): { top_left: Coord, bottom_right: Coord } {
+        return {
+            top_left: zxyToMercatorCoord(
+                tile_position.z,
+                tile_position.x,
+                tile_position.y,
+            ),
+            bottom_right: zxyToMercatorCoord(
+                tile_position.z,
+                tile_position.x + 1,
+                tile_position.y + 1,
+            ),
+        }
     }
 }
 

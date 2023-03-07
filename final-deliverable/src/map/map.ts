@@ -1,6 +1,6 @@
 import { coordZToXYZ, projectMercator, unprojectMercator, zxyToMercatorCoord } from "./geom.js";
 import type { MapsforgeParser } from "./mapsforge/mapsforge.js";
-import type { PoI, Tile } from "./mapsforge/objects.js";
+import { Tile, type PoI } from "./mapsforge/objects.js";
 import { TilePosition } from './mapsforge/objects.js'
 import type { BBox, Coord } from "./types.js";
 
@@ -27,6 +27,7 @@ class CanvasMap {
     // details.
     // this is scaled via 2 ** zoom_level which gives an exponential number
     private zoom_level = 0;
+    private scale = 0;
 
     private x_offset = 0;
     private y_offset = 0;
@@ -386,6 +387,8 @@ class CanvasMap {
             const tile = this.tile_cache[get_tile.toString()]
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now
+
+                this.drawTileLoadCross(get_tile, scale);
                 continue
             }
 
@@ -633,6 +636,32 @@ class CanvasMap {
         this.drawDebugInfo(begin, required_tiles[0], required_tiles.length, total_ways, totals);
 
         requestAnimationFrame(() => this.render());
+    }
+
+    private drawTileLoadCross(get_tile: TilePosition, scale: number) {
+        const { top_left, bottom_right } = Tile.tileBounds(get_tile)
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+            top_left.x * scale + this.x_offset,
+            this.canvas.height - (top_left.y * scale + this.y_offset)
+        );
+        this.ctx.lineTo(
+            bottom_right.x * scale + this.x_offset,
+            this.canvas.height - (bottom_right.y * scale + this.y_offset)
+        );
+        this.ctx.moveTo(
+            bottom_right.x * scale + this.x_offset,
+            this.canvas.height - (top_left.y * scale + this.y_offset)
+        );
+        this.ctx.lineTo(
+            top_left.x * scale + this.x_offset,
+            this.canvas.height - (bottom_right.y * scale + this.y_offset)
+        );
+
+        this.ctx.strokeStyle = ""
+        this.ctx.lineWidth = 1
+        this.ctx.stroke();
     }
 
     private getRequiredTiles(start_base_zoom: number, recursive: boolean = false) {
