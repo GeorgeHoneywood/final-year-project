@@ -345,7 +345,7 @@ class CanvasMap {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // convert zoom level (1-18) into useful scale
-        const scale = 2 ** this.zoom_level;
+        this.scale = 2 ** this.zoom_level;
 
         const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
 
@@ -388,7 +388,7 @@ class CanvasMap {
             if (!tile) {
                 // tile is either empty, or not loaded yet. skip for now
 
-                this.drawTileLoadCross(get_tile, scale);
+                this.drawTileLoadCross(get_tile,);
                 continue
             }
 
@@ -402,11 +402,8 @@ class CanvasMap {
                 for (const path of way.paths) {
                     total_ways++
                     this.ctx.beginPath();
-                    for (const { x, y } of path) {
-                        this.ctx.lineTo(
-                            x * scale + this.x_offset,
-                            this.canvas.height - (y * scale + this.y_offset), // as we are drawing from 0,0 being the top left, we must flip the y-axis
-                        );
+                    for (const point of path) {
+                        this.lineTo(point)
                     }
                     // feature styles
                     if (way.is_closed && way.is_building) {
@@ -452,7 +449,7 @@ class CanvasMap {
                         }
                     } else if (way.is_road) {
                         this.ctx.strokeStyle = "#7a7979"
-                        let scale = 1
+                        let factor = 1
 
                         if (way.tags?.find((e) =>
                             e.startsWith("highway=motorway")
@@ -462,15 +459,15 @@ class CanvasMap {
                             this.ctx.strokeStyle = "#fcba64"
 
                             // major roads should be twice as thick as normal roads
-                            scale = 2
+                            factor = 2
                         }
 
                         if (this.zoom_level < 15) {
-                            this.ctx.lineWidth = 2 * scale
+                            this.ctx.lineWidth = 2 * factor
                         } else if (this.zoom_level < 17) {
-                            this.ctx.lineWidth = 4 * scale
+                            this.ctx.lineWidth = 4 * factor
                         } else {
-                            this.ctx.lineWidth = 6 * scale
+                            this.ctx.lineWidth = 6 * factor
                         }
                         totals['road']++
                         this.ctx.stroke()
@@ -524,7 +521,7 @@ class CanvasMap {
 
                 // draw way labels
                 if (this.zoom_level > 17 && way.label_position) {
-                    let x = (way.paths[0][0].x + way.label_position.x)
+                    let x = way.paths[0][0].x + way.label_position.x
                     let y = way.paths[0][0].y + way.label_position.y
 
                     // console.log(tile.bottom_right, tile.top_left)
@@ -536,10 +533,8 @@ class CanvasMap {
                         continue;
                     }
 
-                    x = x * scale + this.x_offset
-                    y = this.canvas.height
-                        - ((y) * scale + this.y_offset)
-                        + 15 / 2 // font height
+                    x = this.scaleX(x)
+                    y = this.scaleY(y) + 15 / 2 // font height
 
                     // if label is off the canvas, skip it
                     if (x < 0 || y < 0 || x > this.canvas.width || y > this.canvas.height) {
@@ -578,12 +573,12 @@ class CanvasMap {
                     this.ctx.strokeStyle = 'black';
                     // little box over the PoI, then label next to
                     this.ctx.strokeRect(
-                        x * scale + this.x_offset - 5,
-                        this.canvas.height - (y * scale + this.y_offset) - 5, // as we are drawing from 0,0 being the top left, we must flip the y-axis
+                        this.scaleX(x) - 5,
+                        this.scaleY(y) - 5,
                         10,
                         10,
                     );
-                    this.drawStokedText(poi, { x, y }, scale);
+                    this.drawStokedText(poi, { x, y });
                 } else {
                     this.ctx.font = '15px sans-serif';
 
@@ -593,12 +588,8 @@ class CanvasMap {
                     this.ctx.fillStyle = "black"
                     this.ctx.fillText(
                         label,
-                        (x) * scale
-                        + this.x_offset
-                        - size.width / 2,
-                        this.canvas.height
-                        - (y * scale + this.y_offset)
-                        + 15 / 2, // font height
+                        this.scaleX(x) - size.width / 2,
+                        this.scaleY(y) + 15 / 2, // font height
                     );
                 }
             }
@@ -616,48 +607,52 @@ class CanvasMap {
                 const top_left = zxyToMercatorCoord(tile.z, tile.x, tile.y)
 
                 this.ctx.strokeRect(
-                    top_left.x * scale + this.x_offset,
-                    this.canvas.height - (top_left.y * scale + this.y_offset),
+                    this.scaleX(top_left.x),
+                    this.scaleY(top_left.y),
                     10,
                     10,
                 )
                 this.ctx.fillStyle = "black"
                 this.ctx.fillText(
                     `${tile.z}/${tile.x}/${tile.y}`,
-                    top_left.x * scale + this.x_offset + 12,
-                    this.canvas.height - (top_left.y * scale + this.y_offset - 8),
+                    this.scaleX(top_left.x) + 12,
+                    this.scaleY(top_left.y) - 8,
                 )
             }
         }
 
         // draw the user's position
-        this.drawUserPosition(scale);
+        this.drawUserPosition();
 
         this.drawDebugInfo(begin, required_tiles[0], required_tiles.length, total_ways, totals);
 
         requestAnimationFrame(() => this.render());
     }
 
-    private drawTileLoadCross(get_tile: TilePosition, scale: number) {
+    private scaleY = (y: number) => this.canvas.height - (y * this.scale + this.y_offset)
+    private scaleX = (x: number) => x * this.scale + this.x_offset
+
+    private lineTo(coord: Coord) {
+        this.ctx.lineTo(
+            this.scaleX(coord.x),
+            this.scaleY(coord.y),
+        );
+    }
+    private moveTo(coord: Coord) {
+        this.ctx.moveTo(
+            this.scaleX(coord.x),
+            this.scaleY(coord.y),
+        );
+    }
+
+    private drawTileLoadCross(get_tile: TilePosition) {
         const { top_left, bottom_right } = Tile.tileBounds(get_tile)
 
-        this.ctx.beginPath();
-        this.ctx.moveTo(
-            top_left.x * scale + this.x_offset,
-            this.canvas.height - (top_left.y * scale + this.y_offset)
-        );
-        this.ctx.lineTo(
-            bottom_right.x * scale + this.x_offset,
-            this.canvas.height - (bottom_right.y * scale + this.y_offset)
-        );
-        this.ctx.moveTo(
-            bottom_right.x * scale + this.x_offset,
-            this.canvas.height - (top_left.y * scale + this.y_offset)
-        );
-        this.ctx.lineTo(
-            top_left.x * scale + this.x_offset,
-            this.canvas.height - (bottom_right.y * scale + this.y_offset)
-        );
+        this.ctx.beginPath()
+        this.moveTo(top_left)
+        this.lineTo(bottom_right)
+        this.moveTo({ x: bottom_right.x, y: top_left.y });
+        this.lineTo({ x: top_left.x, y: bottom_right.y });
 
         this.ctx.strokeStyle = ""
         this.ctx.lineWidth = 1
@@ -707,7 +702,7 @@ class CanvasMap {
 
     // draw the user's current GPS position to the canvas,
     // if we have it
-    private drawUserPosition(scale: number) {
+    private drawUserPosition() {
         if (this.user_position) {
             const { x, y } = projectMercator({
                 x: this.user_position.longitude,
@@ -717,15 +712,15 @@ class CanvasMap {
             this.ctx.lineWidth = 2;
             this.ctx.strokeStyle = "red";
             this.ctx.strokeRect(
-                x * scale + this.x_offset - 10,
-                this.canvas.height - (y * scale + this.y_offset) - 10,
+                this.scaleX(x) - 10,
+                this.scaleY(y) - 10,
                 20,
                 20
             );
         }
     }
 
-    private drawStokedText(poi: PoI, proj: { x: number; y: number; }, scale: number) {
+    private drawStokedText(poi: PoI, proj: { x: number; y: number; }) {
         this.ctx.strokeStyle = 'black';
         this.ctx.font = '20px sans-serif';
         this.ctx.lineWidth = 4;
@@ -733,15 +728,15 @@ class CanvasMap {
         const label = poi.name ?? poi.house_number ?? poi.tags?.join(",") ?? ""
         this.ctx.strokeText(
             label,
-            proj.x * scale + this.x_offset + 10,
-            this.canvas.height - (proj.y * scale + this.y_offset) + 5
+            this.scaleX(proj.x) + 10,
+            this.scaleY(proj.y) + 5
         );
 
         this.ctx.fillStyle = 'white';
         this.ctx.fillText(
             label,
-            proj.x * scale + this.x_offset + 10,
-            this.canvas.height - (proj.y * scale + this.y_offset) + 5
+            this.scaleX(proj.x) + 10,
+            this.scaleY(proj.y) + 5
         );
     }
 
@@ -766,7 +761,6 @@ class CanvasMap {
      * Draw some debug information to the top left of the map canvas
      * 
      * @param begin time we started rendering the frame at
-     * @param scale the current zoom scale
      * @param top_left the top left tile x,y coordinate
      */
     private drawDebugInfo(begin: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, totals: Record<string, number>) {
