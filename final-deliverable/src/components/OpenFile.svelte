@@ -24,7 +24,7 @@
     }
 </script>
 
-<input type="file" bind:this={file_input} bind:files />
+<input type="file" bind:this={file_input} bind:files accept=".map" />
 <button class="shadow" on:click={openInput}>
     <span class="icon folder" />
 </button>
