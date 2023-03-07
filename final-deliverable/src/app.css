@@ -14,7 +14,9 @@ body,
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  /* not bundling any of these fonts, so we just get whatever the browser has
+  hopefully they should all be fairly similar */
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   margin: 0px;
 }
 
