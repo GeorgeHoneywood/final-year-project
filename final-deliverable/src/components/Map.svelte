@@ -47,6 +47,7 @@
         map_size = canvas.getBoundingClientRect()
     })
 
+    // ====== mouse handling code
     let mousePosition: Coord | null = null
     let previousPosition: Coord | null = null
     let mouseDown = false
@@ -70,12 +71,10 @@
             mouseDown = false
             map.updateUrlHash()
         },
-
         mouseout: (e: MouseEvent) => {
             e.preventDefault()
             mouseDown = false
         },
-
         mousemove: (e: MouseEvent) => {
             e.preventDefault()
 
@@ -100,42 +99,21 @@
         },
     }
 
-    // touch handling code: https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
-    // TODO:
-    // * Double tap zoom
-
-    const currentTouches: any[] = []
-    let previousPinchDistance: number | null = null
+    // ====== touch handling code: https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+    // panning
+    let previousTouchPosition: Coord | null = null
+    // pinch zoom
     let pinchCenter: Coord | null = null
+    let previousPinchDistance: number | null = null
+    // double tap zoom
     let firstTap = false
     let wasDoubleTapped = false
     let doubleTapPosition: Coord | null = null
     let previousDoubleTapDistance: number | null = null
 
-    function copyTouch({ identifier, pageX, pageY }: any) {
-        return { identifier, pageX, pageY }
-    }
-
-    function getCurrentTouchIndex(idToFind: any) {
-        for (let i = 0; i < currentTouches.length; i++) {
-            const id = currentTouches[i].identifier
-
-            if (id === idToFind) {
-                return i
-            }
-        }
-        return -1
-    }
-
     const touch = {
         touchstart: (e: TouchEvent) => {
             e.preventDefault()
-
-            const touches = e.changedTouches
-
-            for (let i = 0; i < touches.length; i++) {
-                currentTouches.push(copyTouch(touches[i]))
-            }
 
             // figure out if a double tap has occurred
             if (!firstTap) {
@@ -153,19 +131,17 @@
         touchmove: (e: TouchEvent) => {
             e.preventDefault()
 
-            const touches = e.changedTouches
-
             if (wasDoubleTapped && e.touches.length === 1) {
                 // handle double tap zoom first
                 const rect = canvas.getBoundingClientRect()
                 doubleTapPosition ??= {
-                    x: touches[0].pageX - rect.left,
-                    y: touches[0].pageY - rect.top,
+                    x: e.touches[0].pageX - rect.left,
+                    y: e.touches[0].pageY - rect.top,
                 }
 
                 // we only care about the distance in the y-axis for double taps
                 const doubleTapDistance =
-                    doubleTapPosition.y - (touches[0].pageY - rect.top)
+                    doubleTapPosition.y - (e.touches[0].pageY - rect.top)
                 previousDoubleTapDistance ??= doubleTapDistance
 
                 // zoom about the position of the double tap
@@ -173,35 +149,41 @@
                     (previousDoubleTapDistance - doubleTapDistance) / 100,
                     doubleTapPosition,
                 )
+
                 previousDoubleTapDistance = doubleTapDistance
-            } else if (touches.length === 1) {
+            } else if (e.touches.length === 1) {
                 // handle single-finger scrolling
 
                 // this handles the random single touches that occur during a pinch zoom
                 if (previousPinchDistance !== null) return
 
-                const idx = getCurrentTouchIndex(touches[0].identifier)
-
-                if (idx >= 0) {
-                    map.translate({
-                        x: -(currentTouches[idx].pageX - touches[0].pageX),
-                        y: -(currentTouches[idx].pageY - touches[0].pageY),
-                    })
-                    currentTouches.splice(idx, 1, copyTouch(touches[0]))
+                previousTouchPosition ??= {
+                    x: e.touches[0].pageX,
+                    y: e.touches[0].pageY,
                 }
-            } else if (touches.length === 2) {
+
+                map.translate({
+                    x: -(previousTouchPosition.x - e.touches[0].pageX),
+                    y: -(previousTouchPosition.y - e.touches[0].pageY),
+                })
+
+                previousTouchPosition = {
+                    x: e.touches[0].pageX,
+                    y: e.touches[0].pageY,
+                }
+            } else if (e.touches.length === 2) {
                 // handle pinch zoom
                 const pinchDistance = Math.hypot(
-                    touches[0].pageX - touches[1].pageX,
-                    touches[0].pageY - touches[1].pageY,
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY,
                 )
 
                 previousPinchDistance ??= pinchDistance
 
-                const rect = canvas.getBoundingClientRect()
+                const box = canvas.getBoundingClientRect()
                 pinchCenter ??= {
-                    x: (touches[0].pageX + touches[1].pageX - rect.left) / 2,
-                    y: (touches[0].pageY + touches[1].pageY - rect.top) / 2,
+                    x: (e.touches[0].pageX + e.touches[1].pageX - box.left) / 2,
+                    y: (e.touches[0].pageY + e.touches[1].pageY - box.top) / 2,
                 }
 
                 // zoom about the pinch center
@@ -217,42 +199,25 @@
             e.preventDefault()
             map.updateUrlHash()
 
-            const touches = e.changedTouches
-
-            for (let i = 0; i < touches.length; i++) {
-                const idx = getCurrentTouchIndex(touches[i].identifier)
-
-                if (idx >= 0) {
-                    currentTouches.splice(idx, 1)
-                }
-            }
-
             // if we are pinch zooming, only stop once the last touch event has ended.
             // otherwise we get a a map jump when you remove one finger
             if (e.touches.length === 0) {
                 previousPinchDistance = null
                 pinchCenter = null
-                currentTouches.splice(0)
             }
 
             // clear out double tap stuff
             wasDoubleTapped = false
             previousDoubleTapDistance = null
             doubleTapPosition = null
+            previousTouchPosition = null
         },
-
         touchcancel: (e: TouchEvent) => {
+            e.preventDefault()
+            map.updateUrlHash()
+
             previousPinchDistance = null
-
-            const touches = e.changedTouches
-
-            for (let i = 0; i < touches.length; i++) {
-                const idx = getCurrentTouchIndex(touches[i].identifier)
-
-                if (idx >= 0) {
-                    currentTouches.splice(idx, 1)
-                }
-            }
+            previousTouchPosition = null
         },
     }
 
