@@ -57,8 +57,8 @@
             e.preventDefault()
 
             e.deltaY < 0
-                ? map.zoom(0.2, mousePosition!)
-                : map.zoom(-0.2, mousePosition!)
+                ? map.zoom(0.2, mousePosition || undefined)
+                : map.zoom(-0.2, mousePosition || undefined)
         },
         mousedown: (e: MouseEvent) => {
             e.preventDefault() // NOTE: for some reason the formatter keeps moving the semicolon to the next line
