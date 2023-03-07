@@ -29,6 +29,7 @@ class CanvasMap {
     private zoom_level = 0;
     private scale = 0;
 
+    // map offsets
     private x_offset = 0;
     private y_offset = 0;
     private dpr = 1;
@@ -36,6 +37,11 @@ class CanvasMap {
     // when dirty, rerender the map
     // rerendering otherwise is a waste of CPU time
     private dirty = true;
+
+    // optimisation tricks
+    private canvas_height = 0;
+    private previous_fill_style = "";
+    private previous_stroke_style = "";
 
     private user_position: GeolocationCoordinates | null = null
 
@@ -339,10 +345,11 @@ class CanvasMap {
 
         // make sure the canvas takes up most of the screen
         this.setCanvasSize();
+        this.canvas_height = this.canvas.height;
 
         // clear canvas
         this.ctx.fillStyle = "#f2efe9";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas_height);
 
         // convert zoom level (1-18) into useful scale
         this.scale = 2 ** this.zoom_level;
@@ -367,6 +374,7 @@ class CanvasMap {
         }
 
         let total_ways = 0
+        let total_coords = 0
         const totals: { [type: string]: number } = {
             building: 0,
             natural: 0,
@@ -402,38 +410,39 @@ class CanvasMap {
                     this.ctx.beginPath();
                     for (const point of path) {
                         this.lineTo(point)
+                        total_coords++
                     }
                     // feature styles
                     if (way.is_closed && way.is_building) {
-                        this.ctx.fillStyle = "#edc88e"
+                        this.setFillStyle("#edc88e");
                         this.ctx.fill()
                         totals['building']++
                     } else if (way.is_closed && way.is_natural) {
-                        this.ctx.fillStyle = "#3f7a3f"
+                        this.setFillStyle("#3f7a3f")
                         this.ctx.fill()
                         totals['natural']++
                     } else if (way.is_closed && way.is_water) {
-                        this.ctx.fillStyle = "#53b9ef"
+                        this.setFillStyle("#53b9ef")
                         this.ctx.fill()
                         totals['water']++
                     } else if (way.is_closed && way.is_beach) {
-                        this.ctx.fillStyle = "#f9e0bb"
+                        this.setFillStyle("#f9e0bb")
                         this.ctx.fill()
                         totals['beach']++
                     } else if (way.is_closed && way.is_grass) {
-                        this.ctx.fillStyle = "#8dc98d"
+                        this.setFillStyle("#8dc98d")
                         this.ctx.fill()
                         totals['grass']++
                     } else if (way.is_closed && way.is_residential) {
                         // FIXME: residential landuse rendering on top of roads
-                        // this.ctx.fillStyle = "#e0dfdf"
+                        // this.setFillStyle(prev_fill_style, "#e0dfdf")
                         // this.ctx.fill()
                         continue
                     } else if (way.is_closed && way.is_path) {
                         // pedestrian areas
                         // FIXME: need to stroke the path if not an area
                         if (way.tags?.find((e) => e === "area=yes")) {
-                            this.ctx.fillStyle = "#f9c1bb"
+                            this.setFillStyle("#f9c1bb")
                             this.ctx.fill()
                             totals['path']++
                         }
@@ -441,12 +450,12 @@ class CanvasMap {
                         // road areas
                         // FIXME: need to stroke the road if not an area
                         if (way.tags?.find((e) => e === "area=yes")) {
-                            this.ctx.fillStyle = "#7a7979"
+                            this.setFillStyle("#7a7979")
                             this.ctx.fill()
                             totals['road']++
                         }
                     } else if (way.is_road) {
-                        this.ctx.strokeStyle = "#7a7979"
+                        this.setStrokeStyle("#7a7979")
                         let factor = 1
 
                         if (way.tags?.find((e) =>
@@ -454,7 +463,7 @@ class CanvasMap {
                             || e.startsWith("highway=trunk")
                         )) {
                             // major roads in orange
-                            this.ctx.strokeStyle = "#fcba64"
+                            this.setStrokeStyle("#fcba64")
 
                             // major roads should be twice as thick as normal roads
                             factor = 2
@@ -470,7 +479,7 @@ class CanvasMap {
                         totals['road']++
                         this.ctx.stroke()
                     } else if (way.is_path) {
-                        this.ctx.strokeStyle = "#f9897c"
+                        this.setStrokeStyle("#f9897c")
                         if (this.zoom_level < 15) {
                             this.ctx.lineWidth = 2
                         } else if (this.zoom_level < 17) {
@@ -482,18 +491,18 @@ class CanvasMap {
                         this.ctx.stroke()
                     } else if (way.is_railway) {
                         this.ctx.lineWidth = 6
-                        this.ctx.strokeStyle = "#ed5c4b"
+                        this.setStrokeStyle("#ed5c4b")
                         this.ctx.stroke()
                         totals['railway']++
                     } else if (way.is_coastline) {
-                        this.ctx.strokeStyle = "black"
+                        this.setStrokeStyle("black")
                         this.ctx.lineWidth = 1
                         totals['coastline']++
                         this.ctx.stroke()
                     } else {
                         // if we don't render it
                         continue
-                        // this.ctx.strokeStyle = "black"
+                        // this.setStrokeStyle("black")
                         // this.ctx.lineWidth = 1
                         // this.ctx.stroke()
                     }
@@ -535,7 +544,7 @@ class CanvasMap {
                     y = this.scaleY(y) + 15 / 2 // font height
 
                     // if label is off the canvas, skip it
-                    if (x < 0 || y < 0 || x > this.canvas.width || y > this.canvas.height) {
+                    if (x < 0 || y < 0 || x > this.canvas.width || y > this.canvas_height) {
                         // NOTE: this is a bit incorrect, as we only shift the label
                         // position after we decided to render it
                         continue;
@@ -598,13 +607,28 @@ class CanvasMap {
         // draw the user's position
         this.drawUserPosition();
 
-        this.drawDebugInfo(begin, required_tiles[0], required_tiles.length, total_ways, totals);
+        this.drawDebugInfo(begin, required_tiles[0], required_tiles.length, total_ways, total_coords, totals);
 
         requestAnimationFrame(() => this.render());
     }
 
-    private scaleY = (y: number) => this.canvas.height - (y * this.scale + this.y_offset)
+    private scaleY = (y: number) => this.canvas_height - (y * this.scale + this.y_offset)
     private scaleX = (x: number) => x * this.scale + this.x_offset
+
+    // only set the fill style if it has changed: see https://profiler.firefox.com/docs/#/./bunny
+    private setFillStyle(fill_style: string) {
+        if (this.previous_fill_style !== fill_style) {
+            this.ctx.fillStyle = fill_style;
+            this.previous_fill_style = fill_style;
+        }
+    }
+
+    private setStrokeStyle(stroke_style: string) {
+        if (this.previous_stroke_style !== stroke_style) {
+            this.ctx.strokeStyle = stroke_style;
+            this.previous_stroke_style = stroke_style;
+        }
+    }
 
     private renderTileLabels(required_tiles: TilePosition[]) {
         this.ctx.strokeStyle = "lime";
@@ -760,7 +784,7 @@ class CanvasMap {
      * @param begin time we started rendering the frame at
      * @param top_left the top left tile x,y coordinate
      */
-    private drawDebugInfo(begin: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, totals: Record<string, number>) {
+    private drawDebugInfo(begin: number, top_left: { x: number, y: number }, tile_count: number, total_ways: number, total_coords: number, totals: Record<string, number>) {
         this.ctx.font = "15px sans-serif";
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(
@@ -769,6 +793,7 @@ class CanvasMap {
              tile_x,y=${top_left.x},${top_left.y}
              tiles=${tile_count}
              ways=${total_ways}
+             coords=${total_coords}
              totals=${JSON.stringify(totals)}`
                 .split("\n").map(e => e.trim()).join(";"),
             5,
