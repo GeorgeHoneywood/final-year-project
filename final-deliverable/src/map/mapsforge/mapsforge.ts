@@ -279,6 +279,11 @@ class MapsforgeParser {
 
             this.zoom_intervals.push(zoom_level)
         }
+
+        for (const zoom_interval of this.zoom_intervals){
+            console.log("precaching index for base zoom level", zoom_interval.base_zoom_level, "at", zoom_interval.sub_file_start_position, "to", zoom_interval.index_end_position, "");
+            await this.fetchBytes(Number(zoom_interval.sub_file_start_position), Number(zoom_interval.index_end_position))
+        }
     }
 
     /**
