@@ -36,6 +36,7 @@ const cacheFirst = async ({ request }) => {
             const cache_url = new URL(key.url)
 
             if (new URL(request.url).pathname !== cache_url.pathname) {
+                // not the file we are looking for
                 continue
             }
 
@@ -52,12 +53,9 @@ const cacheFirst = async ({ request }) => {
         for (const cached_range of cached_ranges) {
             if (requested_range.start >= cached_range.start && requested_range.end <= cached_range.end) {
                 // we can use this range
-                console.log("matched!", requested_range, "from chunk", cached_range, cached_range.key)
 
-                const responseFromCache = await cache
-                    .match(cached_range.key);
+                const responseFromCache = await cache.match(cached_range.key);
                 if (responseFromCache) {
-
                     console.log("served from the service worker cache", requested_range, "from chunk", cached_range)
 
                     return new Response(
@@ -68,7 +66,7 @@ const cacheFirst = async ({ request }) => {
                             )
                     );
                 } else {
-                    console.log("not found!", url)
+                    console.log("failed to retrieve chunk", requested_range, "from chunk", cached_range, "tried file", cached_range.key)
                 }
             }
         }
