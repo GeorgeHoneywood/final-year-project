@@ -316,14 +316,14 @@ class CanvasMap {
         const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom, true)
         console.log(required_tiles)
 
-        for (const get_tile of required_tiles) {
+        for (const zoom_level of required_tiles) {
             // we don't need to add these to `this.tile_cache`, as we are just
             // using this to populate the service worker cache
 
             // FIXME: this will create too many requests that all run at the
             // same time, need a limit on paralellism
-            this.parser.readBaseTile(get_tile)
-            console.log("prefetched tile: ", get_tile.toString())
+            this.parser.fetchBaseTileRange(zoom_level)
+            console.log("prefetched tile range: ", zoom_level.toString())
         }
     }
 
@@ -354,7 +354,7 @@ class CanvasMap {
         // convert zoom level (1-18) into useful scale
         this.scale = 2 ** this.zoom_level;
         const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
-        const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom);
+        const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom)[0];
 
         // read each tile we need to render
         for (const get_tile of required_tiles) {
@@ -680,7 +680,7 @@ class CanvasMap {
         this.ctx.stroke();
     }
 
-    private getRequiredTiles(start_base_zoom: number, recursive: boolean = false) {
+    private getRequiredTiles(start_base_zoom: number, recursive: boolean = false): TilePosition[][] {
         let base_zooms = [start_base_zoom]
         if (recursive) {
             for (const interval of this.parser.zoom_intervals) {
@@ -690,9 +690,11 @@ class CanvasMap {
             }
         }
 
-        const required_tiles: TilePosition[] = [];
+        // individual array for each base zoom level
+        const required_tiles: TilePosition[][] = [];
 
         for (const base_zoom of base_zooms) {
+            required_tiles.push([])
             const {
                 top_left: top_left_coord, bottom_right: bottom_right_coord,
             } = this.getViewport();
@@ -711,10 +713,10 @@ class CanvasMap {
 
             // loop over the gap between the top left and bottom right of the screen
             // in z/y/x tilespace, as these are the tiles we need to fetch
-
-            for (let x = top_left.x; x < bottom_right.x + 1; x++) {
-                for (let y = top_left.y; y < bottom_right.y + 1; y++) {
-                    required_tiles.push(new TilePosition(base_zoom | 0, x, y));
+            // note, loop along x first, as this gets us contiguous byte ranges
+            for (let y = top_left.y; y < bottom_right.y + 1; y++) {
+                for (let x = top_left.x; x < bottom_right.x + 1; x++) {
+                    required_tiles.at(-1).push(new TilePosition(base_zoom | 0, x, y));
                 }
             }
         }

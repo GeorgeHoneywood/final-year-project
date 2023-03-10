@@ -5,7 +5,7 @@ import {
     unprojectMercator,
     zxyToMercatorCoord,
 } from "@/map/geom"
-import type { Coord } from "@/map/types"
+import type { ByteRange, Coord } from "@/map/types"
 import {
     Tile,
     PoI,
@@ -280,9 +280,48 @@ class MapsforgeParser {
             this.zoom_intervals.push(zoom_level)
         }
 
-        for (const zoom_interval of this.zoom_intervals){
+        for (const zoom_interval of this.zoom_intervals) {
             console.log("precaching index for base zoom level", zoom_interval.base_zoom_level, "at", zoom_interval.sub_file_start_position, "to", zoom_interval.index_end_position, "");
             await this.fetchBytes(Number(zoom_interval.sub_file_start_position), Number(zoom_interval.index_end_position))
+        }
+    }
+
+    /**
+     * populate the service worker cache, with a number of tiles of data
+     * 
+     * @param base_tiles should all be the same zoom level, and ordered like so
+     * for (x, y) -> [(0, 0), (1, 0), (0, 1), (1, 1)]
+     */
+    public async fetchBaseTileRange(base_tiles: TilePosition[]) {
+        const zoom_interval = this.getBaseZoom(base_tiles[0].z)
+
+        const byte_ranges = []
+        for (const base_tile of base_tiles) {
+            const byte_range = await this.getTileByteRange(base_tile, zoom_interval)
+            if (byte_range) {
+                byte_ranges.push(byte_range)
+            }
+        }
+
+        console.log("fetching byte ranges:", byte_ranges)
+
+        const contiguous_ranges = []
+        let current_range = byte_ranges[0]
+        for (let i = 1; i < byte_ranges.length; i++) {
+            const next_range = byte_ranges[i]
+            if (next_range.start === current_range.end) {
+                current_range.end = next_range.end
+            } else {
+                contiguous_ranges.push(current_range)
+                current_range = next_range
+            }
+        }
+        contiguous_ranges.push(current_range)
+         
+        console.log("fetching contiguous ranges:", contiguous_ranges)
+
+        for (const range of contiguous_ranges) {
+            await this.fetchBytes(range.start, range.end)
         }
     }
 
@@ -308,41 +347,18 @@ class MapsforgeParser {
             return null
         }
 
-        const index_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
-        const index_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
-
-        // index is stored as a table, with x as rows, and y as columns
-        const block_offset = index_x + zoom_interval.tile_width * index_y
-
-        const index_block_position = zoom_interval.sub_file_start_position
-            + (BigInt(block_offset) * 5n)
-            + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
-
-        // load two index blocks
-        const index = new Reader(
-            await this.fetchBytes(
-                Number(index_block_position),
-                Number(index_block_position + 10n),
-            )
-        )
-
-        // NOTE: EOF condition handled by the previous tile bounds check
-        const block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
-        const next_block_pointer = index.get5ByteBigInt() & 0x7FFFFFFFFFn;
-
-
-        if (next_block_pointer === block_pointer) {
-            // if the tile is empty, the index points to the next tile with data
+        const byte_range = await this.getTileByteRange(base_tile, zoom_interval)
+        if (!byte_range) {
             console.log("tile not found!")
             return null
         }
 
-        const block_length = next_block_pointer - block_pointer;
+        const { start: block_start, end: block_end } = byte_range
 
         const tile_data = new Reader(
             await this.fetchBytes(
-                Number(zoom_interval.sub_file_start_position + block_pointer),
-                Number(zoom_interval.sub_file_start_position + block_pointer + block_length),
+                Number(zoom_interval.sub_file_start_position + block_start),
+                Number(zoom_interval.sub_file_start_position + block_end),
             )
         )
 
@@ -389,6 +405,39 @@ class MapsforgeParser {
             pois,
             ways,
         )
+    }
+
+    private async getTileByteRange(base_tile: TilePosition, zoom_interval: ZoomLevel): Promise<ByteRange> {
+        const index_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
+        const index_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
+
+        // index is stored as a table, with x as rows, and y as columns
+        const block_offset = index_x + zoom_interval.tile_width * index_y
+
+        const index_block_position = zoom_interval.sub_file_start_position
+            + (BigInt(block_offset) * 5n)
+            + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
+
+
+        // load two index blocks
+        const index = new Reader(
+            await this.fetchBytes(
+                Number(index_block_position),
+                Number(index_block_position + 10n)
+            )
+        )
+
+        // NOTE: EOF condition handled by the previous tile bounds check
+        const block_start = index.get5ByteBigInt() & 0x7fffffffffn
+        const next_block_start = index.get5ByteBigInt() & 0x7fffffffffn
+
+        if (next_block_start === block_start) {
+            // if the tile is empty, the index points to the next tile with data
+            return null
+        }
+
+        const block_length = next_block_start - block_start;
+        return { start: block_start, end: block_length + block_start }
     }
 
     getBaseZoom(zoom: number) {

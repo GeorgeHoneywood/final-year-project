@@ -8,4 +8,9 @@ type BBox = {
     centre: Coord,
 }
 
-export type { Coord, BBox };
+type ByteRange = {
+    start: bigint,
+    end: bigint,
+}
+
+export type { Coord, BBox, ByteRange };
