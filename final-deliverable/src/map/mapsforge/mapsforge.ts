@@ -14,6 +14,7 @@ import {
     type TilePosition
 } from "./objects"
 import { Reader } from "./reader"
+import { byteRangeToContiguous } from "./util"
 
 class BBox {
     max_lat = 0
@@ -306,7 +307,7 @@ class MapsforgeParser {
     public async fetchBaseTileRange(base_tiles: TilePosition[]) {
         const zoom_interval = this.getBaseZoom(base_tiles[0].z)
 
-        const byte_ranges = []
+        const byte_ranges: ByteRange[] = []
         for (const base_tile of base_tiles) {
             const byte_range = await this.getTileByteRange(base_tile, zoom_interval)
             if (byte_range) {
@@ -316,18 +317,7 @@ class MapsforgeParser {
 
         console.log("fetching byte ranges:", byte_ranges)
 
-        const contiguous_ranges = []
-        let current_range = byte_ranges[0]
-        for (let i = 1; i < byte_ranges.length; i++) {
-            const next_range = byte_ranges[i]
-            if (next_range.start === current_range.end) {
-                current_range.end = next_range.end
-            } else {
-                contiguous_ranges.push(current_range)
-                current_range = next_range
-            }
-        }
-        contiguous_ranges.push(current_range)
+        const contiguous_ranges = byteRangeToContiguous(byte_ranges)
 
         console.log("fetching contiguous ranges:", contiguous_ranges)
 
