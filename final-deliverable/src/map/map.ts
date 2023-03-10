@@ -138,8 +138,8 @@ class CanvasMap {
         // NOTE: this is useful for debugging issues where too many tiles are
         // being rendered:
         // 
-        // this.ctx.translate(50, 50);
-        // this.ctx.scale(this.dpr*0.4, this.dpr*0.4);
+        // this.ctx.translate(200, 200);
+        // this.ctx.scale(this.dpr*0.6, this.dpr*0.6);
     }
 
     private handleDPRChange() {
@@ -602,7 +602,7 @@ class CanvasMap {
             }
         }
 
-        this.renderTileLabels(required_tiles);
+        await this.renderTileLabels(required_tiles);
 
         // draw the user's position
         this.drawUserPosition();
@@ -630,13 +630,16 @@ class CanvasMap {
         }
     }
 
-    private renderTileLabels(required_tiles: TilePosition[]) {
+    private async renderTileLabels(required_tiles: TilePosition[]) {
         this.ctx.strokeStyle = "lime";
         this.ctx.lineWidth = 2;
         this.ctx.font = '10px sans-serif';
 
         for (const tile of required_tiles) {
             const top_left = zxyToMercatorCoord(tile.z, tile.x, tile.y);
+
+            // NOTE: useful for debugging tile load issues
+            // const range = await this.parser.getTileByteRange(tile, this.parser.getBaseZoom(this.zoom_level))
 
             this.ctx.strokeRect(
                 this.scaleX(top_left.x),
@@ -646,7 +649,7 @@ class CanvasMap {
             );
             this.ctx.fillStyle = "black";
             this.ctx.fillText(
-                `${tile.z}/${tile.x}/${tile.y}`,
+                `${tile.z}/${tile.x}/${tile.y}`, // ${range.start}-${range.end}, ${range.end - range.start}
                 this.scaleX(top_left.x) + 12,
                 this.scaleY(top_left.y) - 8
             );

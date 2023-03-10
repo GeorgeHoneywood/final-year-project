@@ -315,14 +315,13 @@ class MapsforgeParser {
             }
         }
 
-        console.log("fetching byte ranges:", byte_ranges)
-
         const contiguous_ranges = byteRangeToContiguous(byte_ranges)
 
-        console.log("fetching contiguous ranges:", contiguous_ranges)
-
         for (const range of contiguous_ranges) {
-            await this.fetchBytes(range.start, range.end)
+            await this.fetchBytes(
+                range.start,
+                range.end,
+            )
         }
     }
 
@@ -358,8 +357,8 @@ class MapsforgeParser {
 
         const tile_data = new Reader(
             await this.fetchBytes(
-                Number(zoom_interval.sub_file_start_position + block_start),
-                Number(zoom_interval.sub_file_start_position + block_end),
+                Number(block_start),
+                Number(block_end),
             )
         )
 
@@ -436,7 +435,10 @@ class MapsforgeParser {
         }
 
         const block_length = next_block_start - block_start;
-        return { start: block_start, end: block_length + block_start }
+        return {
+            start: block_start + zoom_interval.sub_file_start_position,
+            end: block_length + block_start + zoom_interval.sub_file_start_position,
+        }
     }
 
     getBaseZoom(zoom: number) {
