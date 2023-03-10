@@ -55,6 +55,8 @@ class ZoomLevel {
     left_tile_x = 0
     top_tile_y = 0
     bottom_tile_y = 0
+
+    index_cache: ArrayBuffer | null = null
 }
 
 const tag_wildcard = /^.*=%([bifhs])$/;
@@ -281,8 +283,17 @@ class MapsforgeParser {
         }
 
         for (const zoom_interval of this.zoom_intervals) {
-            console.log("precaching index for base zoom level", zoom_interval.base_zoom_level, "at", zoom_interval.sub_file_start_position, "to", zoom_interval.index_end_position, "");
-            await this.fetchBytes(Number(zoom_interval.sub_file_start_position), Number(zoom_interval.index_end_position))
+            console.log(
+                "precaching index for base zoom level",
+                zoom_interval.base_zoom_level,
+                "at", zoom_interval.sub_file_start_position,
+                "to", zoom_interval.index_end_position,
+            )
+
+            zoom_interval.index_cache = await this.fetchBytes(
+                Number(zoom_interval.sub_file_start_position),
+                Number(zoom_interval.index_end_position),
+            )
         }
     }
 
@@ -317,7 +328,7 @@ class MapsforgeParser {
             }
         }
         contiguous_ranges.push(current_range)
-         
+
         console.log("fetching contiguous ranges:", contiguous_ranges)
 
         for (const range of contiguous_ranges) {
@@ -414,14 +425,12 @@ class MapsforgeParser {
         // index is stored as a table, with x as rows, and y as columns
         const block_offset = index_x + zoom_interval.tile_width * index_y
 
-        const index_block_position = zoom_interval.sub_file_start_position
-            + (BigInt(block_offset) * 5n)
+        const index_block_position = (BigInt(block_offset) * 5n)
             + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
-
 
         // load two index blocks
         const index = new Reader(
-            await this.fetchBytes(
+            zoom_interval.index_cache.slice(
                 Number(index_block_position),
                 Number(index_block_position + 10n)
             )
