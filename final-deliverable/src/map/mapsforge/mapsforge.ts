@@ -317,12 +317,18 @@ class MapsforgeParser {
 
         const contiguous_ranges = byteRangeToContiguous(byte_ranges)
 
+        const promises = []
+        
         for (const range of contiguous_ranges) {
-            await this.fetchBytes(
-                range.start,
-                range.end,
+            promises.push(
+                this.fetchBytes(
+                    range.start,
+                    range.end,
+                )
             )
         }
+
+        await Promise.allSettled(promises)
     }
 
     /**

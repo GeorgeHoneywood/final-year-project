@@ -314,7 +314,7 @@ class CanvasMap {
         const base_zoom_interval = this.base_zooms[this.zoom_level - 1 | 0]
 
         const required_tiles = this.getRequiredTiles(base_zoom_interval.base_zoom, true)
-        console.log(required_tiles)
+        console.log(`prefetching ${required_tiles.length} tiles`)
 
         for (const zoom_level of required_tiles) {
             // we don't need to add these to `this.tile_cache`, as we are just
@@ -322,8 +322,8 @@ class CanvasMap {
 
             // FIXME: this will create too many requests that all run at the
             // same time, need a limit on paralellism
-            this.parser.fetchBaseTileRange(zoom_level)
-            console.log("prefetched tile range: ", zoom_level.toString())
+            await this.parser.fetchBaseTileRange(zoom_level)
+            console.log(`prefetched ${zoom_level.length} tiles at z${zoom_level[0].z}`)
         }
     }
 
