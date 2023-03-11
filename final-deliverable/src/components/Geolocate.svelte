@@ -1,19 +1,24 @@
 <script lang="ts">
     import type { CanvasMap } from "@/map/map"
+    import Spinner from "./Spinner.svelte"
 
     export let map: CanvasMap
+    let loading = false
 
     function geolocate() {
         console.log("geolocating!")
-        let updatedViewport = false
+        let updated_viewport = false
 
         if (navigator.geolocation) {
+            loading = true
+
             // TODO: handle GeolocationPositionError
             // ref: https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError
             navigator.geolocation.watchPosition((pos: GeolocationPosition) => {
+                loading = false
                 map.setUserPosition(pos.coords)
 
-                if (!updatedViewport) {
+                if (!updated_viewport) {
                     // set map to be centred on GPS position
                     map.setViewport(
                         {
@@ -22,7 +27,7 @@
                         },
                         15,
                     )
-                    updatedViewport = true
+                    updated_viewport = true
                 }
             })
         } else {
@@ -31,8 +36,12 @@
     }
 </script>
 
-<button id="geolocate" class="shadow" on:click={geolocate}>
-    <span class="icon geolocate" />
+<button id="geolocate" class="shadow" on:click={geolocate} disabled={loading}>
+    {#if !loading}
+        <span class="icon geolocate" />
+    {:else}
+        <Spinner />
+    {/if}
 </button>
 
 <style>
