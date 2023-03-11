@@ -93,24 +93,24 @@ class CanvasMap {
 
         // check if previous position is within map bounds, otherwise reset
         // NOTE: this is important when switching map files
-        if (!this.withinMapExtent({ x, y })) {
-            zoom_level = null
-            x = null
-            y = null
-        }
+        // if there is no previous location, first try localStorage, then use the map_start_position
+        if (!zoom_level || !y || !x || !this.withinMapExtent({ x, y })) {
 
-        // if there is no previous location, try to use the map_start_position
-        if (!zoom_level || !y || !x) {
-            if (this.parser.map_start_location) {
-                zoom_level = this.parser.map_start_location.zoom;
-                y = this.parser.map_start_location.lat;
-                x = this.parser.map_start_location.long;
-            } else {
-                // centre to the middle of the data bbox if no map start
-                // position available
-                zoom_level = 15;
-                y = (this.parser.bbox.max_lat + this.parser.bbox.min_lat) / 2;
-                x = (this.parser.bbox.max_long + this.parser.bbox.min_long) / 2;
+            [zoom_level, y, x] = (localStorage.getItem("map_position") || "")
+                .split("/").map((e) => +e);
+
+            if (!zoom_level || !y || !x || !this.withinMapExtent({ x, y })) {
+                if (this.parser.map_start_location) {
+                    zoom_level = this.parser.map_start_location.zoom;
+                    y = this.parser.map_start_location.lat;
+                    x = this.parser.map_start_location.long;
+                } else {
+                    // centre to the middle of the data bbox if no map start
+                    // position available
+                    zoom_level = 15;
+                    y = (this.parser.bbox.max_lat + this.parser.bbox.min_lat) / 2;
+                    x = (this.parser.bbox.max_long + this.parser.bbox.min_long) / 2;
+                }
             }
         }
 
@@ -774,13 +774,15 @@ class CanvasMap {
      */
     public updateUrlHash() {
         const { centre } = this.getViewport();
+        const hash = `${this.zoom_level.toFixed(0)}/${centre.y.toFixed(4)}/${centre.x.toFixed(4)}`
 
         // using `replaceState` over updating `window.location.hash` should not
         // add a new history entry
         //
         // however this does not seem to work in either chrome or firefox
         // ff has this bug open: https://bugzilla.mozilla.org/show_bug.cgi?id=753264
-        window.history.replaceState(null, "", `#${this.zoom_level.toFixed(0)}/${centre.y.toFixed(4)}/${centre.x.toFixed(4)}`)
+        window.history.replaceState(null, "", `#${hash}`)
+        localStorage.setItem("map_position", hash)
     }
 
     /**
