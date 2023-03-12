@@ -318,7 +318,6 @@ class MapsforgeParser {
         const contiguous_ranges = byteRangeToContiguous(byte_ranges)
 
         const promises = []
-        
         for (const range of contiguous_ranges) {
             promises.push(
                 this.fetchBytes(
@@ -423,17 +422,37 @@ class MapsforgeParser {
         const index_block_position = (BigInt(block_offset) * 5n)
             + (this.flags.has_debug_info ? 16n : 0n) // if there is debug info, skip it
 
+        // NOTE: use the difference between the two block offsets to determine
+        // the length of the tile data, handling the last tile case
+        let last_tile = false
+        if (
+            zoom_interval.sub_file_start_position
+            + index_block_position
+            + 5n
+            >= zoom_interval.index_end_position
+        ) {
+            last_tile = true
+        }
+
         // load two index blocks
         const index = new Reader(
             zoom_interval.index_cache.slice(
                 Number(index_block_position),
-                Number(index_block_position + 10n)
+                Number(index_block_position + (!last_tile ? 10n : 5n))
             )
         )
 
-        // NOTE: EOF condition handled by the previous tile bounds check
-        const block_start = index.get5ByteBigInt() & 0x7fffffffffn
-        const next_block_start = index.get5ByteBigInt() & 0x7fffffffffn
+        const block_start = (index.get5ByteBigInt() & 0x7fffffffffn)
+            + zoom_interval.sub_file_start_position
+
+        let next_block_start = 0n
+        if (!last_tile) {
+            next_block_start = (index.get5ByteBigInt() & 0x7fffffffffn)
+                + zoom_interval.sub_file_start_position
+        } else {
+            next_block_start = zoom_interval.sub_file_length
+                + zoom_interval.sub_file_start_position
+        }
 
         if (next_block_start === block_start) {
             // if the tile is empty, the index points to the next tile with data
@@ -442,8 +461,8 @@ class MapsforgeParser {
 
         const block_length = next_block_start - block_start;
         return {
-            start: block_start + zoom_interval.sub_file_start_position,
-            end: block_length + block_start + zoom_interval.sub_file_start_position,
+            start: block_start,
+            end: block_length + block_start,
         }
     }
 
