@@ -462,7 +462,7 @@ class MapsforgeParser {
         const block_length = next_block_start - block_start;
         return {
             start: block_start,
-            end: block_length + block_start,
+            end: block_length + block_start - 1n,
         }
     }
 

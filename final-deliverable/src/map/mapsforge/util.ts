@@ -11,7 +11,7 @@ function byteRangeToContiguous(byte_ranges: ByteRange[]) {
     let current_range = byte_ranges[0]
     for (let i = 1; i < byte_ranges.length; i++) {
         const next_range = byte_ranges[i]
-        if (next_range.start === current_range.end) {
+        if (next_range.start === current_range.end + 1n) {
             current_range.end = next_range.end
         } else {
             contiguous_ranges.push(current_range)
