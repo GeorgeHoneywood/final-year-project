@@ -353,18 +353,9 @@ class MapsforgeParser {
 
         console.log(`loading tile z${base_tile.z}/${base_tile.x}/${base_tile.y}`)
 
-        if (base_tile.x < zoom_interval.left_tile_x || base_tile.x > zoom_interval.right_tile_x) {
-            console.log("tile not found!")
-            return null
-        }
-        if (base_tile.y < zoom_interval.top_tile_y || base_tile.y > zoom_interval.bottom_tile_y) {
-            console.log("tile not found!")
-            return null
-        }
-
         const byte_range = await this.getTileByteRange(base_tile, zoom_interval)
         if (!byte_range) {
-            console.log("tile not found!")
+            console.log(`tile ${base_tile.toString()} not found!`)
             return null
         }
 
@@ -422,7 +413,22 @@ class MapsforgeParser {
         )
     }
 
+    /**
+     * Get the range of bytes that store a map tile
+     * 
+     * @param base_tile tile to fetch byte range for
+     * @param zoom_interval sub file to read data from
+     * @returns a range of bytes to fetch. returns null if the tile is not in the sub file
+     */
     private async getTileByteRange(base_tile: TilePosition, zoom_interval: ZoomLevel): Promise<ByteRange> {
+        if (
+            base_tile.x < zoom_interval.left_tile_x
+            || base_tile.x > zoom_interval.right_tile_x
+            || base_tile.y < zoom_interval.top_tile_y
+            || base_tile.y > zoom_interval.bottom_tile_y) {
+            return null
+        }
+
         const index_x = Math.max(base_tile.x - zoom_interval.left_tile_x, 0)
         const index_y = Math.max(base_tile.y - zoom_interval.top_tile_y, 0)
 
