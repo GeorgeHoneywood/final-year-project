@@ -2,7 +2,7 @@ import { describe, test, expect, } from '@jest/globals';
 
 import { byteRangeToContiguous } from "@/map/mapsforge/util"
 
-describe("byteRangeToContiguous should join together touching byte ranges", () => {
+describe("byteRangeToContiguous", () => {
     describe.each([
         {
             name: "no change",
@@ -24,7 +24,12 @@ describe("byteRangeToContiguous should join together touching byte ranges", () =
             value: [{start: 0n, end: 4n}, {start: 5n, end: 8n}, {start: 12n, end: 16n}],
             want: [{start: 0n,  end: 8n}, {start: 12n, end: 16n}]
         },
-    ])("should be able to decode unsigned variable length ints", ({ name, value, want }) => {
+        {
+            name: "empty",
+            value: [],
+            want: []
+        },
+    ])("byteRangeToContiguous should join together touching byte ranges", ({ name, value, want }) => {
         test(`${name}`, () => {
             const got = byteRangeToContiguous(value)
             expect(got).toStrictEqual(want)

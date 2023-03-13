@@ -6,7 +6,11 @@ import type { ByteRange } from "@/map/types"
  * @param byte_ranges that should not overlap
  * @returns a list of contiguous byte ranges
  */
-function byteRangeToContiguous(byte_ranges: ByteRange[]) {
+function byteRangeToContiguous(byte_ranges: ByteRange[]): ByteRange[] {
+    if (byte_ranges.length === 0) {
+        return []
+    }
+
     const contiguous_ranges = []
     let current_range = byte_ranges[0]
     for (let i = 1; i < byte_ranges.length; i++) {
