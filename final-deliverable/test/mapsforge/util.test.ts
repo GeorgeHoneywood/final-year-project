@@ -11,17 +11,17 @@ describe("byteRangeToContiguous", () => {
         },
         {
             name: "2 touching",
-            value: [{start: 0n, end: 4n}, {start: 5n, end: 8n}],
+            value: [{start: 0n, end: 4n}, {start: 4n, end: 8n}],
             want: [{start: 0n, end: 8n}]
         },
         {
             name: "3 touching",
-            value: [{start: 0n, end: 4n}, {start: 5n, end: 8n}, {start: 9n, end: 12n}],
+            value: [{start: 0n, end: 4n}, {start: 4n, end: 8n}, {start: 8n, end: 12n}],
             want: [{start: 0n, end: 12n}]
         },
         {
             name: "3 with gap",
-            value: [{start: 0n, end: 4n}, {start: 5n, end: 8n}, {start: 12n, end: 16n}],
+            value: [{start: 0n, end: 4n}, {start: 4n, end: 8n}, {start: 12n, end: 16n}],
             want: [{start: 0n,  end: 8n}, {start: 12n, end: 16n}]
         },
         {
