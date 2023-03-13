@@ -498,7 +498,9 @@ class MapsforgeParser {
 
     private readPoIs(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): PoI[] {
         const pois: PoI[] = []
-        // TODO: only retrieve the PoIs for the zoom level
+
+        // NOTE: could only return the PoIs we need at the requested zoom level,
+        // but this would just result in duplication in the tile cache
         for (let i = 0; i < zoom_table[zoom_table.length - 1].poi_count; i++) {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
@@ -559,7 +561,9 @@ class MapsforgeParser {
 
     private readWays(zoom_table: ZoomTable, tile_top_left_coord: Coord, tile_data: Reader): Way[] {
         const ways: Way[] = []
-        // TODO: only retrieve the Ways for the zoom level
+
+        // NOTE: could only return the ways we need at the requested zoom level,
+        // but this would just result in duplication in the tile cache
         for (let i = 0; i < zoom_table[zoom_table.length - 1].way_count; i++) {
             let osm_id: string | null = null
             if (this.flags.has_debug_info) {
