@@ -209,7 +209,6 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         let x = zoom_level.right_tile_x
         let y = zoom_level.bottom_tile_y
-        console.log(x, y)
         let tile = await p.readBaseTile({ z: zoom_level.base_zoom_level, x, y })
         expect(tile).toBeTruthy()
 
@@ -225,7 +224,6 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         x = zoom_level.right_tile_x
         y = zoom_level.bottom_tile_y
-        console.log(x, y)
         tile = await p.readBaseTile({ z: zoom_level.base_zoom_level, x, y })
 
         expect(tile).toBeTruthy()

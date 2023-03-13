@@ -353,7 +353,7 @@ class MapsforgeParser {
     public async readBaseTile(base_tile: TilePosition): Promise<Tile | null> {
         const zoom_interval = this.getBaseZoom(base_tile.z)
 
-        console.log(`loading tile z${base_tile.z}/${base_tile.x}/${base_tile.y}`)
+        console.log(`loading tile ${base_tile.toString()}`)
 
         const byte_range = await this.getTileByteRange(base_tile, zoom_interval)
         if (!byte_range) {

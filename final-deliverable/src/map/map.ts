@@ -531,7 +531,6 @@ class CanvasMap {
                     let x = way.paths[0][0].x + way.label_position.x
                     let y = way.paths[0][0].y + way.label_position.y
 
-                    // console.log(tile.bottom_right, tile.top_left)
                     if ((x > tile.bottom_right.x || x < tile.top_left.x)
                         || (y < tile.bottom_right.y || y > tile.top_left.y)
                     ) {
