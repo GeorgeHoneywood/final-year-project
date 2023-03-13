@@ -131,14 +131,24 @@ class MapsforgeParser {
      */
     private async fetchBytes(begin: number, end: number): Promise<ArrayBuffer> {
         if (this.blob) {
+            // NOTE: the end is exclusive
+            // e.g. slice(0, 10) will return 10 bytes
             return this.blob.slice(begin, end).arrayBuffer()
         } else if (this.url) {
             const resp = await fetch(this.url,
                 {
                     headers: {
-                        'Range': `bytes=${begin}-${end}`
+                        // NOTE: the end is inclusive
+                        // e.g. Range: bytes=0-10 will return 11 bytes
+                        'Range': `bytes=${begin}-${end - 1}`
                     }
                 });
+
+            if (!(resp.status === 206)) {
+                throw new Error(
+                    `range request failed, instead got ${resp.statusText || resp.status} -- maybe the server doesn't support range requests?`
+                );
+            }
 
             if (!resp.ok) {
                 throw new Error(
@@ -462,7 +472,7 @@ class MapsforgeParser {
         const block_length = next_block_start - block_start;
         return {
             start: block_start,
-            end: block_length + block_start - 1n,
+            end: block_length + block_start,
         }
     }
 
