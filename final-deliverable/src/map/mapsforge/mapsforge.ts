@@ -288,7 +288,9 @@ class MapsforgeParser {
             zoom_level.bottom_tile_y = bottom_y
 
             // each index is 5 bytes long
-            zoom_level.index_end_position = zoom_level.sub_file_start_position + BigInt(zoom_level.tile_total) * 5n
+            zoom_level.index_end_position = zoom_level.sub_file_start_position
+                + (BigInt(zoom_level.tile_total) * 5n)
+                + (this.flags.has_debug_info ? 16n : 0n)
 
             this.zoom_intervals.push(zoom_level)
         }
