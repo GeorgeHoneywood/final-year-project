@@ -20,6 +20,8 @@
 
         await parser.readHeader()
 
+        console.log({ parser })
+
         map.setMapParser(parser)
     }
 </script>
