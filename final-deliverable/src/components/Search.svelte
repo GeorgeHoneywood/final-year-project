@@ -132,8 +132,8 @@
     }
 
     #search-box {
-        top: 5px;
-        left: 5px;
+        top: 10px;
+        left: 10px;
         max-width: 450px;
         width: calc(100% - 30px);
     }

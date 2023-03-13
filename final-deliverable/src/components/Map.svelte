@@ -8,10 +8,11 @@
     import Offline from "./Offline.svelte"
     import OpenFile from "./OpenFile.svelte"
     import Search from "./Search.svelte"
-
-    import { onMount } from "svelte"
     import Download from "./Download.svelte"
     import Controls from "./Controls.svelte"
+    import Info from "./Info.svelte"
+
+    import { onMount } from "svelte"
 
     let canvas: HTMLCanvasElement
     let map: CanvasMap
@@ -303,6 +304,7 @@
     {/if}
     <OpenFile {map} />
     <Geolocate {map} />
+    <Info />
 </Controls>
 
 <style>
