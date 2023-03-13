@@ -333,8 +333,8 @@ class MapsforgeParser {
         for (const range of contiguous_ranges) {
             promises.push(
                 this.fetchBytes(
-                    range.start,
-                    range.end,
+                    Number(range.start),
+                    Number(range.end),
                 )
             )
         }
