@@ -95,7 +95,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
             .resolves
             .toBe(undefined);
 
-        const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
+        const zoom_level = p.zoom_intervals.at(-1)
 
         const x = zoom_level.left_tile_x + 1
         const y = zoom_level.top_tile_y
@@ -109,7 +109,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         const p = new MapsforgeParser(ferndown)
         await p.readHeader()
 
-        const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
+        const zoom_level = p.zoom_intervals.at(-1)
 
         const tile = (await p.readBaseTile({
             z: zoom_level.base_zoom_level,
@@ -186,7 +186,7 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         const p = new MapsforgeParser(egham)
         await p.readHeader()
 
-        const zoom_level = p.zoom_intervals[p.zoom_interval_count - 1]
+        const zoom_level = p.zoom_intervals.at(-1)
 
         const tile = await p.readBaseTile({
             z: zoom_level.base_zoom_level,
@@ -195,4 +195,40 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
         })
         expect(tile).toBeNull()
     })
+
+    test('should be able to read the last tile from a subfile', async () => {
+        // file without debug info
+        let ferndown = new Blob([await fs.readFile(getPath("ferndown.map"))])
+
+        let p = new MapsforgeParser(ferndown)
+        await expect(p.readHeader())
+            .resolves
+            .toBe(undefined);
+
+        let zoom_level = p.zoom_intervals.at(-1)
+
+        let x = zoom_level.right_tile_x
+        let y = zoom_level.bottom_tile_y
+        console.log(x, y)
+        let tile = await p.readBaseTile({ z: zoom_level.base_zoom_level, x, y })
+        expect(tile).toBeTruthy()
+
+        // file with debug info
+        ferndown = new Blob([await fs.readFile(getPath("ferndown-with-debug.map"))])
+
+        p = new MapsforgeParser(ferndown)
+        await expect(p.readHeader())
+            .resolves
+            .toBe(undefined);
+
+        zoom_level = p.zoom_intervals.at(-1)
+
+        x = zoom_level.right_tile_x
+        y = zoom_level.bottom_tile_y
+        console.log(x, y)
+        tile = await p.readBaseTile({ z: zoom_level.base_zoom_level, x, y })
+
+        expect(tile).toBeTruthy()
+    })
+    
 })
