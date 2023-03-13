@@ -124,7 +124,7 @@ class MapsforgeParser {
     /**
      * Helper function to get some bytes, either from the remote URL using range
      * requests, or from the downloaded blob using `.slice()`
-     * 
+     *
      * @param begin offset to begin read at in bytes
      * @param end offset to end read at in bytes
      * @returns ArrayBuffer containing the requested bytes
@@ -312,7 +312,7 @@ class MapsforgeParser {
 
     /**
      * populate the service worker cache, with a number of tiles of data
-     * 
+     *
      * @param base_tiles should all be the same zoom level, and ordered like so
      * for (x, y) -> [(0, 0), (1, 0), (0, 1), (1, 1)]
      */
@@ -344,7 +344,7 @@ class MapsforgeParser {
 
     /**
      * Read a Tile of data from the mapsforge file
-     * 
+     *
      * @param zoom level to read at. usually 0-21, but depends on the file
      * @param x tile coord
      * @param y tile coord
@@ -417,7 +417,7 @@ class MapsforgeParser {
 
     /**
      * Get the range of bytes that store a map tile
-     * 
+     *
      * @param base_tile tile to fetch byte range for
      * @param zoom_interval sub file to read data from
      * @returns a range of bytes to fetch. returns null if the tile is not in the sub file
