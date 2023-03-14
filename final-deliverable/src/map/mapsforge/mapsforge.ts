@@ -299,9 +299,13 @@ class MapsforgeParser {
             this.zoom_intervals.push(zoom_level)
         }
 
+        await this.cacheIndexes()
+    }
+
+    private async cacheIndexes() {
         for (const zoom_interval of this.zoom_intervals) {
             console.log(
-                "precaching index for base zoom level",
+                "caching index for base zoom level",
                 zoom_interval.base_zoom_level,
                 "at", zoom_interval.sub_file_start_position,
                 "to", zoom_interval.index_end_position,
@@ -367,7 +371,7 @@ class MapsforgeParser {
 
         const { start: block_start, end: block_end } = byte_range
 
-        let tile_data : Reader | null = null
+        let tile_data: Reader | null = null
         try {
             tile_data = new Reader(
                 await this.fetchBytes(

@@ -1,12 +1,5 @@
 <script lang="ts">
-    import { registerServiceWorker } from "./map/register-sw.js"
-
     import Map from "./components/Map.svelte"
-
-    async function main() {
-        await registerServiceWorker()
-    }
-    main()
 </script>
 
 <div id="map-container">

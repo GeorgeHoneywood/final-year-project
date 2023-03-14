@@ -20,6 +20,11 @@
         "./*"
       ]
     },
+    "lib": [
+      "DOM",
+      "ESNext",
+      "WebWorker",
+    ]
   },
   "include": [
     "src/**/*.d.ts",
