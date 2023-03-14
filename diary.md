@@ -106,8 +106,20 @@ Added support for Hi-DPI screens. Previously the canvas size was always just the
 
 ### Week 24 (2023-02-27)
 
+Grammar and spelling fixes in report. Fixed bug where labels were duplicated on tile borders. Tested using map inside an iframe -- this is a common map usecase, i.e. embedded on a business website.
+
+Added support for exact range requests in the service worker cache -- this means we can do offline mode with the dynamic range requests. Added a download/precache button that lets you download a whole area in advance.
+
 ### Week 25 (2023-03-06)
 
+Added a PWA webmanifest, to make the website "installable" on mobile phones. Did some refactoring on the touch event handling code, to remove some necessary helpers. Made it so loading/not found tiles are rendered crossed out.
+
+Improved partial service worker caching, so that it can retrieve smaller chunks of larger files. This makes downloading and storing many map tiles much more efficient, as (x,y) (x+1,y) tiles are contiguous bytes in the mapsforge file. Adapted prefetch code to fetch these contiguous ranges. Added loading spinner, and an "about" page.
+
 ### Week 26 (2023-03-13)
+
+Fixed bug with inconsistent behaviour with dynamic mode and blob mode -- turned out to be due to HTTP range requests including the last requested byte, i.e. `Range: bytes=0-10` will return 11 bytes, whereas `slice(0, 10)` will return 10 bytes. Fixed another bug in the handling of files with debug info.
+
+Made it so that the service worker takes control on the first page load. Before it was only "controlling" the page after a refresh. This meant that tiles were not downloaded or cached until a reload occured, which is unexpected behaviour. Also set up proper resource precaching, to ensure we get all files we need.
 
 ### Week 27 (2023-03-20)
