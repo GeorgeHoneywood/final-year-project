@@ -144,6 +144,10 @@ class MapsforgeParser {
                     }
                 });
 
+            if (resp.status === 408) {
+                throw new Error(`service worker cache doesn't have this range! (${begin}-${end})`)
+            }
+
             if (!(resp.status === 206)) {
                 throw new Error(
                     `range request failed, instead got ${resp.statusText || resp.status} -- maybe the server doesn't support range requests?`
@@ -363,12 +367,18 @@ class MapsforgeParser {
 
         const { start: block_start, end: block_end } = byte_range
 
-        const tile_data = new Reader(
-            await this.fetchBytes(
-                Number(block_start),
-                Number(block_end),
+        let tile_data : Reader | null = null
+        try {
+            tile_data = new Reader(
+                await this.fetchBytes(
+                    Number(block_start),
+                    Number(block_end),
+                )
             )
-        )
+        } catch (e) {
+            console.log(`tile ${base_tile.toString()} not found in cache! ${e}`)
+            return null
+        }
 
         // coordinates in the tile are all against this offset
         const tile_top_left_coord = unprojectMercator(
