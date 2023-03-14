@@ -26,9 +26,13 @@
     let map_size: DOMRect | null = null
 
     onMount(async () => {
-        const blob = undefined
-        // const blob = await loadMapBlob("data/egham.map")
-        const url = "data/dorset.map"
+        let blob = undefined
+        // blob = await loadMapBlob("data/egham.map")
+        // blob = await loadMapBlob("data/ferndown.map")
+        // blob = await loadMapBlob("data/ferndown-with-debug.map")
+        // const url = "data/ferndown-with-debug.map"
+        // const url = "data/ferndown.map"
+        const url = "data/england.map"
 
         let parser: MapsforgeParser
         if (blob) {
@@ -299,7 +303,7 @@
 
 <!-- holds controls at bottom right -->
 <Controls>
-    {#if online}
+    {#if online && navigator.serviceWorker}
         <Download {map} />
     {/if}
     <OpenFile {map} />

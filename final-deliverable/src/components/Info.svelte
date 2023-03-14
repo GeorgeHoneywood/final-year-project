@@ -40,9 +40,14 @@
             </button>
         </div>
         <p>
-            <strong>Storage usage:</strong>
-            {percent_used.toFixed(0)}% ({formatBytes(absolute_used)} used,
-            {formatBytes(absolute_free)} free)
+            {#if navigator.serviceWorker}
+                <strong>Storage usage:</strong>
+                {percent_used.toFixed(0)}% ({formatBytes(absolute_used)} used,
+                {formatBytes(absolute_free)} free)
+            {:else}
+                <strong>Service worker not available!</strong>
+                This means offline mode won't work.
+            {/if}
         </p>
         <p>
             OSMO is a HTML5 map viewer for Mapsforge format files, with offline
@@ -58,10 +63,11 @@
             number of requests required to download a large map region.
         </p>
         <p>
-            OSMO written in <a
-            href="https://www.typescriptlang.org/">TypeScript</a>, using <a
-            href="https://svelte.dev/">Svelte</a> for the UI, rendering the map to
-            a <code>&lt;canvas&gt;</code> element. The map data is &copy;
+            OSMO written in <a href="https://www.typescriptlang.org/"
+                >TypeScript</a
+            >, using <a href="https://svelte.dev/">Svelte</a> for the UI,
+            rendering the map to a <code>&lt;canvas&gt;</code> element. The map
+            data is &copy;
             <a href="https://www.openstreetmap.org/">OpenStreetMap</a>.
         </p>
     </div>
