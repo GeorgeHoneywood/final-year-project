@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { ManifestOptions, VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
+import { execSync } from 'node:child_process'
 
 const pwa_manifest: Partial<ManifestOptions> = {
     background_color: "#f2efe9",
@@ -37,9 +38,9 @@ export default defineConfig({
     plugins: [
         svelte(),
         VitePWA({
-            strategies: 'injectManifest',
-            srcDir: 'src',
-            filename: 'sw.ts',
+            strategies: "injectManifest",
+            srcDir: "src",
+            filename: "sw.ts",
             injectRegister: null, // we register manually in main.ts
             injectManifest: {
                 globPatterns: ["**/*.{js,css,html,svg,png}"],
@@ -53,4 +54,8 @@ export default defineConfig({
             { find: '@', replacement: resolve(__dirname, 'src') },
         ],
     },
+    define: {
+        "__APP_VERSION__": JSON.stringify(execSync("git rev-parse HEAD").toString().trim())
+    },
+
 })

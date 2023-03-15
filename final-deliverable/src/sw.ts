@@ -5,20 +5,37 @@
 // tell TypeScript what self is
 declare let self: ServiceWorkerGlobalScope
 
-const addResourcesToCache = async (resources: string[]) => {
-    const cache = await caches.open('v1');
+// NOTE: macro replaced at build time
+const app_version = __APP_VERSION__
+
+// counting anything that isn't map partials as "assets"
+// i.e. HTML, JS, CSS
+// this means that assets should be refreshed when the service worker has
+// upgraded, and the new version has taken control
+const asset_version = `resources-${app_version}`;
+
+// invalidating users' downloaded map files would be a bad idea, so hardcode this
+const map_version = "map-v1"
+
+const addAssetsToCache = async (resources: string[]) => {
+    const cache = await caches.open(asset_version);
     await cache.addAll(resources);
 };
 
-const putInCache = async (request: Request, response: Response) => {
-    const cache = await caches.open('v1');
+const putAssetInCache = async (request: Request, response: Response) => {
+    const cache = await caches.open(asset_version);
+    await cache.put(request, response);
+};
+
+const putPartialMapInCache = async (request: Request, response: Response) => {
+    const cache = await caches.open(map_version);
     await cache.put(request, response);
 };
 
 // NOTE: this could get pretty inefficent: for each request we do a linear
 // search, over all file in the service worker cache
 const handlePartialMapRequest = async (request: Request, requested_range_header: string) => {
-    const cache = await caches.open('v1')
+    const cache = await caches.open(map_version)
 
     const [start, end] = requested_range_header.split("=")[1].split("-").map(e => +e)
     const requested_range = { start, end }
@@ -84,7 +101,7 @@ const handlePartialMapRequest = async (request: Request, requested_range_header:
 
         // creating a new Response wipes out the 206 Partial header,
         // which we have to do to store file in cache
-        putInCache(new Request(storage_key), new Response(
+        putPartialMapInCache(new Request(storage_key), new Response(
             await responseFromNetwork.clone().blob(),
             { headers: { "Content-Length": responseFromNetwork.headers.get("Content-Length") } }
         ));
@@ -106,8 +123,9 @@ const cacheFirst = async ({ request }) => {
         return handlePartialMapRequest(request, requested_range_header);
     }
 
+    const asset_cache = await caches.open(asset_version)
     // if the file exists in the cache, use it
-    const responseFromCache = await caches.match(request);
+    const responseFromCache = await asset_cache.match(request);
     if (responseFromCache) {
         return responseFromCache;
     }
@@ -117,7 +135,7 @@ const cacheFirst = async ({ request }) => {
         const responseFromNetwork = await fetch(request);
         // response may be used only once we need to save clone to put one copy
         // in cache and serve second one
-        putInCache(request, responseFromNetwork.clone());
+        putAssetInCache(request, responseFromNetwork.clone());
         return responseFromNetwork;
     } catch (error) {
         // we must always return a Response object
@@ -139,23 +157,38 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('install', async (event) => {
     console.log('service worker installing')
-    // NOTE: can't use skipWaiting as we need to wait for the precaching to finish
-    // await self.skipWaiting();
-
     let manifest = ((self as any).__WB_MANIFEST as { url: string }[]).map(e => e.url)
     manifest = [...new Set(manifest)] // remove duplicates
     console.log("precaching files in manifest", manifest)
 
     // precache assets we need
     event.waitUntil((async () => {
-        addResourcesToCache(["./", ...manifest])
+        await addAssetsToCache(["./", ...manifest])
         console.log("finished precaching")
+
+        await self.skipWaiting(); // if we are a new service worker version, fire activate immediately
     })());
 });
 
 self.addEventListener('activate', async (event) => {
     console.log('service worker activated')
-    event.waitUntil(self.clients.claim())
+    event.waitUntil((async () => {
+        await self.clients.claim()
+
+        // clean out old cache versions, after a new service worker is in
+        // control
+        for (const cache_name of await self.caches.keys()) {
+            if (cache_name === map_version) {
+                continue // don't want to clear out the map cache
+            }
+
+            if (cache_name !== asset_version) {
+                // old cache, delete
+                console.log(`cleaned out old cache: ${cache_name}`)
+                await self.caches.delete(cache_name)
+            }
+        }
+    })())
 });
 
 // needed to convince TypeScript that this is a module
