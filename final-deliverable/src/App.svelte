@@ -1,5 +1,21 @@
 <script lang="ts">
+    import { onMount } from "svelte"
+
     import Map from "./components/Map.svelte"
+
+    onMount(() => {
+        if (navigator.storage && navigator.storage.persist) {
+            // this should prevent our service worker cache from being deleted
+            // when under storage pressure
+            navigator.storage.persist().then((persistent) => {
+                console.log(
+                    persistent
+                        ? "we have persistent storage"
+                        : "storage is not persistent",
+                )
+            })
+        }
+    })
 </script>
 
 <div id="map-container">
