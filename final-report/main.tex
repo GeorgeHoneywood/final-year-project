@@ -1,4 +1,4 @@
-\documentclass{final_report}
+\documentclass[hyphens]{final_report}
 \usepackage[backend=biber,
             style=numeric,
             sorting=none,
@@ -9,6 +9,7 @@
 \usepackage{verbatim}
 \usepackage{fancyvrb}
 \usepackage[shortlabels]{enumitem} %change list formatting
+% \usepackage[hyphens]{url}
 \usepackage[pdftex,
             colorlinks,
             breaklinks=true,
@@ -224,7 +225,7 @@ As part of the development process, I have created a number of proof-of-concepts
 
 \section{Simple offline HTML5 app}
 
-{ \hfill \footnotesize Source in \texttt{proof-of-concepts/1-offline-html5}}
+{ \hfill \footnotesize Source in \path{proof-of-concepts/1-offline-html5}}
 
 My first proof of concept was a basic offline HTML5 application, employing the techniques that I researched in Section~\ref{sec:offline-html-applications}. Since the \texttt{Application Cache} has been deprecated, the accepted way to create an offline HTML5 app is to use Service Workers~\cite{w3c-service-workers-caches}. The concept behind this is that the Service Worker intercepts all HTTP requests that are made on the website, and can then respond to this request with a result from a prepopulated cache.
 
@@ -251,6 +252,8 @@ const cacheFirst = async ({ request }) => {
         });
 };
 
+// the fetch event will intercept all HTTP requests made by the website
+// such as JavaScript fetch() calls, or HTML <img> tags
 self.addEventListener('fetch', (event) => event.respondWith(
         cacheFirst({request: event.request})
 ));
@@ -258,7 +261,7 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 \section{Rendering geometry to a canvas}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/2-rendering-a-way}, online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}, or \href{https://youtu.be/2F_vpCrQsO4}{demo video}.}
+{ \footnotesize Source in \path{proof-of-concepts/2-rendering-a-way}, online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}, or \href{https://youtu.be/2F_vpCrQsO4}{demo video}.}
 
 My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which is a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
 
@@ -287,7 +290,7 @@ This proof of concept was entirely static, with the viewport and zoom level hard
 
 \section{Adding interactivity --- panning and zooming}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/3-panning-and-zooming}, online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}, or \href{https://youtu.be/_JvGwLra_Q4}{demo video}.}
+{ \footnotesize Source in \path{proof-of-concepts/3-panning-and-zooming}, online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}, or \href{https://youtu.be/_JvGwLra_Q4}{demo video}.}
 
 The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
 
@@ -319,9 +322,9 @@ public render() {
 }
 \end{lstlisting}
 
-\section{Rendering tiled data from a Mapsforge file}
+\section{Rendering tiled data from a Mapsforge file}\label{sec:poc-4}
 
-{ \footnotesize Source in \texttt{proof-of-concepts/4-rendering-osm-data}, online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}, \href{https://youtu.be/2cvZ-veBUto}{mobile demo video}, or \href{https://youtu.be/0evN3RT42QQ}{desktop demo video}.}
+{ \footnotesize Source in \path{proof-of-concepts/4-rendering-osm-data}, online demo at \href{https://files.george.honeywood.org.uk/4-rendering-osm-data/#15/50.7895/-1.8938}{\nolinkurl{files.george.honeywood.org.uk/4-rendering-osm-data/}}, \href{https://youtu.be/2cvZ-veBUto}{mobile demo video}, or \href{https://youtu.be/0evN3RT42QQ}{desktop demo video}.}
 
 My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
 
@@ -339,6 +342,10 @@ These represent tagged OpenStreetMap nodes, such as shops, bus stops, or any oth
 
 Ways are an abstraction over OpenStreetMap ways and relations, presenting both as a single type. OSM represents complex structures such as buildings with internal courtyards as multiple ways, for the outer and inner parts. These are then linked by a multipolygon relation that labels each part as inner or outer~\cite{osm-wiki-multipolygon}. These are non-trivial to efficiently interpret, especially with large amounts of data, so it makes sense to push this complexity to the map-writer software.
 
+\subsubsection{Indexes}
+
+In order to retrieve a specific tile of data, we need to know where in the file it is stored. This is achieved through a set of indexes for each sub file. Each index entry stores a pointer to the start of a tile. The indexes are stored as row major 5 byte integers, with the first value being for the first tile \((x,y)\;(0,0)\) in the sub-file. You can then read the \((1,0)\) index by adding a 5 byte offset, or the \((0,1)\) index by adding 5 \(\times{}\) the amount of x tiles in the sub-file.
+
 \subsubsection{Sub-files}
 
 \begin{figure}[ht]
@@ -347,9 +354,7 @@ Ways are an abstraction over OpenStreetMap ways and relations, presenting both a
     \caption{Raw tiled data from zoom 14 base tiles}\label{fig:rendering-tiles}
 \end{figure}
 
-%% \- to give latex line break hints
-
-Sub-files store map data for a range of zoom levels. For example, the file \texttt{proof\--of\--concepts/4\--rendering\--osm\--data\-/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
+Sub-files store map data for a range of zoom levels. For example, the file \path{proof-of-concepts/4-rendering-osm-data/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
 
 The over-zoom/under-zoom functionality is supported by each sub-file containing a ``zoom table'', which contains how many PoIs/Ways need to be read for the tile at the requested zoom level. For example, when under-zooming a z14 tile to z12, you will be showing around 112 z14 base tiles (on a 1080p screen). This is too many tiles to be able to render all of their features with acceptable performance. To enable this zoom-table feature, the Way and PoI data in each tile is sorted by ``feature importance'', meaning that data to be shown at low zoom levels, like place labels or important roads, comes first, and less important geometries like houses are placed last. Therefore, you can read that there should be \texttt{x} amount of PoIs/Ways for this tile, for the zoom level you are decoding, read the specified amount, then skip over the rest.
 
@@ -401,6 +406,93 @@ When rendering the map, I first convert the current zoom level to the correspond
 I handled styling fairly simplistically, setting a number of booleans based on way tags, as the tiles load in. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be. This is shown in Figure~\ref{fig:rendering-osm-data}.
 
 To make sure that the map always draw labels on top, I make two passes through the data. In the first, I render out all the areas and lines, then in the second, the way labels and PoIs. Before I implemented this, areas from other tiles would often overlap labels.
+
+\clearpage
+\chapter{Final application development process: OSMO}
+
+{ \footnotesize Source in \texttt{final-deliverable/}, online demo at \href{https://files.george.honeywood.org.uk/final-deliverable/#16/51.4313/-0.5472}{\nolinkurl{files.george.honeywood.org.uk/final-deliverable/}} }
+
+%% FIXME: add demo links
+
+In the second term, I worked on the final application, named OSMO. This started off as a direct clone of the final proof of concept --- as discussed in \autoref{sec:poc-4}.
+
+\section{Dynamic tile loading}
+
+The final proof of concept (\autoref{sec:poc-4}) rendered data from a preloaded Mapsforge file, requiring the whole map to be downloaded into RAM before any tiles could be drawn. This works fine for small map files, but is not reasonable for larger ones --- the map file that covers England is around 800 MB --- which is too much data to download and store in RAM, especially on mobile devices.
+
+To circumvent this issue, we can use HTTP range requests, which allow us to request only certain chunks of a file from a web server~\cite{mdn-range-requests}. Range requests are natively supported by popular web servers like Apache and nginx. This approach is a little unusual, typically vector/raster tile based online maps utilise a dedicated server application known as a tile server. The tile server takes a web request shaped like \texttt{example.org/z/x/y}, and the tile server responds to this with data for the requested tile.
+
+\begin{lstlisting}[caption=Using \texttt{curl} to make a HTTP range request, label=lst:range-request, numbers=none]
+% curl -v 'https://files.george.honeywood.org.uk/final-deliverable/data/england.map' \
+    -H 'range: bytes=0-23'
+
+> GET /final-deliverable/data/england.map HTTP/2
+> Host: files.george.honeywood.org.uk
+> range: bytes=0-23
+
+< HTTP/2 206 
+< server: nginx/1.18.0 (Ubuntu)
+< content-length: 24
+< content-range: bytes 0-23/844019294
+
+[... 24 bytes of data ...]
+\end{lstlisting}
+
+The first 24 bytes of the file contain the magic bytes, then length of the rest of the header. Once we have this, we can then request the rest of the header, and based on this, the tile indexes. We then use these parts of the Mapsforge file to calculate which tiles the file contains, and their offsets within the file.
+
+The Mapsforge format is not designed for this type of use. Instead data is typically read from a locally stored file by a native application. This range request approach was inspired by the PMTiles project, which stores tiles in ``pyramids built on compressed Hilbert ordering'', allowing for efficient random access to tiles~\cite{pmtiles}. This specifically designed PMTiles format saves initial network traffic compared to using the Mapsforge format, but the overhead is relatively low for my use case. For the 800 MB England map, the header is 8.0 KB, and the indexes are just over 1.1 MB\@. The PMTiles approach makes more sense for larger world scale maps, as they will have many more tiles, and hence larger indexes. 
+
+Additionally, PMTiles is intended as a general purpose map library, whereas OSMO is more specifically designed as a standalone offline map application. This means that we can assume that the indexes will only need to be fetched once, and from then will be cached in the service worker.
+
+The dynamic tile loading implementation of this is transparent to the parsing code, as it loads the required bytes via an abstracted \texttt{fetchBytes(start, end)} function. Depending on how the \texttt{MapsforgeParser} was constructed, it will then either read data from a pre-downloaded blob, or dynamically via an HTTP range request. 
+
+\section{Caching dynamically loaded tiles}
+
+As discussed in the previous section, the final proof of concept read data from a pre-downloaded map blob. This made offline use quite simple, as the entire blob could be stored in the service worker cache. Working with only partial range requested data, however, requires a more specialized approach, as the service worker cache cannot natively store partial data~\cite[see Section 5.4.5: \texttt{Cache.put(request, response)}]{w3c-service-workers-caches}.
+
+To work around this limitation I instead decided to store the data with an extra key appended to the URL, which contains the byte range that is stored within that response. For example, if we had stored the two byte ranges in the cache (the file header), we would have two keys in the cache: \path{england.map?bytes=0-23} and \path{england.map?bytes=24-8021}. As the same tile will stay at the same byte offset, later, when we are offline, we can use the same key to retrieve the tile data, with \texttt{cache.match(url)}.
+
+\section{Downloading a region}
+
+Caching the partially downloaded map file became more complicated when I wanted to add the download region feature. This would allow the user to click the ``Download'' button, which downloads all the tiles within the current map viewport. The use case for this is that a disk space restricted user will be able to download a subset of the map, without needing to download the entire 800 MB \texttt{england.map} file.
+
+My initial, naïve downloading approach was as follows:
+
+\begin{enumerate}
+    \item Calculate which tiles are contained within the current viewport
+    \item Generate the byte ranges which these files are stored at within the file
+    \item Call \texttt{fetchBytes()} to load these bytes into the service worker cache for offline use
+\end{enumerate}
+
+While functional, this approach was less than ideal. For one, this meant storing thousands of individual byte ranges within the cache --- an area the size of Cornwall contains about 11,000 tiles at z14. The other main problem was that dispatching hundreds of HTTP range requests to the server was very slow, and it makes much more sense to download larger chunks of the data at once. Conveniently to this end, the Mapforge format stores the tile data for the \((x,y)\; (0,0)\) and \(1,0\) tiles in a contiguous range of bytes. This means that instead of downloading each tile individually, we can download a whole row of tiles at once.
+
+Taking this request chunking approach meant that the service worker code had to be altered, to allow a partial read of data from within a larger cached range. For example if we had the range \path{england.map?bytes=100-200}, we not only need to be able to read bytes 100 to 200, but also any arbitrary subset of that range. The implementation for this was fairly simple (see \autoref{lst:read-cached-range}).
+
+\begin{lstlisting}[caption=Reading a range from a cached response, label=lst:read-cached-range]
+const requested_range = {
+    start: [...] // parsed from Range header in request
+    end: [...]
+};
+
+[...] // elided logic to choose which cached range to use 
+cached_range = {
+    start: [...] // parsed from bytes= query parameter in cache key
+    end: [...]
+};
+
+return new Response(
+    (await responseFromCache.blob())
+        .slice(
+            requested_range.start - cached_range.start,
+            // NOTE: ranges in the cache are end exclusive,
+            // so need add one here to get the final byte
+            (requested_range.end - cached_range.start) + 1,
+        ),
+    { status: 206 }
+);
+\end{lstlisting}
+
+One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache, and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
@@ -466,10 +558,9 @@ The first tool I implemented to work towards achieving this was adding a frame t
 
 This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important factor to optimize in this scenario is to reduce the amount of geometries that need to be rendered.
 
-\clearpage
-\chapter{Final application development process}
 
-% TODO
+
+
 
 \clearpage
 \chapter{Conclusion \& evaluation}
