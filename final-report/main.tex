@@ -492,7 +492,7 @@ return new Response(
 );
 \end{lstlisting}
 
-One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache, and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
+One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache (using \texttt{cache.keys()}), and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
