@@ -440,17 +440,17 @@ To circumvent this issue, we can use HTTP range requests, which allow us to requ
 
 The first 24 bytes of the file contain the magic bytes, then length of the rest of the header. Once we have this, we can then request the rest of the header, and based on this, the tile indexes. We then use these parts of the Mapsforge file to calculate which tiles the file contains, and their offsets within the file.
 
-The Mapsforge format is not designed for this type of use. Instead data is typically read from a locally stored file by a native application. This range request approach was inspired by the PMTiles project, which stores tiles in ``pyramids built on compressed Hilbert ordering'', allowing for efficient random access to tiles~\cite{pmtiles}. This specifically designed PMTiles format saves initial network traffic compared to using the Mapsforge format, but the overhead is relatively low for my use case. For the 800 MB England map, the header is 8.0 KB, and the indexes are just over 1.1 MB\@. The PMTiles approach makes more sense for larger world scale maps, as they will have many more tiles, and hence larger indexes. 
+The Mapsforge format is not specifically designed for this type of use. Instead data is typically read from a locally stored file by a native application. This range request approach was inspired by the PMTiles project, which stores tiles in ``pyramids built on compressed Hilbert ordering'', allowing for efficient random access to tiles~\cite{pmtiles}. This specifically designed PMTiles format saves initial network traffic compared to using the Mapsforge format, but the overhead is relatively low for my use case. For the 800 MB England map, the file header is only 8.0 KB, and the tile indexes are just over 1.1 MB\@. The PMTiles approach makes more sense for larger world scale maps, as they will have many more tiles, and hence larger tile indexes. 
 
 Additionally, PMTiles is intended as a general purpose map library, whereas OSMO is more specifically designed as a standalone offline map application. This means that we can assume that the indexes will only need to be fetched once, and from then will be cached in the service worker.
 
-The dynamic tile loading implementation of this is transparent to the parsing code, as it loads the required bytes via an abstracted \texttt{fetchBytes(start, end)} function. Depending on how the \texttt{MapsforgeParser} was constructed, it will then either read data from a pre-downloaded blob, or dynamically via an HTTP range request. 
+The dynamic tile loading implementation is transparent to the parsing code, as it loads the required bytes via an abstracted \texttt{fetchBytes(start, end)} function. Depending on how the \texttt{MapsforgeParser} was constructed, it will then either read data from a pre-downloaded blob, or dynamically via an HTTP range request. 
 
 \section{Caching dynamically loaded tiles}
 
 As discussed in the previous section, the final proof of concept read data from a pre-downloaded map blob. This made offline use quite simple, as the entire blob could be stored in the service worker cache. Working with only partial range requested data, however, requires a more specialized approach, as the service worker cache cannot natively store partial data~\cite[see Section 5.4.5: \texttt{Cache.put(request, response)}]{w3c-service-workers-caches}.
 
-To work around this limitation I instead decided to store the data with an extra key appended to the URL, which contains the byte range that is stored within that response. For example, if we had stored the two byte ranges in the cache (the file header), we would have two keys in the cache: \path{england.map?bytes=0-23} and \path{england.map?bytes=24-8021}. As the same tile will stay at the same byte offset, later, when we are offline, we can use the same key to retrieve the tile data, with \texttt{cache.match(url)}.
+To work around this limitation I instead decided to store the data with an extra key appended to the URL, which contains the byte range that is stored within that response. For example, if we had stored the two byte ranges in the cache (that make up the file header), we would have two keys in the cache: \path{england.map?bytes=0-23} and \path{england.map?bytes=24-8021}. As the same tile will stay at the same byte offset, later, when we are offline, we can use the same key to retrieve the tile data, with \texttt{cache.match(url)}.
 
 \section{Downloading a region}
 
@@ -460,11 +460,11 @@ My initial, naïve downloading approach was as follows:
 
 \begin{enumerate}
     \item Calculate which tiles are contained within the current viewport
-    \item Generate the byte ranges which these files are stored at within the file
-    \item Call \texttt{fetchBytes()} to load these bytes into the service worker cache for offline use
+    \item Generate the byte ranges which these tiles are stored at within the file
+    \item Call \texttt{fetchBytes()} to load these bytes into the service worker cache for later offline use
 \end{enumerate}
 
-While functional, this approach was less than ideal. For one, this meant storing thousands of individual byte ranges within the cache --- an area the size of Cornwall contains about 11,000 tiles at z14. The other main problem was that dispatching hundreds of HTTP range requests to the server was very slow, and it makes much more sense to download larger chunks of the data at once. Conveniently to this end, the Mapforge format stores the tile data for the \((x,y)\; (0,0)\) and \(1,0\) tiles in a contiguous range of bytes. This means that instead of downloading each tile individually, we can download a whole row of tiles at once.
+While functional, this approach was less than ideal. For one, this meant storing thousands of individual byte ranges within the cache --- an area the size of Cornwall contains about 11,000 tiles at z14. The other main problem was that dispatching hundreds of HTTP range requests to the server was very slow, and it makes much more sense to download larger chunks of the data at once. Conveniently to this end, the Mapforge format stores the tile data for the \((x,y)\; (0,0)\) and \((1,0)\) tiles in a contiguous range of bytes. This means that instead of downloading each tile individually, we can download a whole row of tiles at once.
 
 Taking this request chunking approach meant that the service worker code had to be altered, to allow a partial read of data from within a larger cached range. For example if we had the range \path{england.map?bytes=100-200}, we not only need to be able to read bytes 100 to 200, but also any arbitrary subset of that range. The implementation for this was fairly simple (see \autoref{lst:read-cached-range}).
 
@@ -493,6 +493,14 @@ return new Response(
 \end{lstlisting}
 
 One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache (using \texttt{cache.keys()}), and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
+
+\section{Experimenting with WebGL}
+
+Whilst profiling the \texttt{render()} function of my application, it became apparent that the draw calls on the \texttt{<canvas>} were the limiting factor in my applications' performance (see~\ref{sec:profiling}). Instead of using \texttt{CanvasRenderingContext2D}, popular vector map rendering libraries like Mapbox GL use the \texttt{WebGL2RenderingContext}. This allows for GPU accelerated rendering, even providing enough power to render complex 3D graphics. This would have been the best way to reduce the time needed to render a frame, and make the application more responsive to panning and zooming.
+
+During the beginning of term two, I decided to experiment with using WebGL for rendering. WebGL2 provides very low level interface to the GPU, employing the concepts of fragment shaders and vertex shaders. These allow you to draw triangles, that you can then use to make up more complex shapes --- for example a square would be made up of two equilateral triangles. You have to handle all of this work yourself, unless you choose to employ a library.
+
+Following a tutorial, I was able to implement basic drawing using to the \texttt{WebGL2\-Rendering\-Context}~\cite{webglf2undamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus adding more functionality to my application.
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
