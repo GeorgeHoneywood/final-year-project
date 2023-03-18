@@ -502,6 +502,12 @@ During the beginning of term two, I decided to experiment with using WebGL for r
 
 Following a tutorial, I was able to implement basic drawing using to the \texttt{WebGL2\-Rendering\-Context}~\cite{webglf2undamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus adding more functionality to my application.
 
+\section{Svelte: using a frontend framework}
+
+The search box was the first feature I added that wasn't primarily using the canvas for display and interaction. I initially implemented it in vanilla JavaScript, which worked fine, but I found myself writing a lot of error-prone boilerplate code to update the DOM\@. In addition to this, I was following the antipattern of creating references to the DOM, then passing around these references to other functions. This made it difficult to reason about the state of the application, and harder to refactor the code.
+
+To remedy this I decided to start using a frontend framework, which allows you to write declarative code, and abstract away the DOM manipulation. It also solved my issue of passing DOM references, by allowing them to be created next to the point of use. I chose to use Svelte, as it is relatively lightweight \& performant, and I've used it before. This allowed me to write self-contained components, which each manage their own state. Another benefit of Svelte is that it provides a simple interface to allow you to write animations that aren't normally possible with CSS\@. For example, in the search box, when the result box appears, it scales in from the top. This is cannot be done with pure CSS as CSS animations can only work when the properties of the element are changed. However, Svelte allows you to write animations that are triggered by changing the state of the component.
+
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
 
@@ -566,12 +572,10 @@ The first tool I implemented to work towards achieving this was adding a frame t
 
 This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important factor to optimize in this scenario is to reduce the amount of geometries that need to be rendered.
 
-
-
-
-
 \clearpage
 \chapter{Conclusion \& evaluation}
+
+% use THREE.js or some other webgl library, to speed up rendering
 
 \section{Professional issues}
 
