@@ -508,6 +508,8 @@ The search box was the first feature I added that wasn't primarily using the can
 
 To remedy this I decided to start using a frontend framework, which allows you to write declarative code, and abstract away the DOM manipulation. It also solved my issue of passing DOM references, by allowing them to be created next to the point of use. I chose to use Svelte, as it is relatively lightweight \& performant, and I've used it before. This allowed me to write self-contained components, which each manage their own state. Another benefit of Svelte is that it provides a simple interface to allow you to write animations that aren't normally possible with CSS\@. For example, in the search box, when the result box appears, it scales in from the top. This is cannot be done with pure CSS as CSS animations can only work when the properties of the element are changed. However, Svelte allows you to write animations that are triggered by changing the state of the component.
 
+
+
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
 
@@ -545,6 +547,18 @@ should be able to decode signed variable ints
     pass: 3 byte max: [11111111,11111111,01111111].getVSint() == -1048575
     pass: 4 byte min: [10000000,10000000,10000000,00000001].getVSint() == 2097152
 \end{lstlisting}
+
+\section{Gitlab CI}
+
+In industry, it is common to run tests and deploy code automatically, as it is pushed to the repository --- this is known as CI/CD (continuous integration/continuous deployment). I set up GitLab CI to automatically run tests when new commits were pushed. The advantage of this is that if I accentidently push code that breaks the tests, I get an email to alert me (see \autoref{fig:ci-fail}). As the CIM Gitlab doesn't provide any CI runners, I had to set up my own ``self-managed'' runner. There are a number of options for how the job should be run (known as ``executors''), such as in a Docker container, or over SSH\@. As my use case is fairly simple, without any complicated dependencies or required state, I decided to use the shell executor, which simply downloads the Git repository, and runs the shell code specified in the \path{.gitlab-ci.yml} file.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/gitlab-ci-failure.png}
+    \caption{Gitlab CI failure notification}\label{fig:ci-fail}
+\end{figure}
+
+When working in a team it is good practice to have a centrally managed deployment system (CD), where team members can initiate or the current state of a deployment. For my project, as I am the sole developer, it is acceptable to have a simple deploy script that copies files to my web server using \texttt{rsync}.
 
 \section{Version control}
 
@@ -589,7 +603,7 @@ Even most non-text based media can be made accessible to blind people, through \
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{../final-deliverable/screenshots/simulated-deuteranopia.png}
+    \includegraphics[width=0.7\textwidth]{images/simulated-deuteranopia.png}
     \caption{Simulating deuteranopia, in Firefox Developer Tools}\label{fig:deuteranopia}
 \end{figure}
 
