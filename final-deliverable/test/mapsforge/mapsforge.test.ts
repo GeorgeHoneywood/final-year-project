@@ -228,5 +228,41 @@ describe("MapsforgeParser should correctly parse Mapsforge files", () => {
 
         expect(tile).toBeTruthy()
     })
-    
+
+    test('fetchBaseTileRange should fetch the correct byte ranges', async () => {
+
+        const fetchBytesMock = jest.spyOn(MapsforgeParser.prototype as any, 'fetchBytes') // any cast to access private method
+
+        let ferndown = new Blob([await fs.readFile(getPath("ferndown.map"))])
+
+        let p = new MapsforgeParser(ferndown)
+        await expect(p.readHeader())
+            .resolves
+            .toBe(undefined);
+
+        let zoom_level = p.zoom_intervals.at(-1)
+
+        let x = zoom_level.left_tile_x + 1
+        let y = zoom_level.top_tile_y + 1
+        let z = zoom_level.base_zoom_level
+
+        // load a square of 4 tiles, 2x2 
+        await expect (p.fetchBaseTileRange([
+            { z, x, y },
+            { z, x: x + 1, y },
+            { z, x, y: y + 1 },
+            { z, x: x + 1, y: y + 1 },
+        ])).resolves.toBe(undefined)
+
+        // final calls to fetchBytes should be 2 byte ranges, one for the bytes
+        // for the first row of tiles, and one for the second row
+        expect(fetchBytesMock.mock.calls.at(-2)).toStrictEqual(
+            [135608, 222458]
+        )
+        expect(fetchBytesMock.mock.calls.at(-1)).toStrictEqual(
+            [332039, 438949]
+        )
+
+        fetchBytesMock.mockRestore();
+    })
 })
