@@ -5,16 +5,16 @@ import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
 
 const pwa_manifest: Partial<ManifestOptions> = {
+    name: "OSMO: Final Deliverable",
+    short_name: "OSMO",
+    start_url: "./",
     background_color: "#f2efe9",
+    theme_color: "#f2efe9",
     description: "Offline HTML5 map viewer, based on the Mapsforge format",
     display: "standalone",
+    orientation: "portrait",
+    scope: "./",
     icons: [
-        {
-            src: "icons/favicon-svg",
-            sizes: "512x512",
-            type: "image/svg+xml",
-            purpose: "maskable any",
-        },
         {
             src: "icons/favicon-512x512.png",
             sizes: "512x512",
@@ -28,9 +28,6 @@ const pwa_manifest: Partial<ManifestOptions> = {
             purpose: "maskable any",
         },
     ],
-    name: "OSMO: Final Deliverable",
-    short_name: "OSMO",
-    start_url: "/final-deliverable/",
 }
 
 // https://vitejs.dev/config/
