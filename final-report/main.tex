@@ -508,7 +508,9 @@ The search box was the first feature I added that wasn't primarily using the can
 
 To remedy this I decided to start using a frontend framework, which allows you to write declarative code, and abstract away the DOM manipulation. It also solved my issue of passing DOM references, by allowing them to be created next to the point of use. I chose to use Svelte, as it is relatively lightweight \& performant, and I've used it before. This allowed me to write self-contained components, which each manage their own state. Another benefit of Svelte is that it provides a simple interface to allow you to write animations that aren't normally possible with CSS\@. For example, in the search box, when the result box appears, it scales in from the top. This is cannot be done with pure CSS as CSS animations can only work when the properties of the element are changed. However, Svelte allows you to write animations that are triggered by changing the state of the component.
 
+\section{Progressive web apps (PWAs)}
 
+PWAs are the concept that web applications should be able to present themselves as, and have similar features to native applications (FIXME: CITE THIS). For example PWA like abilities could include offline support, ability to ``install'' the website on mobile platforms, and features like push notifications. In order to make web app installable, you have to write a web manifest. The manifest provides metadata about your application, allowing you to control how it will be displayed in the user's app list. In my manifest I provide icons to use, long and short names to use, and a description.
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
