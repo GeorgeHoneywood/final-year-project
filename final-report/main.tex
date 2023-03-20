@@ -552,7 +552,7 @@ should be able to decode signed variable ints
 
 \section{Gitlab CI}
 
-In industry, it is common to run tests and deploy code automatically, as it is pushed to the repository --- this is known as CI/CD (continuous integration/continuous deployment). I set up GitLab CI to automatically run tests when new commits were pushed. The advantage of this is that if I accentidently push code that breaks the tests, I get an email to alert me (see \autoref{fig:ci-fail}). As the CIM Gitlab doesn't provide any CI runners, I had to set up my own ``self-managed'' runner. There are a number of options for how the job should be run (known as ``executors''), such as in a Docker container, or over SSH\@. As my use case is fairly simple, without any complicated dependencies or required state, I decided to use the shell executor, which simply downloads the Git repository, and runs the shell code specified in the \path{.gitlab-ci.yml} file.
+In industry, it is common to run tests and deploy code automatically, as it is pushed to the repository --- this is known as CI/CD (continuous integration/continuous deployment). I set up GitLab CI to automatically run tests when new commits were pushed. The advantage of this is that if I accidentally push code that breaks the tests, I get an email to alert me (see \autoref{fig:ci-fail}). As the CIM Gitlab doesn't provide any CI runners, I had to set up my own ``self-managed'' runner. There are a number of options for how the job should be run (known as ``executors''), such as in a Docker container, or over SSH\@. As my use case is fairly simple, without any complicated dependencies or required state, I decided to use the shell executor, which simply downloads the Git repository, and runs the shell code specified in the \path{.gitlab-ci.yml} file.
 
 \begin{figure}[ht]
     \centering
@@ -560,7 +560,7 @@ In industry, it is common to run tests and deploy code automatically, as it is p
     \caption{Gitlab CI failure notification}\label{fig:ci-fail}
 \end{figure}
 
-When working in a team it is good practice to have a centrally managed deployment system (CD), where team members can initiate or the current state of a deployment. For my project, as I am the sole developer, it is acceptable to have a simple deploy script that copies files to my web server using \texttt{rsync}.
+When working in a team it is good practice to have a centrally managed deployment system (CD), where team members can initiate or view the current state of a deployment of an application. For my project, as I am the sole developer, it is acceptable to have a simple deploy script that copies files to my web server using \texttt{rsync}.
 
 \section{Version control}
 
