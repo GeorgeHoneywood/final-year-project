@@ -120,6 +120,8 @@ Improved partial service worker caching, so that it can retrieve smaller chunks 
 
 Fixed bug with inconsistent behaviour with dynamic mode and blob mode -- turned out to be due to HTTP range requests including the last requested byte, i.e. `Range: bytes=0-10` will return 11 bytes, whereas `slice(0, 10)` will return 10 bytes. Fixed another bug in the handling of files with debug info.
 
-Made it so that the service worker takes control on the first page load. Before it was only "controlling" the page after a refresh. This meant that tiles were not downloaded or cached until a reload occured, which is unexpected behaviour. Also set up proper resource precaching, to ensure we get all files we need.
+Made it so that the service worker takes control on the first page load. Before it was only "controlling" the page after a refresh. This meant that tiles were not cached until a reload occurred, which is unexpected behaviour. Also set up proper resource precaching, to ensure we get all files we need.
 
 ### Week 27 (2023-03-20)
+
+Fixed "installing" PWA on Android -- before it would add a shortcut to the homescreen, but not add the icon to the app drawer. This was due to providing an SVG icon in the webmanifest, when a PNG was required.
