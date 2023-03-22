@@ -525,13 +525,54 @@ PWAs are web apps that are able to present themselves as, and have similar featu
 
 To ensure my application was a valid PWA, that could be installed on mobile devices, I used Google Chrome's Lighthouse testing tool. Unfortunately this did not catch an issue I experienced, which was that my app could be ``added to home screen'', but it was not installed into the application drawer. When using the Chrome remote debug functionality to see the console output on my phone, I saw a message: \texttt{Failed to install WebAPK for '<url>'}. 
 
-After some searching, I found that PWA installation on Android has a few indirections, principally that clicking ``Install'' sends a request to a Google server to bundle the website into a WebAPK\@. The bundling as a WebAPK means your app is treated like a native app, and hence can handle URL ranges or custom URI schemes\footnote{In the case of my application, registering to handle geo URIs would have allowed users to open links to specific locations~\cite{geo-uri-rfc}. Unfortunately I did not have time to implement this.}. Unfortunately, this terse message did not provide any detail into why the installation failed. Eventually after considerable debugging, I found that the issue was that I had provided my icon in the manifest as an SVG, instead of a PNG\@. See \autoref{fig:osmo-pwa} for a screenshot of OSMO installed on my phone.
-
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.4\textwidth]{images/osmo-pwa.png}
     \caption{OSMO installed in the app drawer of an Android phone}\label{fig:osmo-pwa}
 \end{figure}
+
+After some searching, I found that PWA installation on Android has a few indirections, principally that clicking ``Install'' sends a request to a Google server to bundle the website into a WebAPK\@. The bundling as a WebAPK means your app is treated like a native app, and hence can handle URL ranges or custom URI schemes\footnote{In the case of my application, registering to handle geo URIs would have allowed users to open links to specific locations~\cite{geo-uri-rfc}. Unfortunately I did not have time to implement this.}. Unfortunately, this terse message did not provide any detail into why the installation failed. Eventually after considerable debugging, I found that the issue was that I had provided my icon in the manifest as an SVG, instead of a PNG\@. See \autoref{fig:osmo-pwa} for a screenshot of OSMO installed on my phone.
+
+\section{Service worker quirks}
+
+Near the end of the project I spent some time polishing the offline user experience. One of the principle issues was due to a quirk in service worker registration behaviour. When a new service worker installs, it will not control the page, until the next page reload. This creates the unexpected behaviour that if you download a region on the initial page load, then go offline, you will not be able to see the downloaded region after a refresh. This is because when the service worker is not controlling, it cannot intercept \texttt{fetch} events, and so the cache will not be populated. Luckily some escape hatches are provided, such as \texttt{skipWaiting()} and \texttt{clients.claim()}. These allow you to force the service worker to take control of the page, and intercept requests immediately.
+
+However, this led to a race condition issue --- that critical resources would be loaded before the service worker had finished installing. For example on initial page load, the header \& tile index would be loaded before the service worker had claimed the page, meaning it wouldn't get cached.
+
+The simplest way to remedy this would have been to force a page reload when the service worker finished installing, but this would have been a poor user experience. Instead, I added another event listener, for the \texttt{controllerchange} event, which is fired when \texttt{clients.claim()} is called. Once this event fires, I then instantiate the Svelte app, ensuring that the service worker is ready to intercept and cache the header \& tile indexes --- see \autoref{lst:wait-for-claim}.
+
+\begin{lstlisting}[caption=Waiting for the service worker to claim the page before starting the app, numbers=none, label=lst:wait-for-claim]
+navigator.serviceWorker.register('./sw.js', { scope: './' }).then(() => {
+    return new Promise<void>(resolve => {
+        if (navigator.serviceWorker.controller) {
+            resolve();
+        } else {
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                resolve();
+            });
+        }
+    });
+}).then(() => {
+    console.log(`starting app, service worker is ready, took ${performance.now() - start_time}ms`)
+    new App({
+        target: document.getElementById('app'),
+    })
+})
+\end{lstlisting}
+
+\section{Handling HiDPI displays}
+
+One long-standing bug was the map rendering blurry on HiDPI screens, like on mobile phones. This is due to how the \texttt{px} unit works in CSS --- they are just a unit of length, not a representation of the physical pixels on the screen. This means that on a HiDPI screen, the if the \texttt{canvas.width} and \texttt{height} are set to the viewport width in CSS pixels, they have will be stretched to fit on the screen.
+
+This means that you have to use the \texttt{window.devicePixelRatio} property, to determine how many physical pixels there are per CSS pixel. You can then use this to set the \texttt{canvas.width} and \texttt{height} to be the same as the screens physical pixel height and width, then scale the canvas back down to the size of the viewport, which will remove the blur.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/debugging-tiles.png}
+    \caption{Scaling and translating the canvas to debug tile rendering --- the black area represents the scaled down viewport}\label{fig:debugging-tiles}
+\end{figure}
+
+Unfortunately, as many of the rendering calculations assumed that the canvas size would be the same as the size in CSS \texttt{px}, I had to fix some subtle bugs. One example was that extra tiles were being rendered off the edge of the canvas, resulting in performance losses. This was quite difficult to debug, as the tiles could not be seen --- I ended up translating the whole canvas across, then scaling it down, allowing me to see where the extra tiles were being rendered (see~\autoref{fig:debugging-tiles}). 
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
