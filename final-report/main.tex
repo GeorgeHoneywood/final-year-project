@@ -510,7 +510,15 @@ To remedy this I decided to start using a frontend framework, which allows you t
 
 \section{Progressive web apps (PWAs)}
 
-PWAs are the concept that web applications should be able to present themselves as, and have similar features to native applications (FIXME: CITE THIS). For example PWA like abilities could include offline support, ability to ``install'' the website on mobile platforms, and features like push notifications. In order to make web app installable, you have to write a web manifest. The manifest provides metadata about your application, allowing you to control how it will be displayed in the user's app list. In my manifest I provide icons to use, long and short names to use, and a description.
+PWAs are web apps that are able to present themselves as, and have similar features to native applications~\cite{mdn-pwas}. For example a PWA could include offline support, the ability to ``install'' the website on mobile platforms, and features like push notifications. In order to make web app installable, you have to write a web manifest, and have a service worker that provides offline content. The manifest provides metadata about your application, allowing you to control how it will be displayed in the user's app list. In my manifest I provide icons to use, long and short names to use, and a description.
+
+To ensure my application was a valid PWA, that could be installed on mobile devices, I used Google Chrome's Lighthouse testing tool. Unfortunately this did not catch an issue I experienced, which was that my app could be ``added to home screen'', but it was not installed into the application drawer. When using the Chrome remote debug functionality to see the console output on my phone, I saw a message: \texttt{Failed to install WebAPK for '<url>'}. After some searching, I found that PWA installation on Android has a few indirections, principally that clicking ``Install'' sends a request to a Google server to bundle the website into a WebAPK\@. The benefit of this that as a WebAPK is treated as a native app, your PWA can handle URL ranges or custom URI schemes\footnote{In the case of my application, registering to handle geo URIs would have allowed users to open links to specific locations~\cite{geo-uri-rfc}.}. Unfortunately, this terse message did not provide any detail into why the installation failed. Eventually after considerable debugging, I found that the issue was that I had provided my icon in the manifest as an SVG, instead of a PNG\@. See \autoref{fig:osmo-pwa} for a screenshot of OSMO installed on my phone.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/osmo-pwa.png}
+    \caption{OSMO installed in the app drawer of an Android phone}\label{fig:osmo-pwa}
+\end{figure}
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
@@ -632,8 +640,6 @@ Even most non-text based media can be made accessible to blind people, through \
 \end{figure}
 
 A common form of visual impairment is colour vision deficiency (colour blindness). According to the \textcite{nhs-colour-vision-deficiency}, the red-green form affects around 1 in 12 men and 1 in 200 women. This can be more easily accommodated than other forms of visual impairment, by ensuring that text and backgrounds have a suitable contrast ratio, described in the Web Content Accessibility Guidelines~\cite{w3c-wcag}. It is also important to visually check colour contrast through simulators. The Developer Tools in Firefox provide one such simulator, which can visualize various forms of colour vision deficiency --- see \autoref{fig:deuteranopia}.
-
-% TODO: talk about wheelchair access tags in OSM
 
 \begin{figure}[ht]
     \centering
