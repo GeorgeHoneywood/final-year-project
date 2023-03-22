@@ -550,14 +550,36 @@ should be able to decode signed variable ints
     pass: 4 byte min: [10000000,10000000,10000000,00000001].getVSint() == 2097152
 \end{lstlisting}
 
-\section{Gitlab CI}
+\subsection{Test suite coverage}
 
-In industry, it is common to run tests and deploy code automatically, as it is pushed to the repository --- this is known as CI/CD (continuous integration/continuous deployment). I set up GitLab CI to automatically run tests when new commits were pushed. The advantage of this is that if I accidentally push code that breaks the tests, I get an email to alert me (see \autoref{fig:ci-fail}). As the CIM Gitlab doesn't provide any CI runners, I had to set up my own ``self-managed'' runner. There are a number of options for how the job should be run (known as ``executors''), such as in a Docker container, or over SSH\@. As my use case is fairly simple, without any complicated dependencies or required state, I decided to use the shell executor, which simply downloads the Git repository, and runs the shell code specified in the \path{.gitlab-ci.yml} file.
+Test coverage is the percentage of lines of code that are executed by the test suite. This can be a useful tool to determine which parts of the code your tests are covering, and which cases you had not considered. You can then use this information to write more tests to cover the untested parts of the program. However, chasing 100\% coverage is usually not a productive use of time, as testing every single trivial case or condition is often necessary, and adds noise to the test suite.
+
+\begin{lstlisting}[caption=Test suite coverage, numbers=none, keepspaces=true, label=lst:test-coverage]
+---------------|---------|----------|---------|---------|-------------------
+File           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                               
+---------------|---------|----------|---------|---------|-------------------
+All files      |   92.73 |    75.23 |   94.82 |    92.4 |                                                                 
+map            |     100 |      100 |     100 |     100 |                                                                 
+geom.ts        |     100 |      100 |     100 |     100 |                                                                 
+map/mapsforge  |   92.42 |    75.23 |   93.75 |   92.06 |                                                                 
+mapsforge.ts   |   91.25 |    63.38 |     100 |   90.93 | 117,137-166,192,[..snip..] 
+objects.ts     |    90.9 |      100 |      85 |   89.36 | 196-202,212                                                     
+reader.ts      |     100 |      100 |     100 |     100 |                                                                 
+util.ts        |     100 |      100 |     100 |     100 |                                                                 
+---------------|---------|----------|---------|---------|-------------------
+Tests:       38 passed, 38 total
+Snapshots:   0 total
+Time:        1.125 s
+\end{lstlisting}
+
+\section{GitLab CI}
+
+In industry, it is common to run tests and deploy code automatically, as commits are pushed to the repository --- this is known as CI/CD (continuous integration/continuous deployment). I set up GitLab CI to automatically run tests when new commits were pushed. The advantage of this is that if I accidentally push code that breaks the tests, I get an email to alert me (see \autoref{fig:ci-fail}). As the CIM GitLab doesn't provide any CI runners, I had to set up my own ``self-managed'' runner. There are a number of options for how the job should be run (known as ``executors''), such as in a Docker container, or over SSH\@. As my use case is fairly simple, without any complicated dependencies or required state, I decided to use the shell executor, which simply downloads the Git repository, and runs the shell code specified in the \path{.gitlab-ci.yml} file.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{images/gitlab-ci-failure.png}
-    \caption{Gitlab CI failure notification}\label{fig:ci-fail}
+    \caption{GitLab CI failure notification}\label{fig:ci-fail}
 \end{figure}
 
 When working in a team it is good practice to have a centrally managed deployment system (CD), where team members can initiate or view the current state of a deployment of an application. For my project, as I am the sole developer, it is acceptable to have a simple deploy script that copies files to my web server using \texttt{rsync}.
