@@ -494,21 +494,21 @@ return new Response(
 
 One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache (using \texttt{cache.keys()}), and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
 
-\section{Experimenting with WebGL}
+\section{Experimenting with WebGL}\label{sec:webgl}
 
 Whilst profiling the \texttt{render()} function of my application, it became apparent that the draw calls on the \texttt{<canvas>} were the limiting factor in my applications' performance (see~\ref{sec:profiling}). Instead of using \texttt{CanvasRenderingContext2D}, popular vector map rendering libraries like Mapbox GL use the \texttt{WebGL2RenderingContext}. This allows for GPU accelerated rendering, even providing enough power to render complex 3D graphics. This would have been the best way to reduce the time needed to render a frame, and make the application more responsive to panning and zooming.
 
 During the beginning of term two, I decided to experiment with using WebGL for rendering. WebGL2 provides very low level interface to the GPU, employing the concepts of fragment shaders and vertex shaders. These allow you to draw triangles, that you can then use to make up more complex shapes --- for example a square would be made up of two equilateral triangles. You have to handle all of this work yourself, unless you choose to employ a library.
 
-Following a tutorial, I was able to implement basic drawing using to the \texttt{WebGL2\-Rendering\-Context}~\cite{webglf2undamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus adding more functionality to my application.
+Following a tutorial, I was able to implement basic drawing using to the \texttt{WebGL2\-Rendering\-Context}~\cite{webgl2fundamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus adding more functionality to my application.
 
-\section{Svelte: using a frontend framework}
+\section{Svelte: using a frontend framework}\label{sec:svelte}
 
 The search box was the first feature I added that wasn't primarily using the canvas for display and interaction. I initially implemented it in vanilla JavaScript, which worked fine, but I found myself writing a lot of error-prone boilerplate code to update the DOM\@. In addition to this, I was following the antipattern of creating references to the DOM, then passing around these references to other functions. This made it difficult to reason about the state of the application, and harder to refactor the code.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/search.png}
+    \includegraphics[width=\textwidth]{images/search.png}
     \caption{Searching for ``Egham'' in OSMO}\label{fig:search}
 \end{figure}
 
@@ -553,7 +553,7 @@ navigator.serviceWorker.register('./sw.js', { scope: './' }).then(() => {
         }
     });
 }).then(() => {
-    console.log(`starting app, service worker is ready, took ${performance.now() - start_time}ms`)
+    console.log(`starting app, service worker is ready, took {performance.now() - start_time}ms`)
     new App({
         target: document.getElementById('app'),
     })
@@ -568,11 +568,11 @@ This means that you have to use the \texttt{window.devicePixelRatio} property, t
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/debugging-tiles.png}
+    \includegraphics[width=\textwidth]{images/debugging-tiles.png}
     \caption{Scaling and translating the canvas to debug tile rendering --- the black area represents the scaled down viewport}\label{fig:debugging-tiles}
 \end{figure}
 
-Unfortunately, as many of the rendering calculations assumed that the canvas size would be the same as the size in CSS \texttt{px}, I had to fix some subtle bugs. One example was that extra tiles were being rendered off the edge of the canvas, resulting in performance losses. This was quite difficult to debug, as the tiles could not be seen --- I ended up translating the whole canvas across, then scaling it down, allowing me to see where the extra tiles were being rendered (see~\autoref{fig:debugging-tiles}). 
+Unfortunately, as many of the rendering calculations assumed that the canvas size would be the same as the size in CSS \texttt{px}, I had to fix some subtle bugs. One example was that extra tiles were being rendered off the edge of the canvas, resulting in performance losses. This was quite difficult to debug, as the exta tiles could not be seen --- I ended up translating the whole canvas across, then scaling it down, allowing me to see where the extra tiles were being rendered (see~\autoref{fig:debugging-tiles}). 
 
 \clearpage
 \chapter{Software engineering}\label{sec:software-engineering}
@@ -673,11 +673,8 @@ The first tool I implemented to work towards achieving this was adding a frame t
 This is where the profiler comes in. It is a tool that lets you visualize how long different function calls within your code take to execute. Both Firefox and Chrome include one within their Developer Tools. I marginally prefer the one Firefox provides (for its Flame Graph, see Figure~\ref{fig:profiling}), but it is important to test in both browsers, as their performance characteristics are surprisingly different. This led me to discover that the vast majority of the time spent in the \texttt{render()} function is in calls on the \texttt{CanvasRenderingContext2D}, to either \texttt{stroke()}, \texttt{fill()}, or draw a \texttt{lineTo()}. Therefore, the most important factor to optimize in this scenario is to reduce the amount of geometries that need to be rendered.
 
 \clearpage
-\chapter{Conclusion \& evaluation}
 
-% use THREE.js or some other webgl library, to speed up rendering
-
-\section{Professional issues}
+\chapter{Professional issues}
 
 Accessibility is a particularly relevant concern for my project. People with disabilities still need to be able to be able to interpret geographic data, and may have different priorities to able-bodied users. Those with visual impairments need larger map label sizes, and wheelchair users may need extra context about sloped kerbs. My application should accommodate as many of these needs as possible.
 
@@ -707,15 +704,32 @@ There are specialized map viewers, specifically designed to make viewing wheelch
 
 One accessibility consideration that I have made whilst developing this project is to include multiple alternative interaction gestures where possible. For example, when zooming the map, you can pick from either the two finger ``pinch'' zoom gesture, or alternatively a single finger tap and hold. This allows people with the ability to use only one hand, such as amputees, or walking stick users, to make full use of the application.
 
-% FIXME: this is all out of date
+\clearpage
+\chapter{Conclusion \& evaluation}
 
-% In term one I have successfully followed the timeline I set out in Section~\ref{sec:term-1-plan}. During the beginning of the term I fell slightly behind, as I was busy with other modules, but I managed to catch up on lost time. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, which provides a basis of understanding for the rest of my report, as I had written my other reseasrch assuming quite a high level of base knowledge. My proof of concepts have been useful, helping me to understand key technologies and discover how is best to build the final deliverable.
+Overall the project has been a success. OSMO is capable of decoding and rendering Mapsforge files, and can sparsely download map regions for offline use. A novel aspect of the project is the usage of HTTP range requests to fetch and decode the data, meaning that no specialized map tile server is required. I am also happy with the UX on mobile, where the web app can be ``installed'' as a PWA, giving a native-like experience.
 
-% In term two I hope to continue keeping up with my plan. I may also write another report, on the subject of WebGL\@. It will be useful to do some research into this technology, as I fear that I have reached the limits of performance of the CPU rendered \texttt{CanvasRenderingContext2D} (see Section~\ref{sec:profiling}). WebGL, which is GPU accelerated, may allow me to go further, without compromising on the level of detail on the map.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{images/osmo.png}
+    \caption{OSMO rendering Cornwall}\label{fig:osmo}
+\end{figure}
 
-% One thing that I have allowed for in the plan for term two is deliverable~\ref{item:deliverable:mobile-testing} (testing on mobile). This may not require as much time as I initially thought, given I have made mobile support a priority throughout the development of the proof of concepts. I also allocated a generous amount of time to integrating my proof of concepts together, which will not be necessary as they have each built on each other.
+In term one I successfully followed the timeline I set out in \autoref{sec:term-1-plan}. I mildly deviated from the plan in that I added an extra research report. This was on the basics of web technologies, to provide a basis of understanding for the rest of my project --- as I had written my other reports assuming quite a high level of base knowledge. The proof of concepts were useful, helping me to understand key technologies and discover how is best to build the final deliverable.
 
-% The rest of the deliverables planned for term two are all fairly independent (i.e., they do not ``block'' progress). This means that if one is too difficult to implement, I can skip over it and move on to other tasks, providing some flexibility in my schedule. This may be useful for deliverable~\ref{item:deliverable:wikipedia}, where I would provide Wikipedia integration --- as I am unsure whether the Mapsforge files preserve Wikipedia tags.
+In term two the plan was less useful, as the way that I had built the proof of concepts on one another meant that no integration work was necessary. I also allocated a generous amount of time for mobile design \& testing, which wasn't required as I conducted this through the development of proof of concepts. In addition, I did not allow time specifically for working on the UI, when in reality I spent some time working adding a frontend framework (see \autoref{sec:svelte}).
+
+In term two I also spent some time refining the tile loading system to use HTTP range requests, which was not planned for. This had the knock-on effect of complicating offline support with the service worker, which taking up extra time. Other than that, however, the rest of the deliverables were non-blocking to the project, meaning I had some flexibility in what I worked on. I ended up not implementing deliverables~\ref{item:deliverable:routing} (online routing), and~\ref{item:deliverable:wikipedia} (Wikipedia integration), instead prioritizing polishing the offline user experience.
+
+In retrospect, I should have put some more thought into alternative rendering strategies --- the renderer is definitely the weakest part of the project. On both mobile and desktop performance is broadly acceptable until you zoom out past zoom level 13, at which point the frame time becomes \textgreater{}100ms (\textless{}10fps). At zoom 7, where you can see the whole of the UK, the frame time is \textgreater{}500ms (\textless{}2fps). This is unacceptable, especially for an app targeted at mobile devices with limited CPU power \& battery life. 
+
+At the start of the project I should have spent time researching alternative rendering strategies that would have allowed for a more responsive experience. One way I could have achieved this would have been to use WebGL, which is GPU accelerated --- see \autoref{sec:webgl} for more detail. Instead of WebGL I could have adopted a hybrid raster approach, in which the tiles are each rendered once for each zoom level, then reused, instead of re-rendering everything on every frame. The drawbacks of this approach would be significant added complexity, and that you would only be able to view the map at discrete zoom levels.
+
+Due to this ever-present need to keep the frame time down, I was apprehensive to add advanced rendering features, like way labels that follow road curvature --- as they would make the process even slower. In addition, I would have liked to add a label collision prevention algorithm. While the Mapsforge format handles some of this issue, mostly by reducing the number of city/town labels, a more sophisticated solution would have been useful for areas with a high density of labels, such as town centres.
+
+Finally, it would have been valuable to implement some form of theming system. Most map rendering libraries provide some sort of interface that can be used to customize how features render. This could be used to provide a dark theme, or customize the cartography of the map for a specific use.
+
+I am pleased with the implementation of online/offline mode switching, where if a user loads any tile that has not already been cached, it will be stored in the service worker for later offline use. The user can also choose to download the tiles currently below the viewport, if they know that they will need access to that specific area when offline later.
 
 \clearpage
 \chapter{Appendix}
