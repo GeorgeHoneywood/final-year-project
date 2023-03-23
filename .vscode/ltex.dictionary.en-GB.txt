@@ -34,3 +34,4 @@ WCAG
 Taginfo
 WebAPK
 OSMO
+HiDPI
