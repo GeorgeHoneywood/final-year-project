@@ -103,7 +103,7 @@
 
 \section{Literature review}
 
-Whilst researching my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge that supplemented information that I have picked up over the years from contributing to the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
+Whilst researching, my primary source for information about the OpenStreetMap project was \emph{OpenStreetMap — Using and Enhancing the Free Map of the World}, by \textcite{RAMM:2011}. This provided a good foundation of knowledge that supplemented information that I have picked up over the years from contributing to the project. Some sections were a little out of date, especially the sections on editors and tools for mappers. Notably the online editor referred to here, Potlatch, is no longer available, being superseded by iD in 2013.
 
 For more up to date or specific information I often relied on the OpenStreetMap Wiki~\cite{osm-wiki}, which provides a helpful reference for both OSM specific information and other GIS adjacent topics. These include general information about map projections~\cite{osm-wiki-mercator}, and details about the Z/X/Y tiling scheme that is common for web maps~\cite{osm-wiki-tile-names}.
 
@@ -111,21 +111,21 @@ When it came to implementing the project, MDN Web Developer documentation proved
 
 \section{Aims and objectives}
 
-Here I will list some specific features that I would like to implement in the project. These are not fixed, and some may not be implemented, or others added in their place.
+Here I will list some specific features that I would like to implement in the project. These are not fixed, and some may not be implemented, or others added in their place:
 
 \begin{itemize}
-    \item Download vector map data for a user-provided region (preferably at least as large as a UK county), allowing the user to browse the map offline
+    \item Download vector map data for a user-provided region (preferably at least as large as a UK county), allowing the user to browse the map offline.
     \item Allow the user to pan and zoom the map. They should be able to zoom out to the view the full extent of the downloaded data.
     \item Provide a search functionality, using the Nominatim API
-    \item Allow the user to route between two points, which could be implemented using OSRM, GraphHopper or Valhalla
-    \item When an OSM element has been tagged with a reference to a Wikipedia article, it should show a description from Wikipedia
-    \item Allow the user to save and name markers for later use
+    \item Allow the user to route between two points, which could be implemented using OSRM, GraphHopper or Valhalla.
+    \item When an OSM element has been tagged with a reference to a Wikipedia article, it should show a description from Wikipedia.
+    \item Allow the user to save and name markers for later use.
     \item When online, the application should allow the user to browse a map without having to first download any data. This could be done using raster tiles.
 \end{itemize}
 
 \section{Deliverables \& timeline}
 
-Following a timeline will help my project proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focussed on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
+Following a predetermined timeline will help my project proceed without any major unexpected delays, and will give me targets to aim for. At the beginning of term 1 I focused on exploring any risky areas or technologies that I was unsure about. This helped answer any large questions early on in the process.
 
 \begin{enumerate}
     \item Report on offline HTML5 technologies. Used this to discover whether it is possible to download \& store a large amount of vector map data (>100 MB) for later rendering.\label{item:deliverable:offline-html}
@@ -133,7 +133,7 @@ Following a timeline will help my project proceed without any major unexpected d
     \item Report on the different ways  that the program could get OpenStreetMap data. One possibility is the Mapsforge format, or it could use the OSM editing API\@. This helped mitigate risk of using a technology that is not suitable for the project.\label{item:deliverable:osm-data}
     \item Report about how map projection works. Specifically the mathematics behind projecting the data that is produced by OpenStreetMap. This ensured that I understood this key concept.\label{item:deliverable:map-projection}
     \item Proof of concept that took some way made up of latitude longitude pairs and draws a line onto a canvas.\label{item:deliverable:draw-line}
-    \item Make proof of concept~\ref{item:deliverable:draw-line} interactive; allow the user to pan and zoom the map. This should be done with the scroll wheel on desktop and pinch zooming on mobile.\label{item:deliverable:pan-zoom}
+    \item Make proof of concept~\ref{item:deliverable:draw-line} interactive, by allowing the user to pan and zoom the map. This should be done with the scroll wheel on desktop and pinch zooming on mobile.\label{item:deliverable:pan-zoom}
     \item Proof of concept that loads some actual OSM data using the technology that I decided upon in deliverable~\ref{item:deliverable:osm-data}.\label{item:deliverable:load-osm-data}
     \item Thoroughly test the application on mobile, as this will likely be the main use case for an offline map.\label{item:deliverable:mobile-testing}
     \item Add online search functionality, using the Nominatim API.\label{item:deliverable:search}
@@ -172,11 +172,11 @@ Here I present the research reports I conducted throughout the development proce
 
 \section{Basic web technologies}
 
-Websites are commonly made up of 3 main components: HTML, CSS and JavaScript~\cite{mdn-html}. HTML is used to create text, images, videos, and other non-interactive content. CSS is responsible for styling, colours, sizing, and other visual effects. JavaScript is used to add interactivity.
+Websites are commonly made up of 3 main components: HTML, CSS, and JavaScript~\cite{mdn-html}. HTML is used to create text, images, videos, and other non-interactive content. CSS is responsible for styling, colours, sizing, and other visual effects. JavaScript is used to add interactivity.
 
 While I will need some HTML and CSS, my project is focused on creating an interactive map. Therefore, much of my work will be done in JavaScript, specifically heavily utilising the Canvas API~\cite{mdn-canvas-api}. Instead of using vanilla JavaScript, I have chosen to use TypeScript, which is a superset of JavaScript that adds a compilation/stripping step, where types are statically checked to prevent runtime type issues (this is discussed more in Section~\ref{sec:software-engineering}).
 
-In \autoref{lst:basic-html} you can see some example HTML that does little other than create a canvas element, and load an external script. This script can then get a reference to the \texttt{map} canvas element in the DOM (e.g., with \texttt{document.querySelector("\#map")}), and use this to create and issue calls to the canvas rendering context.
+In \autoref{lst:basic-html} you can see an HTML example that does little other than create a canvas element, and load an external script. This script can then get a reference to the \texttt{map} canvas element in the DOM (e.g., with \texttt{document.querySelector("\#map")}), and use this to create and issue calls to the canvas rendering context.
 
 \begin{lstlisting}[caption=Basic HTML to run an external script with some basic styling, language=html, label=lst:basic-html]
 <!DOCTYPE html>
@@ -198,9 +198,9 @@ In \autoref{lst:basic-html} you can see some example HTML that does little other
 </html>
 \end{lstlisting}
 
-To run your multiple JavaScript files in the browser, you can either use plain ES Modules~\cite{mdn-es-modules}, or add a bundling step, where all the code is combined into a single file. Using ES Modules in the browser allows you to avoid a build step, but has the negative that it requires \(n\) round-trips to the server. For example if say \texttt{main.js} imports \texttt{map.js} and \texttt{map.js} imports \texttt{util.js}, your browser will need to make 3 separate requests to the server, and script execution will be blocked until the last dependency has been fetched and evaluated~\cite{sitepoint-using-es-modules}. 
+To run your multiple JavaScript files in the browser, you can either use plain ES Modules~\cite{mdn-es-modules}, or add a bundling step, where all the code is combined into a single file. Using ES Modules in the browser allows you to avoid a build step, but has the negative that it requires \(n\) round-trips to the server. For example, if \texttt{main.js} imports \texttt{map.js} and \texttt{map.js} imports \texttt{util.js}, your browser will need to make 3 separate requests to the server, and script execution will be blocked until the last dependency has been fetched and evaluated~\cite{sitepoint-using-es-modules}. 
 
-Bundling in its simplest form involves concatenating all the source files together into a single file, which neatly avoids the round trip problem, whilst still allowing you to store your source code in separate files. Advanced bundlers also support features like minification, where variables are renamed to be shorter, whitespace is removed, and unused functions are purged. \texttt{esbuild} is a high-performance modern JavaScript/TypeScript bundler, which is written in Go~\cite{esbuild}.
+Bundling, in its simplest form, involves concatenating all the source files together into a single file. This neatly avoids the round trip problem, whilst still allowing you to store your source code in separate files. Advanced bundlers also support features like minification, where variables are renamed to be shorter, whitespace is removed, and unused functions are purged. \texttt{esbuild} is a high-performance modern JavaScript/TypeScript bundler, which is written in Go~\cite{esbuild}.
 
 \section{Offline HTML5 applications}\label{sec:offline-html-applications}
 
@@ -221,7 +221,7 @@ Bundling in its simplest form involves concatenating all the source files togeth
 \clearpage
 \chapter{Proof-of-concept development process}
 
-As part of the development process, I have created a number of proof-of-concepts, that each build on each other. These have helped me to understand, test and evaluate various technologies that I could use to build the final application.
+As part of the development process, I have created a number of proof of concepts, that each build on each other. These have helped me to understand, test, and evaluate various technologies that I could use to build the final application.
 
 \section{Simple offline HTML5 app}
 
@@ -231,7 +231,7 @@ My first proof of concept was a basic offline HTML5 application, employing the t
 
 In addition to creating an offline HTML5 app, I also learned how to store a large binary blob. This will be necessary for my project, as this is how the map data will be stored. To this end I looked at using both the Service Worker cache, and the File API\@.
 
-The File API works like a traditional file picker --- allowing the user to choose some file from their local filesystem~\cite{w3c-file-api}. This is useful, but does not provide an excellent user experience. For example the user would have to download a map file to some location on their computer, then select it in the file picker every time they want to view a map. This violates Nielsen's ``Recognition, not recall'' heuristic~\cite{nielsen-heuristics}, as the application should work without the user having to remember where they saved the map file.
+The File API works like a traditional file picker --- allowing the user to choose some file from their local filesystem~\cite{w3c-file-api}. This is useful, but does not provide an excellent user experience. For example, the user would have to download a map file to some location on their computer, then select it in the file picker every time they want to view a map. This violates Nielsen's ``Recognition, not recall'' heuristic~\cite{nielsen-heuristics}, as the application should work without the user having to remember where they saved the map file.
 
 Therefore, it is preferred to use the Service Worker cache method, where you store the file inside the web browser's cache. You can store binary blobs in the same way as any other website resources:
 
@@ -263,11 +263,11 @@ self.addEventListener('fetch', (event) => event.respondWith(
 
 { \footnotesize Source in \path{proof-of-concepts/2-rendering-a-way}, online demo at \href{https://files.george.honeywood.org.uk/2-rendering-a-way/}{\nolinkurl{files.george.honeywood.org.uk/2-rendering-a-way/}}, or \href{https://youtu.be/2F_vpCrQsO4}{demo video}.}
 
-My second proof of concept was to draw some geographical data on to the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which is a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
+My second proof of concept was to draw some geographical data onto the canvas. As a first step, I had to acquire some data to project. As this was a simple proof of concept I decided to use the GeoJSON format, which is a popular standard for representing geodata, in a fairly human-readable format. The main reason I chose it was that it is easier to parse in JavaScript than the XML data that the OpenStreetMap API provides~\cite{osm-api-wiki}. For my first test, I attempted to render the boundary of Egham, which is currently \href{https://www.openstreetmap.org/way/666914693}{way 666914693}. To convert XML data from OpenStreetMap I used the online \texttt{geojson.io} tool, which allows you to import OSM XML and export GeoJSON~\cite{geojson.io}.
 
 The main challenge I wanted to solve in this proof of concept was projecting the data. This stage is necessary, as OpenStreetMap data comes in the WGS84 CRS, and while this can be naively plotted on a graph as \((x,y)\) coordinates, this would result in the ``plate carrée'' projection, as detailed in Section~\ref{sec:projecting-map-data}. The ``plate carrée'' projection is not particularly desirable, as it does not have any useful properties like conformality (preservation of angle) or preservation of area. Hence, for my application I chose to use Web Mercator, which preserves conformality, and is the de facto standard for web maps.
 
-Initially, I attempted to use the algorithm from \textcite[41]{snyder1987map}, as shown in Section~\ref{sec:projecting-map-data}. Unfortunately I had some issues with getting these equations to produce reasonable results. Therefore, I turned to the OpenStreetMap Wiki, which helpfully provides a reference for transforming WGS84 data into the Web Mercator projection~\cite{osm-wiki-mercator}. I translated the C example into TypeScript, and it correctly projected the data --- see \autoref{lst:projecting} for the implementation.
+Initially, I attempted to use the algorithm from \textcite[41]{snyder1987map}, as shown in Section~\ref{sec:projecting-map-data}. Unfortunately, I had some issues with getting these equations to produce reasonable results. Therefore, I turned to the OpenStreetMap Wiki, which helpfully provides a reference for transforming WGS84 data into the Web Mercator projection~\cite{osm-wiki-mercator}. I translated the C example into TypeScript, and it correctly projected the data --- see \autoref{lst:projecting} for the implementation.
 
 \begin{lstlisting}[caption=Projecting to Web Mercator, label=lst:projecting]
 const RADIANS_TO_DEGREES = 180 / Math.PI;
@@ -292,7 +292,7 @@ This proof of concept was entirely static, with the viewport and zoom level hard
 
 { \footnotesize Source in \path{proof-of-concepts/3-panning-and-zooming}, online demo at \href{https://files.george.honeywood.org.uk/3-panning-and-zooming/}{\nolinkurl{files.george.honeywood.org.uk/3-panning-and-zooming/}}, or \href{https://youtu.be/_JvGwLra_Q4}{demo video}.}
 
-The third proof of concept heavily built upon this second --- with the goal of adding interactivity in the form of panning and zooming. As being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
+The third proof of concept heavily built upon the second --- with the additional goal of adding interactivity in the form of panning and zooming. Since being mobile friendly is a priority for my project, I made sure to add touch controls once I had it working with mouse events.
 
 The first part I tackled was the zooming. This turned out to be as simple as multiplying each projected coordinate by some scale factor, which I was already doing in the previous proof of concept. To modify this scale factor, the user can use the +/- buttons, the mouse scroll wheel, or a pinch gesture on a touch device. Pinch gestures were the most challenging to implement, as you have to handle and interpret \texttt{Touch} events for each separate finger on the screen.
 
@@ -308,7 +308,7 @@ For testing the zooming between low and high zoom, I needed some ``large scale''
 
 To begin with, I was simply redrawing the map every time a \texttt{Touch} or \texttt{Mouse} event fired. This worked, but these events would often fire very rapidly (>60 times/second), resulting in a slow panning experience, where rendering was occurring unnecessarily. My solution for this was \texttt{requestAnimationFrame()}, which allows you to have some function executed at a regular interval by the browser~\cite{mdn-request-animation-frame}. Therefore, I could modify the state of the map as often as necessary, then have it smoothly rendered at regular intervals to reflect any changes to zoom or offsets.
 
-Unfortunately this change meant the canvas re-rendered 60 times a second at all times, even when no state change had occurred, which is a waste of processing power and energy, especially on mobile devices. To remedy this I introduced a \texttt{dirty} flag, which I set whenever a state change had occurred. I then check this \texttt{dirty} flag at the beginning of the \texttt{render()} function, and return early if the internal state is unchanged --- as shown in \autoref{lst:dirty}. The end result was a map that updated smoothly 60 times a second when state changes were occurring, and not at all when the map was static.
+Unfortunately, this change meant the canvas re-rendered 60 times a second at all times, even when no state change had occurred. This is a waste of processing power and energy, especially on mobile devices. To remedy this I introduced a \texttt{dirty} flag, which I set whenever a state change had occurred. I then check this \texttt{dirty} flag at the beginning of the \texttt{render()} function, and return early if the internal state is unchanged --- as shown in \autoref{lst:dirty}. The end result was a map that updated smoothly 60 times a second when state changes were occurring, and not at all when the map was static.
 
 \begin{lstlisting}[caption=Only rendering when the map state is \texttt{dirty}, label=lst:dirty]
 public render() {
@@ -328,7 +328,7 @@ public render() {
 
 My final proof of concept revolved around reading tiled vector OSM data. This allows for a map viewer that is performant at a wide range of zoom levels, as it can switch to more detailed data as you zoom in, and less detailed as you zoom out. It also solves the issue of which data to render --- my previous proof of concepts rendered all the data, all the time, even if it was off canvas. With tiled data, you only have to render the tiles that are currently within the viewport.
 
-The bulk of the work for this proof of concept came in the form of writing a parser for the Mapsforge format~\cite{mapsforge-format}. I decided to use this format based on my report on OpenStreetMap data sources, in Section~\ref{sec:osm-data-sources}. This was because it seemed simpler to parse than MBTiles, which is the other popular choice for tiled vector map files. It is a binary format, that is designed to space-efficiently encode geographical data, such that it can be rendered on low-power mobile devices.
+The bulk of the work for this proof of concept came in the form of writing a parser for the Mapsforge format~\cite{mapsforge-format}. I decided to use this format based on my report on OpenStreetMap data sources, in Section~\ref{sec:osm-data-sources}. This was because it seemed simpler to parse than MBTiles, which is the other popular choice for tiled vector map files. It is a binary format that is designed to space-efficiently encode geographical data, such that it can be rendered on low-power mobile devices.
 
 \subsection{The Mapsforge format}
 
@@ -354,7 +354,7 @@ In order to retrieve a specific tile of data, we need to know where in the file 
     \caption{Raw tiled data from zoom 14 base tiles}\label{fig:rendering-tiles}
 \end{figure}
 
-Sub-files store map data for a range of zoom levels. For example, the file \path{proof-of-concepts/4-rendering-osm-data/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if say we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
+Sub-files store map data for a range of zoom levels. For example, the file \path{proof-of-concepts/4-rendering-osm-data/data/ferndown.map} is compromised of three sub-files, one for z1-z7, based at z5, another for z8-z11, based at z10, and a final one for z12-z21, based at z14. This system provides a compromise between storage space and geographical correctness --- if, say, we want data for z18, we ``over-zoom'' the z14 sub-file, and vice versa for z1, we ``under-zoom'' the z5 sub-file. Therefore, we don't need to store much duplicated data, compared to storing each zoom level separately.
 
 The over-zoom/under-zoom functionality is supported by each sub-file containing a ``zoom table'', which contains how many PoIs/Ways need to be read for the tile at the requested zoom level. For example, when under-zooming a z14 tile to z12, you will be showing around 112 z14 base tiles (on a 1080p screen). This is too many tiles to be able to render all of their features with acceptable performance. To enable this zoom-table feature, the Way and PoI data in each tile is sorted by ``feature importance'', meaning that data to be shown at low zoom levels, like place labels or important roads, comes first, and less important geometries like houses are placed last. Therefore, you can read that there should be \texttt{x} amount of PoIs/Ways for this tile, for the zoom level you are decoding, read the specified amount, then skip over the rest.
 
@@ -387,7 +387,7 @@ getVUint() {
 }
 \end{lstlisting}
 
-Signed integers follow a similar scheme with the continuation bit, but also sacrifice the second bit of the last byte to indicate the sign of the number, i.e., \texttt{0100 0000}. There is no concept of a floating point number in the format. Instead, you divide numbers when it is required, for example for coordinates, which are stored in the file in microdegree units.
+Signed integers follow a similar scheme with the continuation bit, but also sacrifice the second bit of the last byte to indicate the sign of the number, e.g., \texttt{0100 0000}. There is no concept of a floating point number in the format. Instead, you divide numbers when it is required, such as for coordinates, which are stored in the file in microdegree units.
 
 \subsection{Writing a parser}
 
@@ -401,7 +401,7 @@ In my first iteration of this proof of concept, I was decoding the file inline, 
     \caption{Styling of data from Mapsforge file}\label{fig:rendering-osm-data}
 \end{figure}
 
-When rendering the map, I first convert the current zoom level to the corresponding base zoom level of one of the sub-files. Once I have this I then calculate the coordinates at the top-left and bottom right of the screen, then convert these into Z/X/Y tile numbers, which I can then fetch from the file. To improve rendering performance, only the PoIs and Ways specified in the zoom table for that zoom level are shown.
+When rendering the map, I first convert the current zoom level to the corresponding base zoom level of one of the sub-files. Once I have this I then calculate the coordinates at the top-left and bottom-right of the screen, then convert these into Z/X/Y tile numbers, which I can then fetch from the file. To improve rendering performance, only the PoIs and Ways specified in the zoom table for that zoom level are shown.
 
 I handled styling fairly simplistically, setting a number of booleans based on way tags, as the tiles load in. This moves the more complicated (and slow) logic out of the rendering hot path. Inside the \texttt{render()} function I then check these booleans and choose whether a stroke or fill should be used for that way, and what colour it should be. This is shown in Figure~\ref{fig:rendering-osm-data}.
 
@@ -418,7 +418,7 @@ In the second term, I worked on the final application, named OSMO. This started 
 
 The final proof of concept (\autoref{sec:poc-4}) rendered data from a preloaded Mapsforge file, requiring the whole map to be downloaded into RAM before any tiles could be drawn. This works fine for small map files, but is not reasonable for larger ones --- the map file that covers England is around 800 MB --- which is too much data to download and store in RAM, especially on mobile devices.
 
-To circumvent this issue, we can use HTTP range requests, which allow us to request only certain chunks of a file from a web server~\cite{mdn-range-requests}. Range requests are natively supported by popular web servers like Apache and nginx. This approach is a little unusual, typically vector/raster tile based online maps utilise a dedicated server application known as a tile server. The tile server takes a web request shaped like \texttt{example.org/z/x/y}, and the tile server responds to this with data for the requested tile.
+To circumvent this issue, we can use HTTP range requests, which allow us to request only certain chunks of a file from a web server~\cite{mdn-range-requests}. Range requests are natively supported by popular web servers like Apache and nginx. This approach is a little unusual, typically vector/raster tile based online maps utilise a dedicated server application known as a tile server. The tile server takes a web request shaped like \texttt{example.org/z/x/y}, and then responds to this with data for the requested tile.
 
 \begin{lstlisting}[caption=Using \texttt{curl} to make a HTTP range request, label=lst:range-request, numbers=none]
 % curl -v 'https://files.george.honeywood.org.uk/final-deliverable/data/england.map' \
@@ -438,7 +438,7 @@ To circumvent this issue, we can use HTTP range requests, which allow us to requ
 
 The first 24 bytes of the file contain the magic bytes, then length of the rest of the header. Once we have this, we can then request the rest of the header, and based on this, the tile indexes. We then use these parts of the Mapsforge file to calculate which tiles the file contains, and their offsets within the file.
 
-The Mapsforge format is not specifically designed for this type of use. Instead data is typically read from a locally stored file by a native application. This range request approach was inspired by the PMTiles project, which stores tiles in ``pyramids built on compressed Hilbert ordering'', allowing for efficient random access to tiles~\cite{pmtiles}. This specifically designed PMTiles format saves initial network traffic compared to using the Mapsforge format, but the overhead is relatively low for my use case. For the 800 MB England map, the file header is only 8.0 KB, and the tile indexes are just over 1.1 MB\@. The PMTiles approach makes more sense for larger world scale maps, as they will have many more tiles, and hence larger tile indexes. 
+The Mapsforge format is not specifically designed for this type of use. Instead, data is typically read from a locally stored file by a native application. This range request approach was inspired by the PMTiles project, which stores tiles in ``pyramids built on compressed Hilbert ordering'', allowing for efficient random access to tiles~\cite{pmtiles}. This specifically designed PMTiles format saves initial network traffic compared to using the Mapsforge format, but the overhead is relatively low for my use case. For the 800 MB England map, the file header is only 8.0 KB, and the tile indexes are just over 1.1 MB\@. The PMTiles approach makes more sense for larger world scale maps, as they will have many more tiles, and hence larger tile indexes. 
 
 Additionally, PMTiles is intended as a general purpose map library, whereas OSMO is more specifically designed as a standalone offline map application. This means that we can assume that the indexes will only need to be fetched once, and from then will be cached in the service worker.
 
@@ -457,14 +457,14 @@ Caching the partially downloaded map file became more complicated when I wanted 
 My initial, naïve downloading approach was as follows:
 
 \begin{enumerate}
-    \item Calculate which tiles are contained within the current viewport
-    \item Generate the byte ranges which these tiles are stored at within the file
-    \item Call \texttt{fetchBytes()} to load these bytes into the service worker cache for later offline use
+    \item Calculate which tiles are contained within the current viewport.
+    \item Generate the byte ranges which these tiles are stored at within the file.
+    \item Call \texttt{fetchBytes()} to load these bytes into the service worker cache for later offline use.
 \end{enumerate}
 
 While functional, this approach was less than ideal. For one, this meant storing thousands of individual byte ranges within the cache --- an area the size of Cornwall contains about 11,000 tiles at z14. The other main problem was that dispatching hundreds of HTTP range requests to the server was very slow, and it makes much more sense to download larger chunks of the data at once. Conveniently to this end, the Mapforge format stores the tile data for the \((x,y)\; (0,0)\) and \((1,0)\) tiles in a contiguous range of bytes. This means that instead of downloading each tile individually, we can download a whole row of tiles at once.
 
-Taking this request chunking approach meant that the service worker code had to be altered, to allow a partial read of data from within a larger cached range. For example if we had the range \path{england.map?bytes=100-200}, we not only need to be able to read bytes 100 to 200, but also any arbitrary subset of that range. The implementation for this was fairly simple (see \autoref{lst:read-cached-range}).
+Taking this request chunking approach meant that the service worker code had to be altered, to allow a partial read of data from within a larger cached range. For example, if we had the range \path{england.map?bytes=100-200}, we not only need to be able to read bytes 100 to 200, but also any arbitrary subset of that range. The implementation for this was fairly simple (see \autoref{lst:read-cached-range}).
 
 \begin{lstlisting}[caption=Reading a range from a cached response, label=lst:read-cached-range]
 const requested_range = {
@@ -490,15 +490,15 @@ return new Response(
 );
 \end{lstlisting}
 
-One minor complication caused by allowing the partial reads of cached ranges, was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache (using \texttt{cache.keys()}), and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
+One minor complication caused by allowing the partial reads of cached ranges was that we could no longer use the \texttt{cache.match(url)} method, as this only matches an exact request URL\@. Instead, I had to create my own implementation, where I looped over the keys in the cache (using \texttt{cache.keys()}) and manually checked if the requested byte range was a subset of one of the cached ranges. This was done with a linear search, which isn't ideal, but the runtime should remain reasonable so long as the number of cached ranges is small.
 
 \section{Experimenting with WebGL}\label{sec:webgl}
 
 Whilst profiling the \texttt{render()} function of my application, it became apparent that the draw calls on the \texttt{<canvas>} were the limiting factor in my applications' performance (see~\ref{sec:profiling}). Instead of using \texttt{CanvasRenderingContext2D}, popular vector map rendering libraries like Mapbox GL use the \texttt{WebGL2RenderingContext}. This allows for GPU accelerated rendering, even providing enough power to render complex 3D graphics. This would have been the best way to reduce the time needed to render a frame, and make the application more responsive to panning and zooming.
 
-During the beginning of term two, I decided to experiment with using WebGL for rendering. WebGL2 provides very low level interface to the GPU, employing the concepts of fragment shaders and vertex shaders. These allow you to draw triangles, that you can then use to make up more complex shapes --- for example a square would be made up of two equilateral triangles. You have to handle all of this work yourself, unless you choose to employ a library.
+During the beginning of term two, I decided to experiment with using WebGL for rendering. WebGL2 provides a very low level interface to the GPU, employing the concepts of fragment shaders and vertex shaders. These allow you to draw triangles that you can then use to make up more complex shapes --- for example, a square would be made up of two equilateral triangles. You have to handle all of this work yourself, unless you choose to employ a library.
 
-Following a tutorial, I was able to implement basic drawing using to the \texttt{WebGL2\-Rendering\-Context}~\cite{webgl2fundamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus adding more functionality to my application.
+Following a tutorial, I was able to implement basic drawing using the \texttt{WebGL2\-Rendering\-Context}~\cite{webgl2fundamentals}. This simple experiment rendered a million one pixel wide lines to the screen, which required over 150 lines of code. The implementation can be seen on the \href{https://gitlab.cim.rhul.ac.uk/zhac152/PROJECT/-/blob/feat/web-gl/final-deliverable/src/map/map.ts#L87}{\path{feat/web-gl}} branch. This was in stark contrast to the relative simplicity of the \texttt{CanvasRenderingContext2D} API\@. Granted, the performance was very impressive, but it would have taken a significant effort to implement the same functionality as my existing application using the simpler 2D rendering context. Therefore, I decided to continue using the \texttt{CanvasRenderingContext2D} and instead focus on adding more functionality to my application.
 
 \section{Svelte: using a frontend framework}\label{sec:svelte}
 
@@ -511,17 +511,17 @@ The search box was the first feature I added that wasn't primarily using the can
 \end{figure}
 
 
-To remedy this I decided to start using a frontend framework, which allows you to write declarative code, and abstract away the DOM manipulation. I chose to use Svelte, as it is relatively lightweight \& performant, and I've used it before. Svelte also solved my issue of passing DOM references, by allowing them to be created next to the point of use. This allowed me to write self-contained components, which each manage their own state. 
+To remedy this I decided to start using a frontend framework. This would allow me to write declarative code, and abstract away the DOM manipulation. I chose to use Svelte, as it is relatively lightweight \& performant, and I've used it before. Svelte also solved my issue of passing DOM references, by allowing them to be created next to the point of use. This allowed me to write self-contained components, which each manage their own state. 
 
-Another benefit of Svelte is that it provides a simple interface to allow you to write animations that aren't normally possible with CSS\@. For example, in the search box, when the result box appears, it slides in from the top --- see \autoref{fig:search}. This is cannot be done with pure CSS as CSS animations only trigger when the properties of the element are changed, for example when setting \texttt{el.style.height = "200px"}. In reality, you don't know the height that the results box will be, so this method is untenable. Svelte allows you to overcome this limitation, by providing means to write animations that are triggered by changing the state of the component.
+Another benefit of Svelte is that it provides a simple interface to allow you to write animations that aren't normally possible with CSS\@. For example, in the search box, when the result box appears, it slides in from the top --- see \autoref{fig:search}. This is cannot be done with pure CSS, as CSS animations only trigger when the properties of the element are changed. For example, when setting \texttt{el.style.height = "200px"}. In reality, you don't know the height that the results box will be, so this method is untenable. Svelte allows you to overcome this limitation by providing means to write animations that are triggered by changing the state of the component.
 
-Svelte also provides scoped CSS, which allows you to write styles that will only apply to the component. This means you don't have to be careful about giving your DOM elements unique IDs or class names, as they will only be used within the component. This means you can often get away with just styling a plain \texttt{div}, \texttt{span} or \texttt{p} element, without having to give it a class name. 
+Svelte also provides scoped CSS, which allows you to write styles that will only apply to the component. This means you don't have to be careful about giving your DOM elements unique IDs or class names, as they will only be used within the component. This then means you can often get away with just styling a plain \texttt{div}, \texttt{span} or \texttt{p} element, without having to give it a class name. 
 
 \section{Progressive web apps (PWAs)}
 
-PWAs are web apps that are able to present themselves as, and have similar features to native applications~\cite{mdn-pwas}. For example a PWA could include offline support, the ability to ``install'' the website on mobile platforms, and features like push notifications. In order to make web app installable, you have to write a web manifest, and have a service worker that provides offline content. The manifest provides metadata about your application, allowing you to control how it will be displayed in the user's app list. In my manifest I provide icons to use, long and short names to use, and a description.
+PWAs are web apps that are able to present themselves as and have similar features to native applications~\cite{mdn-pwas}. For example, a PWA could include offline support, the ability to ``install'' the website on mobile platforms, and features like push notifications. In order to make web app installable, you have to write a web manifest, and have a service worker that provides offline content. The manifest provides metadata about your application, allowing you to control how it will be displayed in the user's app list. In my manifest I provide icons to use, long and short names to use, and a description.
 
-To ensure my application was a valid PWA, that could be installed on mobile devices, I used Google Chrome's Lighthouse testing tool. Unfortunately this did not catch an issue I experienced, which was that my app could be ``added to home screen'', but it was not installed into the application drawer. When using the Chrome remote debug functionality to see the console output on my phone, I saw a message: \texttt{Failed to install WebAPK for '<url>'}. 
+To ensure my application was a valid PWA that could be installed on mobile devices, I used Google Chrome's Lighthouse testing tool. Unfortunately, this did not catch an issue I experienced, which was that my app could be ``added to home screen'' but it was not installed into the application drawer. When using the Chrome remote debug functionality to see the console output on my phone, I saw a message: \texttt{Failed to install WebAPK for '<url>'}. 
 
 \begin{figure}[ht]
     \centering
@@ -529,13 +529,13 @@ To ensure my application was a valid PWA, that could be installed on mobile devi
     \caption{OSMO installed in the app drawer of an Android phone}\label{fig:osmo-pwa}
 \end{figure}
 
-After some searching, I found that PWA installation on Android has a few indirections, principally that clicking ``Install'' sends a request to a Google server to bundle the website into a WebAPK\@. The bundling as a WebAPK means your app is treated like a native app, and hence can handle URL ranges or custom URI schemes\footnote{In the case of my application, registering to handle geo URIs would have allowed users to open links to specific locations~\cite{geo-uri-rfc}. Unfortunately I did not have time to implement this.}. Unfortunately, this terse message did not provide any detail into why the installation failed. Eventually after considerable debugging, I found that the issue was that I had provided my icon in the manifest as an SVG, instead of a PNG\@. See \autoref{fig:osmo-pwa} for a screenshot of OSMO installed on my phone.
+After some searching, I found that PWA installation on Android has a few indirections, principally that clicking ``Install'' sends a request to a Google server to bundle the website into a WebAPK\@. Bundling as a WebAPK means your app is treated like a native app, and hence can handle URL ranges or custom URI schemes\footnote{In the case of my application, registering to handle geo URIs would have allowed users to open links to specific locations~\cite{geo-uri-rfc}. Unfortunately I did not have time to implement this.}. Unfortunately, this terse message did not provide any detail into why the installation failed. Eventually after considerable debugging, I found that the issue was that I had provided my icon in the manifest as an SVG, instead of a PNG\@. See \autoref{fig:osmo-pwa} for a screenshot of OSMO installed on my phone.
 
 \section{Service worker quirks}
 
-Near the end of the project I spent some time polishing the offline user experience. One of the principal issues was due to a quirk in service worker registration behaviour. When a new service worker installs, it will not control the page that registered it, until the next page refresh. This creates the unexpected behaviour that if you download a region on the initial page load, then go offline, you will not be able to see the downloaded region after a refresh. This is because when the service worker is not controlling, it cannot intercept \texttt{fetch} events, and so the cache will not be populated. Luckily some escape hatches are provided, such as \texttt{skipWaiting()} and \texttt{clients.claim()}. These allow you to force the service worker to take control of the page, and intercept requests immediately.
+Near the end of the project I spent some time polishing the offline user experience. One of the principal issues was due to a quirk in service worker registration behaviour. When a new service worker installs, it will not control the page that registered it until the next page refresh. This creates the unexpected behaviour that if you download a region on the initial page load, then go offline, you will not be able to see the downloaded region after a refresh. This is because when the service worker is not controlling, it cannot intercept \texttt{fetch} events, and so the cache will not be populated. Luckily some escape hatches are provided, such as \texttt{skipWaiting()} and \texttt{clients.claim()}. These allow you to force the service worker to take control of the page, and intercept requests immediately.
 
-However, this led to a race condition issue --- that critical resources would be loaded before the service worker had finished installing. For example on initial page load, the header \& tile index would be loaded before the service worker had claimed the page, meaning it wouldn't get cached.
+However, this led to a race condition issue --- that critical resources would be loaded before the service worker had finished installing. For example, on initial page load, the header \& tile index would be loaded before the service worker had claimed the page, meaning it wouldn't get cached.
 
 The simplest way to remedy this would have been to force a page reload when the service worker finished installing, but this would have been a poor user experience. Instead, I added another event listener, for the \texttt{controllerchange} event, which is fired when \texttt{clients.claim()} is called. Once this event fires, I then instantiate the Svelte app, ensuring that the service worker is ready to intercept and cache the header \& tile indexes --- see \autoref{lst:wait-for-claim}.
 
@@ -562,7 +562,7 @@ navigator.serviceWorker.register('./sw.js', { scope: './' }).then(() => {
 
 One long-standing bug was the map rendering slightly blurry on devices with HiDPI screens, such as mobile phones or 4K monitors. This is due to how the \texttt{px} unit works in CSS --- they are just a unit of length, not a representation of the physical pixels on the screen. This means that on a HiDPI screen, if the \texttt{canvas.width} and \texttt{height} are set to the canvas width in CSS pixels, the canvas pixels have will be stretched across multiple physical pixels.
 
-Therefore, to render at the correct resolution you must use the \texttt{window.devicePixelRatio} property, to determine how many physical pixels there are per CSS pixel. You can then use this to set the \texttt{canvas.width} and \texttt{height} to be the same as the screens' physical pixel height and width. As you are now rendering more pixels, you'll then need scale the canvas back down to the size it is rendering at, which will remove the blur.
+Therefore, to render at the correct resolution, you must use the \texttt{window.devicePixelRatio} property to determine how many physical pixels there are per CSS pixel. You can then use this to set the \texttt{canvas.width} and \texttt{height} to be the same as the screen's physical pixel height and width. As you are now rendering more pixels, you'll then need scale the canvas back down to the size it is rendering at, which will remove the blur.
 
 \begin{figure}[ht]
     \centering
@@ -595,7 +595,7 @@ I implemented testing using the Jest framework. Initially I had some issues sett
     \caption{Rendering incorrectly parsed geometries}\label{fig:artifacts}
 \end{figure}
 
-In particular the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as is shown in Figure~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function (see \autoref{lst:vint-test-output}), and I realized that I was incrementing my offset through the file on the wrong line.
+In particular, the tests for the \texttt{Reader} class proved very useful. At first, I didn't write any formal tests for the \texttt{.getVSint()} method --- instead running it and checking if the output seemed reasonable. This got me so far, with it returning some well-formed data, but when it came to rendering the geometries were all corrupted, as is shown in Figure~\ref{fig:artifacts}. During the debugging process, I wrote exhaustive table tests for this function (see \autoref{lst:vint-test-output}), and I realized that I was incrementing my offset through the file on the wrong line.
 
 These tests made it much easier to refactor the code, without worrying about breaking functionality. This is because I could just run \texttt{pnpm test} to ensure I had not introduced any regressions, and did not need to manually check various different cases.
 
@@ -676,11 +676,11 @@ This is where the profiler comes in. It is a tool that lets you visualize how lo
 
 Accessibility is a particularly relevant concern for my project. People with disabilities still need to be able to be able to interpret geographic data, and may have different priorities to able-bodied users. Those with visual impairments need larger map label sizes, and wheelchair users may need extra context about sloped kerbs. My application should accommodate as many of these needs as possible.
 
-Through assistive technologies like screen readers or magnification, most text-based web content is accessible to partially sighted or blind users. Android and iOS both have built-in screen-readers --- TalkBack and VoiceOver respectively. These tools assist users by providing a full alternate means of interaction, that is more complete and usable than simply reading out the text on screen. TalkBack disables the usual touch/swipe gestures on the phone, instead allowing the user to swipe left or right to navigate through tab stops in the interface. At each tab stop TalkBack announces the type and content of the selected screen element, and the user can double-tap to interact with it if necessary. The system navigation gestures can be accessed through two-finger swipes, instead of the usual single finger ones.
+Through assistive technologies like screen readers or magnification, most text-based web content is accessible to partially sighted or blind users. Android and iOS both have built-in screen-readers --- TalkBack and VoiceOver respectively. These tools assist users by providing a full alternate means of interaction that is more complete and usable than simply reading out the text on screen. TalkBack disables the usual touch/swipe gestures on the phone, instead allowing the user to swipe left or right to navigate through tab stops in the interface. At each tab stop TalkBack announces the type and content of the selected screen element, and the user can double-tap to interact with it if necessary. The system navigation gestures can be accessed through two-finger swipes, instead of the usual single finger ones.
 
 Talkback works for not only native apps, but also web based content. This is enabled through use of semantic HTML elements, supplemented by ARIA tagging where this is not possible~\cite{w3c-aria}. The idea behind semantic HTML is that the HTML markup should convey meaning, instead of providing information purely visually through CSS\@. For example, UI buttons should be tagged as \texttt{<button>} elements, over plain \texttt{<div>}s, so that a screen reader can relay this context to the user. There are numerous HTML elements that have semantics, such as basics like \texttt{<ul>} and \texttt{<h1>}, and others that convey more complex concepts, like \texttt{<nav>} for navigation menus~\cite{mdn-accessibility-basis}.
 
-Even most non-text based media can be made accessible to blind people, through \texttt{alt} tags on images and subtitling on videos. Unfortunately this is simply not possible for web maps, as they convey meaning in a visual form that cannot be textually described easily. MDN advises that in general, web developers should use semantic HTML over the \texttt{<canvas>} element, as the canvas is opaque bitmapped data that cannot be interpreted by a screen reader~\cite{mdn-element-reference-canvas}. Notwithstanding this, blind and visually impaired people still need to navigate the world. \textcite{accessible-wayfinding-belt} found that a ``Tactile Way-finding Belt'', could help facilitate navigation for those with ``visual impairment or Alzheimer's disease''. They based their study on a system of four vibrating motors, with one for each cardinal direction, which provide signals directing the wearer to their destination. By design this format is more limited than a map, but it does work towards making one of their main uses, navigation, more accessible.
+Even most non-text based media can be made accessible to blind people, through \texttt{alt} tags on images and subtitling on videos. Unfortunately, this is simply not possible for web maps, as they convey meaning in a visual form that cannot be textually described easily. MDN advises that, in general, web developers should use semantic HTML over the \texttt{<canvas>} element, as the canvas is opaque bitmapped data that cannot be interpreted by a screen reader~\cite{mdn-element-reference-canvas}. Notwithstanding this, blind and visually impaired people still need to navigate the world. \textcite{accessible-wayfinding-belt} found that a ``Tactile Way-finding Belt'', could help facilitate navigation for those with ``visual impairment or Alzheimer's disease''. They based their study on a system of four vibrating motors, with one for each cardinal direction, which provide signals directing the wearer to their destination. By design this format is more limited than a map, but it does work towards making one of their main uses, navigation, more accessible.
 
 \begin{figure}[ht]
     \centering
@@ -688,7 +688,7 @@ Even most non-text based media can be made accessible to blind people, through \
     \caption{Simulating deuteranopia, in Firefox Developer Tools}\label{fig:deuteranopia}
 \end{figure}
 
-A common form of visual impairment is colour vision deficiency (colour blindness). According to the \textcite{nhs-colour-vision-deficiency}, the red-green form affects around 1 in 12 men and 1 in 200 women. This can be more easily accommodated than other forms of visual impairment, by ensuring that text and backgrounds have a suitable contrast ratio, described in the Web Content Accessibility Guidelines~\cite{w3c-wcag}. It is also important to visually check colour contrast through simulators. The Developer Tools in Firefox provide one such simulator, which can visualize various forms of colour vision deficiency --- see \autoref{fig:deuteranopia}.
+A common form of visual impairment is colour vision deficiency (colour blindness). According to the \textcite{nhs-colour-vision-deficiency}, the red-green form affects around 1 in 12 men and 1 in 200 women. This can be more easily accommodated than other forms of visual impairment by ensuring that text and backgrounds have a suitable contrast ratio, described in the Web Content Accessibility Guidelines~\cite{w3c-wcag}. It is also important to visually check colour contrast through simulators. The Developer Tools in Firefox provide one such simulator, which can visualize various forms of colour vision deficiency --- see \autoref{fig:deuteranopia}.
 
 \begin{figure}[ht]
     \centering
@@ -700,7 +700,7 @@ Physical disabilities can also be accommodated in an OpenStreetMap-based map. In
 
 There are specialized map viewers, specifically designed to make viewing wheelchair tagging simple --- most popularly Wheelmap, which uses green, orange, or red to indicate wheelchair accessibility~\cite{wheelmap}. Wheelmap can also be used to add this tagging to amenities, through a simple form, that lowers the barrier of entry for contributing this information to OSM\@. \texttt{smoothness=*} tagging is also valuable to wheelchair users~\cite{osm-wiki-smoothness}. This key has textual values ranging from \texttt{excellent} to \texttt{very\_horrible}, with wheelchair users unlikely to be able to traverse anything at the level of \texttt{smoothness=bad} or worse. Routers can use this information to inform the paths they choose.
 
-One accessibility consideration that I have made whilst developing this project is to include multiple alternative interaction gestures where possible. For example, when zooming the map, you can pick from either the two finger ``pinch'' zoom gesture, or alternatively a single finger tap and hold. This allows people with the ability to use only one hand, such as amputees, or walking stick users, to make full use of the application.
+One accessibility consideration that I have made whilst developing this project is to include multiple alternative interaction gestures where possible. For example, when zooming the map, you can pick from either the two finger ``pinch'' zoom gesture, or alternatively a single finger tap and hold. This allows people with the ability to use only one hand, such as amputees or walking stick users, to make full use of the application.
 
 \clearpage
 \chapter{Conclusion \& evaluation}
@@ -717,11 +717,11 @@ In term one I successfully followed the timeline I set out in \autoref{sec:term-
 
 In term two the plan was less useful, as the way that I had built the proof of concepts on one another meant that no integration work was necessary. I also allocated a generous amount of time for mobile design \& testing, which wasn't required as I conducted this through the development of proof of concepts. In addition, I did not allow time specifically for working on the UI, when in reality I spent some time working adding a frontend framework (see \autoref{sec:svelte}).
 
-In term two I also spent some time refining the tile loading system to use HTTP range requests, which was not planned for. This had the knock-on effect of complicating offline support with the service worker, which taking up extra time. Other than that, however, the rest of the deliverables were non-blocking to the project, meaning I had some flexibility in what I worked on. I ended up not implementing deliverables~\ref{item:deliverable:routing} (online routing), and~\ref{item:deliverable:wikipedia} (Wikipedia integration), instead prioritizing polishing the offline user experience.
+In term two I also spent some time refining the tile loading system to use HTTP range requests, which was not planned for. This had the knock-on effect of complicating offline support with the service worker, taking up extra time. Other than that, however, the rest of the deliverables were non-blocking to the project, meaning I had some flexibility in what I worked on. I ended up not implementing deliverables~\ref{item:deliverable:routing} (online routing) and~\ref{item:deliverable:wikipedia} (Wikipedia integration), instead prioritizing polishing the offline user experience.
 
-In retrospect, I should have put some more thought into alternative rendering strategies --- the renderer is definitely the weakest part of the project. On both mobile and desktop performance is broadly acceptable until you zoom out past zoom level 13, at which point the frame time becomes \textgreater{}100ms (\textless{}10fps). At zoom 7, where you can see the whole of the UK, the frame time is \textgreater{}500ms (\textless{}2fps). This is unacceptable, especially for an app targeted at mobile devices with limited CPU power \& battery life. 
+In retrospect, I should have put some more thought into alternative rendering strategies --- the renderer is definitely the weakest part of the project. Both mobile and desktop performance is broadly acceptable until you zoom out past zoom level 13, at which point the frame time becomes \textgreater{}100ms (\textless{}10fps). At zoom 7, where you can see the whole of the UK, the frame time is \textgreater{}500ms (\textless{}2fps). This is unacceptable, especially for an app targeted at mobile devices with limited CPU power \& battery life. 
 
-At the start of the project I should have spent time researching alternative rendering strategies that would have allowed for a more responsive experience. One way I could have achieved this would have been to use WebGL, which is GPU accelerated --- see \autoref{sec:webgl} for more detail. Instead of WebGL I could have adopted a hybrid raster approach, in which the tiles are each rendered once for each zoom level, then reused, instead of re-rendering everything on every frame. The drawbacks of this approach would be significant added complexity, and that you would only be able to view the map at discrete zoom levels.
+At the start of the project I should have spent time researching alternative rendering strategies that would have allowed for a more responsive experience. One way I could have achieved this would have been to use WebGL, which is GPU accelerated --- see \autoref{sec:webgl} for more detail. Or, instead of WebGL, I could have adopted a hybrid raster approach, in which the tiles are each rendered once for each zoom level, then reused, instead of re-rendering everything on every frame. The drawbacks of this approach would be additional complexity, and that you would only be able to view the map at discrete zoom levels.
 
 Due to this ever-present need to keep the frame time down, I was apprehensive to add advanced rendering features, like way labels that follow road curvature --- as they would make the process even slower. In addition, I would have liked to add a label collision prevention algorithm. While the Mapsforge format handles some of this issue, mostly by reducing the number of city/town labels, a more sophisticated solution would have been useful for areas with a high density of labels, such as town centres.
 
