@@ -1,27 +1,18 @@
-# Final Year Project -- Offline HTML5 Maps Application 
+# OSMO: Offline viewer for Mapsforge map files
 
-This is where I store all the code and reports for my Final Year Project.
+OSMO renders map files stored in the popular Mapsforge format, allowing for the (slow) the display of entire countries. Some other key features:
 
-To render the reports to `.pdf`, use `latexmk -pdf main.tex`. This should work with any installation of TexLive.
+* Partial offline downloads
+* Geolocation
+* Search (using Nominatim API)
+* Render local map files
 
-## Repository structure
+A fairly novel feature is the usage of HTTP range requests to load the specific bytes required to render the map. This means that no app specific server is required — a generic web server like Apache or nginx can be used. This was inspired by the [Protomaps project](https://protomaps.com/), which uses a purpose built map format designed around this concept.
 
-```
-├── diary.md: my project dairy, updated regularly with my progress
-├── plan: the inital plan for the project
-├── proof-of-concepts: that I have written throughout the development process
-│   ├── 1-offline-html5: a simple demo of offline HTML5 capabilities
-│   ├── 2-rendering-a-way: projecting some coordinates to a canvas
-│   ├── 3-panning-and-zooming: the same as previous, with also the ability to pan and zoom
-│   ├── 4-rendering-osm-data: reading & rendering tiled data from a Mapsforge file
-│   └── upload.sh: a helper script to upload demos to my website
-├── research-reports: compiled with latexmk
-│   ├── 1-offline-html5
-│   ├── 2-osm-data-sources
-│   ├── 3-map-projections
-│   └── 4-html5-canvas
-├── interim-report
-├── final-report
-├── final-deliverable
-└── sources.bib: shared citations between all reports
-```
+The Service Worker cache is used to store the fetched byte ranges, so that portions of the whole map file can be downloaded in advance and rendered offline.
+
+You can find an online demo at [files.george.honeywood.org.uk/final-deliverable/](https://files.george.honeywood.org.uk/final-deliverable/#18/51.4273/-0.5543), where you can scroll about and search within the UK.
+
+Technology wise, OSMO is fairly simple, with the renderer using the HTML5 canvas, and the bulk of the code being written in TypeScript. The frontend code is written in Svelte, with Vite as a bundler/transpiler.
+
+OSMO was developed as my Final Year Project, at Royal Holloway, University of London. I was supervised by Dr. Reuben Rowe.
