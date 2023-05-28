@@ -15,4 +15,4 @@ You can find an online demo at [files.george.honeywood.org.uk/final-deliverable/
 
 Technology wise, OSMO is fairly simple, with the renderer using the HTML5 canvas, and the bulk of the code being written in TypeScript. The frontend code is written in Svelte, with Vite as a bundler/transpiler.
 
-OSMO was developed as my Final Year Project, at Royal Holloway, University of London. I was supervised by Dr. Reuben Rowe.
+You can read the report associated with this project [here](https://github.com/GeorgeHoneywood/final-year-project/files/11584765/george-honeywood-final-report.pdf). OSMO was developed as my Final Year Project, at Royal Holloway, University of London, supervised by Dr. Reuben Rowe.
